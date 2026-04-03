@@ -1,0 +1,52 @@
+{
+  "name": "dynamic-multi-agent-system",
+  "version": "1.0.0-alpha",
+  "description": "混合动态多Agent协作系统，支持任务自动分解、子Agent动态组建、全流程质量控制",
+  "author": "Dynamic Multi-Agent System Team",
+  "license": "MIT",
+  "homepage": "https://github.com/openclaw/dynamic-multi-agent-system",
+  "openclaw-version": ">=1.0.0",
+  "dependencies": [],
+  "capabilities": [
+    "task-decomposition",
+    "subagent-management",
+    "quality-control",
+    "skill-evolution",
+    "multi-task-orchestration"
+  ],
+  "task-types": [
+    "creative-writing",
+    "data-analysis",
+    "code-development",
+    "research",
+    "design",
+    "planning"
+  ],
+  "tags": [
+    "multi-agent",
+    "collaboration",
+    "automation",
+    "workflow",
+    "orchestration"
+  ],
+  "examples": [
+    "写一本科幻小说",
+    "分析销售数据并生成报告",
+    "开发一个完整的前端页面",
+    "设计公司管理体系"
+  ],
+  "models": {
+    "recommended": "modelstudio/qwen3.5-plus",
+    "alternatives": [
+      "modelstudio/qwen3-max-2026-01-23",
+      "modelstudio/MiniMax-M2.5"
+    ]
+  },
+  "configuration": {
+    "max-concurrent-tasks": 3,
+    "max-sub-agents": 12,
+    "enable-evolution": true,
+    "confidence-threshold": 0.7,
+    "subagent-timeout": 300
+  }
+}

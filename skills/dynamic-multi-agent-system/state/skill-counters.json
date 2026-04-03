@@ -1,0 +1,9 @@
+{
+  "skills": {},
+  "metadata": {
+    "created-at": "2026-04-03T11:00:00Z",
+    "last-updated": "2026-04-03T11:00:00Z",
+    "version": "1.0.0"
+  },
+  "note": "Skill计数器 - 初始版本。每次任务成功后，对应Skill类型的count会+1。当count>=3且满意度>=4时，触发Skill固化流程。"
+}
