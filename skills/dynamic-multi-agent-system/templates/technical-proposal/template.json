@@ -1,0 +1,152 @@
+{
+  "name": "技术方案书",
+  "description": "技术方案书模板，支持需求分析、架构设计、实施计划等核心模块",
+  "version": "1.0.0",
+  "type": "technical",
+  "fields": {
+    "projectName": {
+      "type": "text",
+      "label": "项目名称",
+      "required": true,
+      "placeholder": "请输入项目名称"
+    },
+    "clientName": {
+      "type": "text",
+      "label": "客户名称",
+      "required": false,
+      "placeholder": "请输入客户名称"
+    },
+    "projectType": {
+      "type": "select",
+      "label": "项目类型",
+      "required": true,
+      "options": [
+        "软件开发",
+        "系统集成",
+        "技术咨询",
+        "架构设计",
+        "技术选型",
+        "其他"
+      ]
+    },
+    "budget": {
+      "type": "text",
+      "label": "项目预算",
+      "required": false,
+      "placeholder": "如：100 万人民币"
+    },
+    "timeline": {
+      "type": "text",
+      "label": "预期周期",
+      "required": false,
+      "placeholder": "如：6 个月"
+    },
+    "techStack": {
+      "type": "tags",
+      "label": "技术栈偏好",
+      "required": false,
+      "maxCount": 10,
+      "placeholder": "如：Java, Spring Boot, MySQL, Redis"
+    }
+  },
+  "structure": [
+    {
+      "section": "项目概述",
+      "required": true,
+      "wordCount": 500,
+      "description": "项目背景、目标、范围"
+    },
+    {
+      "section": "需求分析",
+      "required": true,
+      "wordCount": 1500,
+      "description": "功能需求、非功能需求、约束条件"
+    },
+    {
+      "section": "技术方案",
+      "required": true,
+      "wordCount": 2000,
+      "description": "技术选型、架构设计、关键技术"
+    },
+    {
+      "section": "系统架构",
+      "required": true,
+      "wordCount": 1500,
+      "description": "整体架构、模块划分、接口设计"
+    },
+    {
+      "section": "数据库设计",
+      "required": true,
+      "wordCount": 1000,
+      "description": "数据模型、表结构设计、索引策略"
+    },
+    {
+      "section": "实施计划",
+      "required": true,
+      "wordCount": 1000,
+      "description": "项目阶段、时间节点、交付物"
+    },
+    {
+      "section": "团队配置",
+      "required": true,
+      "wordCount": 600,
+      "description": "团队结构、人员配置、职责分工"
+    },
+    {
+      "section": "质量保证",
+      "required": true,
+      "wordCount": 800,
+      "description": "质量标准、测试策略、验收标准"
+    },
+    {
+      "section": "风险管理",
+      "required": true,
+      "wordCount": 600,
+      "description": "风险识别、应对措施、应急预案"
+    },
+    {
+      "section": "预算报价",
+      "required": true,
+      "wordCount": 500,
+      "description": "成本分析、报价明细、付款计划"
+    }
+  ],
+  "agents": [
+    {
+      "role": "架构师",
+      "description": "设计系统架构，确保技术可行性",
+      "skills": ["系统架构", "技术选型", "架构评审"]
+    },
+    {
+      "role": "需求分析师",
+      "description": "分析业务需求，编写需求文档",
+      "skills": ["需求分析", "业务理解", "文档编写"]
+    },
+    {
+      "role": "数据库设计师",
+      "description": "设计数据库结构，优化数据模型",
+      "skills": ["数据库设计", "数据建模", "性能优化"]
+    },
+    {
+      "role": "项目经理",
+      "description": "制定项目计划，管理项目风险",
+      "skills": ["项目管理", "进度控制", "风险管理"]
+    },
+    {
+      "role": "质量工程师",
+      "description": "制定质量标准，规划测试策略",
+      "skills": ["质量管理", "测试规划", "验收标准"]
+    }
+  ],
+  "checklist": [
+    "需求分析是否全面？",
+    "技术选型是否合理？",
+    "架构设计是否可扩展？",
+    "数据库设计是否规范？",
+    "实施计划是否可行？",
+    "团队配置是否合理？",
+    "质量标准是否明确？",
+    "风险评估是否到位？",
+    "预算报价是否合理？"
+  ]
+}

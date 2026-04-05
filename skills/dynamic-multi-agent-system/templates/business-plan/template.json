@@ -1,0 +1,151 @@
+{
+  "name": "商业计划书",
+  "description": "商业计划书模板，支持市场分析、商业模式、财务预测等核心模块",
+  "version": "1.0.0",
+  "type": "business",
+  "fields": {
+    "companyName": {
+      "type": "text",
+      "label": "公司名称",
+      "required": true,
+      "placeholder": "请输入公司/项目名称"
+    },
+    "industry": {
+      "type": "select",
+      "label": "所属行业",
+      "required": true,
+      "options": [
+        "互联网/科技",
+        "消费零售",
+        "医疗健康",
+        "教育培训",
+        "金融服务",
+        "制造业",
+        "其他"
+      ]
+    },
+    "stage": {
+      "type": "select",
+      "label": "发展阶段",
+      "required": true,
+      "options": [
+        "创意阶段",
+        "初创期",
+        "成长期",
+        "扩张期",
+        "成熟期"
+      ]
+    },
+    "fundingAmount": {
+      "type": "text",
+      "label": "融资金额",
+      "required": false,
+      "placeholder": "如：500 万人民币"
+    },
+    "targetMarket": {
+      "type": "textarea",
+      "label": "目标市场",
+      "required": true,
+      "placeholder": "描述目标客户群体和市场规模"
+    },
+    "uniqueValue": {
+      "type": "textarea",
+      "label": "核心价值",
+      "required": true,
+      "placeholder": "一句话说明你的独特价值主张"
+    }
+  },
+  "structure": [
+    {
+      "section": "执行摘要",
+      "required": true,
+      "wordCount": 500,
+      "description": "简明扼要地概括整个商业计划"
+    },
+    {
+      "section": "公司概述",
+      "required": true,
+      "wordCount": 800,
+      "description": "公司介绍、使命愿景、发展历程"
+    },
+    {
+      "section": "市场分析",
+      "required": true,
+      "wordCount": 1500,
+      "description": "行业趋势、目标市场、竞争分析"
+    },
+    {
+      "section": "产品与服务",
+      "required": true,
+      "wordCount": 1200,
+      "description": "产品介绍、核心价值、技术优势"
+    },
+    {
+      "section": "商业模式",
+      "required": true,
+      "wordCount": 1000,
+      "description": "收入模式、成本结构、盈利模式"
+    },
+    {
+      "section": "营销策略",
+      "required": true,
+      "wordCount": 1000,
+      "description": "市场定位、推广渠道、销售策略"
+    },
+    {
+      "section": "运营计划",
+      "required": true,
+      "wordCount": 800,
+      "description": "团队架构、运营流程、关键里程碑"
+    },
+    {
+      "section": "财务预测",
+      "required": true,
+      "wordCount": 1000,
+      "description": "收入预测、成本分析、资金需求"
+    },
+    {
+      "section": "风险分析",
+      "required": true,
+      "wordCount": 600,
+      "description": "风险识别、应对措施、退出策略"
+    }
+  ],
+  "agents": [
+    {
+      "role": "商业顾问",
+      "description": "提供商业策略指导，确保商业模式可行",
+      "skills": ["商业分析", "战略规划", "行业洞察"]
+    },
+    {
+      "role": "市场分析师",
+      "description": "分析市场趋势和竞争格局",
+      "skills": ["市场研究", "数据分析", "竞品分析"]
+    },
+    {
+      "role": "财务专家",
+      "description": "制定财务预测和资金规划",
+      "skills": ["财务分析", "预算编制", "投资评估"]
+    },
+    {
+      "role": "营销专家",
+      "description": "制定营销策略和推广方案",
+      "skills": ["营销策划", "品牌推广", "渠道管理"]
+    },
+    {
+      "role": "运营顾问",
+      "description": "规划运营流程和团队架构",
+      "skills": ["运营管理", "团队建设", "流程优化"]
+    }
+  ],
+  "checklist": [
+    "执行摘要是否有吸引力？",
+    "市场分析是否有数据支持？",
+    "商业模式是否清晰可行？",
+    "财务预测是否合理？",
+    "竞争分析是否全面？",
+    "营销策略是否具体？",
+    "团队架构是否合理？",
+    "风险分析是否到位？"
+  ]
+}
