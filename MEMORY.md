@@ -10,10 +10,11 @@
 
 **当前状态：** 🟢 **v1.0.0-alpha 开发完成，已打包待提交 SkillHub！**
 
-**最新进展：** 2026-04-05 08:35 - 魔法师主题可视化监控完成！
+**最新进展：** 2026-04-05 08:45 - 等距 2.5D 监控大屏完成！
 
 ### 2026-04-05 可视化动画完善
 
+#### 第一版：魔法师主题监控
 **完成内容：**
 1. ✅ 后端服务完善 - monitor.py Flask API
 2. ✅ 魔法师主题页面 - monitor-mage.html（38KB）
@@ -26,17 +27,31 @@
 - 子 Agent 根据任务类型显示不同形象（18 种角色）
 - 星空背景 + 魔法特效动画
 - 实时数据监控（每 5 秒刷新）
-- 告警系统 + 进度展示
+
+#### 第二版：等距 2.5D 监控大屏（参考截图风格）
+**完成内容：**
+1. ✅ 等距大屏页面 - dashboard-isometric.html（30KB）
+2. ✅ 快速启动脚本 - start-dashboard.bat
+
+**特色功能：**
+-  **等距 2.5D 场景** - 类似截图中的立体房间效果
+- 🧙 **中央角色** - 女魔法师在工作场景中
+- ✨ **漂浮数据屏** - 3 个悬浮数据显示
+- 📊 **左右数据面板** - 任务列表/资源监控/告警
+- 🎯 **圆形仪表盘** - 健康度/使用率实时显示
+- ⚡ **动态效果** - 漂浮/闪烁/流光/旋转
+- 🔮 **魔法粒子** - 场景中漂浮的魔法效果
 
 **启动方式：**
 ```bash
 cd skills/dynamic-multi-agent-system/core/multi-task-queue
-start-monitor-mage.bat
+start-dashboard.bat
 ```
 
 **访问地址：**
+- 等距大屏：http://localhost:5000/dashboard-isometric.html ⭐ 推荐
 - 魔法主题：http://localhost:5000/monitor-mage.html
-- API 接口：http://localhost:5000/api/queue/status
+- API 接口：http://localhost:5000/api/queue/status?mock=true
 
 ---
 
