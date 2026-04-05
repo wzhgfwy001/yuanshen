@@ -1,6 +1,6 @@
 {
   "name": "dynamic-multi-agent-system",
-  "version": "1.0.0-alpha",
+  "version": "1.0.1",
   "description": "混合动态多Agent协作系统，支持任务自动分解、子Agent动态组建、全流程质量控制",
   "author": "Dynamic Multi-Agent System Team",
   "license": "MIT",
