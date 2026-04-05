@@ -1,6 +1,6 @@
 # 🎨 可视化监控大屏使用指南
 
-**版本：** v1.0  
+**版本：** v1.1  
 **更新时间：** 2026-04-05  
 
 ---
@@ -14,15 +14,39 @@ cd C:\Users\DELL\.openclaw\workspace\skills\dynamic-multi-agent-system\core\mult
 python -m http.server 5001
 ```
 
-### 访问监控大屏
+### Agency HQ 像素办公室（🔥 新增推荐）
 
-**推荐版本：**
+**特点：** 
+- 🏢 6 个房间（办公室/会议室/厨房/游戏室/服务器室/休息室）
+- 🚶 Agent 行走动画
+- 💬 Agent 聊天系统
+- 📊 实时活动流
+- 🌅 昼夜循环
+
+**使用方式：**
+
+1. **独立运行（推荐）**
+```bash
+cd D:\agency-hq-1.0.0
+npm install
+npm run dev
+# 访问 http://localhost:3000
+```
+
+2. **通过 iframe 嵌入页面**
+```
+http://localhost:5001/dashboard-agency-hq.html
+```
+
+### 魔法教堂监控大屏（经典版）
+
+**完整版：**
 ```
 http://localhost:5001/dashboard-complete.html
 ```
 **特点：** 完整女魔法师形象（魔法帽/长袍/大圈眼镜）+ 六翼天使
 
-**备选版本：**
+**终极版：**
 ```
 http://localhost:5001/dashboard-ultimate.html
 ```
