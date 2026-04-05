@@ -1,0 +1,31 @@
+此文件为示例数据模板说明
+
+请使用 Excel 创建以下格式的表格:
+
+学校专业表 (schools.xlsx) 字段:
+- major_id: 专业 ID (如 MAJ001)
+- school_id: 学校 ID (如 SCH001)
+- school_name: 学校名称 (如 清华大学)
+- major_name: 专业名称 (如 计算机科学与技术)
+- major_category: 专业类别 (理工/文史/医学/艺术)
+- subject_requirement: 选科要求文本 (如 物理 + 化学)
+- subject_required: 必选科目 (如 物理，化学)
+- subject_optional: 可选科目 (如 生物，地理)
+- year: 招生年份 (如 2025)
+- min_score: 最低录取分 (如 680)
+- min_rank: 最低录取排名 (如 100)
+- avg_score: 平均录取分 (可选)
+- enrollment_count: 招生人数 (可选)
+- tuition: 学费元/年 (可选)
+
+学生信息表 (students.xlsx) 字段:
+- student_id: 学生 ID (如 STU001)
+- student_name: 学生姓名
+- category: 考生类别 (物理类/历史类)
+- subjects: 选科 (如 物理，化学，生物)
+- total_score: 高考总分
+- rank: 省内排名
+- province: 考生省份
+- preference_province: 期望省份 (可选)
+- preference_level: 期望层次 (可选)
+- preference_major: 期望专业 (可选)

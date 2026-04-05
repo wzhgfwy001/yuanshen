@@ -1,9 +1,45 @@
 {
-  "experiences": [],
-  "metadata": {
-    "created-at": "2026-04-03T11:00:00Z",
-    "last-updated": "2026-04-03T11:00:00Z",
-    "version": "1.0.0"
+  "experiences": [
+    {
+      "id": "exp-001",
+      "task-type": "standard",
+      "task-description": "创作科幻短篇小说",
+      "date": "2026-04-04",
+      "outcome": "success",
+      "score": 92,
+      "workflow": ["task-classifier", "task-decomposer", "executor-coordinator", "quality-checker"],
+      "agents-used": ["世界观设计师", "大纲规划师", "内容创作者", "质量审查员"],
+      "total-duration-minutes": 70,
+      "output-words": 892,
+      "lessons-learned": [
+        "串行流程适合小型创作任务",
+        "三层质量检查有效保障输出质量",
+        "世界观设定为创作提供丰富细节支撑"
+      ],
+      "can-solidify": false,
+      "solidify-count": 1,
+      "solidify-threshold": 3
+    }
+  ],
+  "patterns": {
+    "sci-fi-writing": {
+      "pattern-id": "pattern-sci-fi-writing",
+      "name": "科幻创作",
+      "category": "creative-writing",
+      "first-seen": "2026-04-04",
+      "last-seen": "2026-04-04",
+      "execution-count": 1,
+      "success-count": 1,
+      "fail-count": 0,
+      "avg-quality-score": 92,
+      "avg-user-score": 5,
+      "avg-duration-minutes": 70,
+      "solidify-status": "accumulating",
+      "solidify-progress": "1/3",
+      "version": null,
+      "solidified-at": null
+    }
   },
-  "note": "经验数据库 - 初始版本。记录成功模式、常见错误、优化建议等。随着任务执行逐渐丰富。"
+  "solidified-skills": [],
+  "last-updated": "2026-04-04T19:10:00Z"
 }

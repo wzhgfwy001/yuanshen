@@ -1,9 +1,23 @@
 {
-  "skills": {},
-  "metadata": {
-    "created-at": "2026-04-03T11:00:00Z",
-    "last-updated": "2026-04-03T11:00:00Z",
-    "version": "1.0.0"
+  "skill-counters": {
+    "total-tasks-completed": 1,
+    "successful-tasks": 1,
+    "failed-tasks": 0,
+    "skills-created": 0,
+    "skills-solidified": 0,
+    "last-task-date": "2026-04-04",
+    "task-type-counts": {
+      "simple": 0,
+      "standard": 1,
+      "hybrid": 0,
+      "innovative": 0
+    }
   },
-  "note": "Skill计数器 - 初始版本。每次任务成功后，对应Skill类型的count会+1。当count>=3且满意度>=4时，触发Skill固化流程。"
+  "solidification": {
+    "patterns-accumulating": 1,
+    "patterns-ready": 0,
+    "patterns-solidified": 0,
+    "next-solidification-check": "2026-04-04T20:00:00Z"
+  },
+  "last-updated": "2026-04-04T19:10:00Z"
 }

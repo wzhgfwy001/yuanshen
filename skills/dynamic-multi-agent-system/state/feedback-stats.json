@@ -1,0 +1,61 @@
+{
+  "feedback-stats": {
+    "today": {
+      "date": "2026-04-04",
+      "tasks-completed": 1,
+      "feedback-received": 1,
+      "avg-score": 5.0,
+      "distribution": {
+        "5": 1,
+        "4": 0,
+        "3": 0,
+        "2": 0,
+        "1": 0
+      },
+      "satisfaction-rate": 1.0,
+      "exemplar-rate": 1.0
+    },
+    "this-week": {
+      "week": "2026-W14",
+      "tasks-completed": 1,
+      "feedback-received": 1,
+      "avg-score": 5.0,
+      "distribution": {
+        "5": 1,
+        "4": 0,
+        "3": 0,
+        "2": 0,
+        "1": 0
+      },
+      "satisfaction-rate": 1.0,
+      "exemplar-rate": 1.0
+    },
+    "all-time": {
+      "tasks-completed": 1,
+      "feedback-received": 1,
+      "avg-score": 5.0,
+      "distribution": {
+        "5": 1,
+        "4": 0,
+        "3": 0,
+        "2": 0,
+        "1": 0
+      },
+      "satisfaction-rate": 1.0,
+      "exemplar-rate": 1.0
+    }
+  },
+  "pending-feedbacks": [],
+  "low-score-tasks": [],
+  "exemplar-tasks": [
+    {
+      "task-id": "task-sci-fi-001",
+      "description": "创作科幻短篇小说",
+      "score": 5,
+      "quality-score": 92,
+      "date": "2026-04-04",
+      "comment": "完整流程测试成功，输出质量优秀"
+    }
+  ],
+  "last-updated": "2026-04-04T19:15:00Z"
+}

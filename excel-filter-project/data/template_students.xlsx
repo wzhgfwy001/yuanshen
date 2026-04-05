@@ -1,0 +1,21 @@
+此文件为学生信息表模板说明
+
+请使用 Excel 创建以下格式的表格:
+
+学生信息表 (students.xlsx) 字段:
+- student_id: 学生 ID (如 STU001)
+- student_name: 学生姓名 (如 张三)
+- category: 考生类别 (物理类/历史类)
+- subjects: 选科组合 (如 物理，化学，生物)
+- total_score: 高考总分 (如 650)
+- rank: 省内排名 (如 5000)
+- province: 考生省份 (如 广东)
+- preference_province: 期望省份，逗号分隔 (可选，如 北京，上海)
+- preference_level: 期望学校层次，逗号分隔 (可选，如 985,211)
+- preference_major: 期望专业类别，逗号分隔 (可选，如 理工，医学)
+
+示例数据:
+student_id,student_name,category,subjects,total_score,rank,province
+STU001，张三，物理类，"物理，化学，生物",650,5000，广东
+STU002，李四，物理类，"物理，化学，地理",630,8000，广东
+STU003，王五，历史类，"历史，政治，地理",620,3000，广东

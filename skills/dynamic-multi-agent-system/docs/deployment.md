@@ -1,351 +1,361 @@
 # 部署指南
 
-## 部署方式
-
-### 方式1：开发环境部署（推荐）
-
-适合测试和开发阶段。
-
-**步骤：**
-
-1. **确认位置**
-   ```
-   目标目录：C:\Users\DELL\.openclaw\workspace\skills\dynamic-multi-agent-system\
-   ```
-
-2. **验证文件完整性**
-   ```
-   检查以下文件是否存在：
-   - README.md
-   - SKILL.md
-   - manifest.json
-   - core/*/SKILL.md (6个核心组件)
-   ```
-
-3. **配置OpenClaw**
-   ```
-   编辑：C:\Users\DELL\.openclaw\openclaw.json
-   
-   添加（如需要）：
-   {
-     "skills": {
-       "paths": [
-         "./workspace/skills"
-       ]
-     }
-   }
-   ```
-
-4. **重启Gateway**
-   ```
-   openclaw gateway restart
-   ```
-
-5. **验证安装**
-   ```
-   openclaw skill list
-   
-   应显示：dynamic-multi-agent-system ✅
-   ```
+**版本：** v1.0.0-alpha  
+**更新日期：** 2026-04-04  
+**适用平台：** OpenClaw 2026.4.1+
 
 ---
 
-### 方式2：生产环境部署
+## 📋 前置要求
 
-适合正式使用。
+### 系统要求
 
-**步骤：**
-
-1. **复制到Skills目录**
-   ```
-   源目录：C:\Users\DELL\.openclaw\workspace\skills\dynamic-multi-agent-system\
-   目标目录：C:\Users\DELL\AppData\Roaming\npm\node_modules\openclaw\skills\dynamic-multi-agent-system\
-   ```
-
-2. **设置权限**
-   ```
-   确保OpenClaw有读取权限
-   ```
-
-3. **重启Gateway**
-   ```
-   openclaw gateway restart
-   ```
-
-4. **验证安装**
-   ```
-   openclaw skill list
-   ```
-
----
-
-### 方式3：SkillHub上架（未来）
-
-适合发布给社区使用。
-
-**步骤：**
-
-1. **准备上架材料**
-   - 完整的Skill包
-   - README.md（展示页）
-   - 使用示例（至少3个）
-   - 测试报告
-
-2. **提交到SkillHub**
-   ```
-   访问：https://clawhub.ai
-   提交Skill包
-   ```
-
-3. **等待审核**
-   ```
-   审核时间：1-3个工作日
-   ```
-
-4. **发布**
-   ```
-   审核通过后自动发布
-   用户可通过 openclaw skill install 安装
-   ```
-
----
-
-## 部署前检查
-
-### 环境检查
-
-```bash
-# 检查OpenClaw版本
-openclaw --version
-# 应 >= 1.0.0
-
-# 检查Gateway状态
-openclaw gateway status
-# 应显示 running
-
-# 检查可用模型
-openclaw models list
-# 应至少有一个可用模型
-```
-
-### 文件检查
-
-```bash
-# 检查核心文件
-ls -la skills/dynamic-multi-agent-system/
-# 应包含 README.md, SKILL.md, manifest.json
-
-# 检查核心组件
-ls -la skills/dynamic-multi-agent-system/core/
-# 应包含6个组件目录
-```
+| 要求 | 最低配置 | 推荐配置 |
+|------|----------|----------|
+| OpenClaw 版本 | 2026.4.1 | 2026.4.2+ |
+| 内存 | 4GB | 8GB+ |
+| 磁盘空间 | 100MB | 500MB+ |
+| 网络 | 需要（API 调用） | 稳定连接 |
 
 ### 依赖检查
 
+```bash
+# 检查 OpenClaw 版本
+openclaw --version
+
+# 检查 Gateway 状态
+openclaw gateway status
+
+# 检查设备配对
+openclaw devices list
 ```
-依赖项：
-- OpenClaw >= 1.0.0 ✅
-- 模型：qwen3.5-plus 或其他 ✅
-- 无外部API依赖 ✅
+
+**要求：**
+- ✅ OpenClaw ≥ 2026.4.1
+- ✅ Gateway 正常运行
+- ✅ 至少配对 1 个设备（用于子 Agent 创建）
+
+---
+
+## 📦 安装步骤
+
+### 方法 1：手动安装（推荐）
+
+**步骤 1：下载 Skill 包**
+
+```bash
+# 克隆或下载项目到本地
+git clone <repository-url> dynamic-multi-agent-system
+# 或下载 ZIP 解压
+```
+
+**步骤 2：复制到 Skills 目录**
+
+```bash
+# Windows PowerShell
+Copy-Item -Path ".\dynamic-multi-agent-system" `
+  -Destination "$env:APPDATA\npm\node_modules\openclaw\skills\" `
+  -Recurse
+
+# 或手动复制文件夹到：
+# C:\Users\<用户名>\AppData\Roaming\npm\node_modules\openclaw\skills\
+```
+
+**步骤 3：验证安装**
+
+```bash
+# 检查 Skill 是否被识别
+openclaw skills list
+
+# 应该看到：
+# dynamic-multi-agent-system - 混合动态多 Agent 协作系统
+```
+
+**步骤 4：重启 Gateway**
+
+```bash
+openclaw gateway restart
 ```
 
 ---
 
-## 配置选项
+### 方法 2：使用安装包（待提供）
 
-### 基础配置
+```bash
+# 未来支持（待实现）
+openclaw skills install dynamic-multi-agent-system
+```
+
+---
+
+## ⚙️ 配置说明
+
+### 默认配置
+
+安装后无需额外配置，系统使用默认设置：
 
 ```json
-// C:\Users\DELL\.openclaw\openclaw.json
 {
-  "multi-agent": {
-    "enabled": true,
-    "max-concurrent-tasks": 3,
-    "max-sub-agents": 12,
-    "enable-evolution": true,
-    "confidence-threshold": 0.7,
-    "subagent-timeout": 300
+  "max-concurrent-tasks": 3,
+  "max-subagents-total": 12,
+  "max-subagents-per-task": 6,
+  "confidence-threshold": 0.7,
+  "solidify-threshold": 3
+}
+```
+
+### 自定义配置（可选）
+
+**配置文件位置：**
+```
+skills/dynamic-multi-agent-system/config/user-config.json
+```
+
+**可配置项：**
+
+```json
+{
+  "limits": {
+    "max-concurrent-tasks": 3,      // 最大并发主任务数
+    "max-subagents-total": 12,      // 最大子 Agent 总数
+    "max-subagents-per-task": 6     // 单任务最大子 Agent 数
+  },
+  "thresholds": {
+    "confidence": 0.7,              // 分类置信度阈值
+    "solidify": 3,                  // 固化所需成功次数
+    "quality-min": 85               // 最低质量分
+  },
+  "feedback": {
+    "auto-send": true,              // 自动发送反馈请求
+    "delay-seconds": 30             // 延迟发送时间
   }
 }
 ```
 
-### 配置说明
+---
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| enabled | true | 是否启用系统 |
-| max-concurrent-tasks | 3 | 最多并发主任务数 |
-| max-sub-agents | 12 | 最多子Agent总数 |
-| enable-evolution | true | 是否启用Skill进化 |
-| confidence-threshold | 0.7 | 任务分类置信度阈值 |
-| subagent-timeout | 300 | 子Agent超时时间（秒） |
+## 🧪 验证安装
+
+### 快速测试
+
+**测试 1：单一任务**
+
+```
+任务：翻译"你好，世界"为英文
+预期：直接翻译，无子 Agent 创建
+```
+
+**测试 2：标准任务**
+
+```
+任务：写一篇科幻短篇小说（800 字）
+预期：创建 4 个子 Agent（世界观→大纲→写作→审查）
+```
+
+**测试 3：创新任务**
+
+```
+任务：设计一套公司管理体系
+预期：创建 6-8 个子 Agent，动态分解
+```
+
+### 检查清单
+
+- [ ] Skill 出现在 `openclaw skills list` 中
+- [ ] 单一任务测试通过
+- [ ] 标准任务测试通过
+- [ ] 子 Agent 创建正常
+- [ ] 输出质量达标（≥85 分）
 
 ---
 
-## 首次运行
+## 🔧 故障排除
 
-### 测试任务
+### 问题 1：Skill 未识别
 
-```
-任务：写一篇200字的科幻微小说
-主题：人工智能
-要求：有反转结局
-```
-
-**预期行为：**
-1. 识别为"创新任务"
-2. 创建2个子Agent（大纲+写作）
-3. 执行并输出结果
-4. 清理临时资源
-
-### 验证要点
-
-- [ ] 任务正确分类
-- [ ] 子Agent成功创建
-- [ ] 输出符合质量要求
-- [ ] 资源正确清理
-- [ ] Skill计数+1
-
----
-
-## 故障排除
-
-### 问题1：Skill未识别
-
-**现象：** `openclaw skill list` 未显示
+**症状：** `openclaw skills list` 未显示
 
 **解决：**
-```
-1. 检查文件路径是否正确
-2. 检查openclaw.json中的skills.paths配置
-3. 重启Gateway
-4. 检查日志：openclaw logs
+```bash
+# 1. 检查文件夹位置
+ls "$env:APPDATA\npm\node_modules\openclaw\skills\dynamic-multi-agent-system"
+
+# 2. 确认 SKILL.md 存在
+ls skills/dynamic-multi-agent-system/SKILL.md
+
+# 3. 重启 Gateway
+openclaw gateway restart
+
+# 4. 清除缓存（如需要）
+openclaw skills refresh
 ```
 
-### 问题2：子Agent创建失败
+---
 
-**现象：** sessions_spawn返回错误
+### 问题 2：子 Agent 创建失败
+
+**症状：** `pairing required` 错误
 
 **解决：**
-```
-1. 检查Gateway状态
-2. 检查模型配置
-3. 检查资源限制（max-sub-agents）
-4. 查看错误日志
+```bash
+# 1. 检查设备配对状态
+openclaw devices list
+
+# 2. 如有待批准请求，批准它
+openclaw devices approve <requestId>
+
+# 3. 重启 Gateway
+openclaw gateway restart
 ```
 
-### 问题3：任务执行超时
+**参考：** 配对问题修复指南
 
-**现象：** 任务长时间无响应
+---
+
+### 问题 3：任务分类错误
+
+**症状：** 任务类型识别不准确
 
 **解决：**
-```
-1. 增加subagent-timeout配置
-2. 检查子Agent是否卡住
-3. 手动终止：openclaw sessions kill
-4. 简化任务或增加资源
+```bash
+# 1. 检查分类器配置
+cat skills/dynamic-multi-agent-system/core/task-classifier/SKILL.md
+
+# 2. 调整置信度阈值（如需要）
+# 编辑 config/user-config.json
+# "confidence-threshold": 0.6  # 降低阈值
+
+# 3. 手动指定任务类型（临时方案）
+# 在任务描述中明确说明："这是一个创新任务，需要..."
 ```
 
-### 问题4：资源未清理
+---
 
-**现象：** 任务完成后子Agent仍存在
+### 问题 4：输出质量不达标
+
+**症状：** 质量分 <85 分
 
 **解决：**
-```
-1. 手动清理：openclaw sessions kill <session-key>
-2. 检查resource-cleaner组件
-3. 查看清理日志
-4. 重启Gateway强制清理
+1. **检查输入质量** - 任务描述是否清晰详细
+2. **增加审查环节** - 要求启用审查 Agent
+3. **提供示例** - 给出参考样例
+4. **多次迭代** - 使用反馈机制改进
+
+---
+
+### 问题 5：系统超时
+
+**症状：** 任务执行超时（>5 分钟无响应）
+
+**解决：**
+```bash
+# 1. 检查 Gateway 日志
+openclaw logs --follow
+
+# 2. 检查子 Agent 状态
+openclaw subagents list
+
+# 3. 终止卡住的子 Agent
+openclaw subagents kill <session-id>
+
+# 4. 重试任务
 ```
 
 ---
 
-## 性能调优
+## 📊 性能基准
 
-### 并发优化
+### 典型任务耗时
 
+| 任务类型 | 字数/规模 | 预计耗时 | 资源使用 |
+|----------|-----------|----------|----------|
+| 单一任务 | <500 字 | <5 分钟 | 1 次 LLM 调用 |
+| 标准任务 | 800-1000 字 | 60-90 分钟 | 4 个子 Agent |
+| 创新任务 | 3000-5000 字 | 120-180 分钟 | 6-8 个子 Agent |
+| 混合任务 | 2000-3000 字 | 90-120 分钟 | 5 个子 Agent |
+
+### 资源限制
+
+| 资源 | 限制 | 说明 |
+|------|------|------|
+| 并发主任务 | 3 个 | 同时运行的主任务数 |
+| 子 Agent 总数 | 12 个 | 所有任务共享 |
+| 单任务子 Agent | 6 个 | 单个任务最多占用 |
+| 任务超时 | 60 分钟 | 默认超时时间 |
+| 子 Agent 超时 | 5 分钟 | 无响应自动终止 |
+
+---
+
+## 🔄 更新方法
+
+### 手动更新
+
+```bash
+# 1. 备份现有配置
+Copy-Item skills/dynamic-multi-agent-system/config `
+  skills/dynamic-multi-agent-system/config.backup
+
+# 2. 下载新版本
+# 覆盖安装文件夹
+
+# 3. 恢复用户配置
+Copy-Item skills/dynamic-multi-agent-system/config.backup/user-config.json `
+  skills/dynamic-multi-agent-system/config/user-config.json
+
+# 4. 重启 Gateway
+openclaw gateway restart
 ```
-如系统响应慢：
-- 减少 max-concurrent-tasks (3→2)
-- 减少 max-sub-agents (12→8)
 
-如资源利用率低：
-- 增加 max-concurrent-tasks (3→4)
-- 增加 max-sub-agents (12→16)
-```
+### 自动更新（待实现）
 
-### 质量优化
-
-```
-如输出质量不稳定：
-- 启用审查Agent（降低阈值）
-- 增加检查清单严格度
-- 提高模型等级
-
-如修改次数过多：
-- 加强前期需求确认
-- 增加中期检查点
-- 优化检查清单
+```bash
+# 未来支持
+openclaw skills update dynamic-multi-agent-system
 ```
 
 ---
 
-## 备份与恢复
+## 📞 获取帮助
 
-### 备份
+### 文档资源
 
-```
-备份内容：
-- state/skill-counters.json
-- state/experience-db.json
-- state/execution-logs/
+- [架构说明](docs/architecture.md)
+- [API 参考](docs/api-reference.md)
+- [故障排除](docs/troubleshooting.md)
+- [使用示例](examples/)
 
-备份命令：
-cp -r skills/dynamic-multi-agent-system/state/ backup/
-```
+### 社区支持
 
-### 恢复
+- **Discord:** https://discord.com/invite/clawd
+- **GitHub:** https://github.com/openclaw/openclaw
+- **文档：** https://docs.openclaw.ai
 
-```
-恢复命令：
-cp -r backup/state/ skills/dynamic-multi-agent-system/
-```
+### 报告问题
 
----
-
-## 升级指南
-
-### 版本检查
-
-```
-查看当前版本：
-cat skills/dynamic-multi-agent-system/manifest.json | grep version
-```
-
-### 升级步骤
-
-```
-1. 备份当前版本和数据
-2. 下载新版本
-3. 替换文件（保留state目录）
-4. 重启Gateway
-5. 验证功能
-```
-
-### 版本兼容性
-
-| 当前版本 | 可升级到 | 说明 |
-|----------|----------|------|
-| 1.0.0-alpha | 1.0.0 | 直接升级 |
-| 1.0.0 | 1.1.0 | 直接升级 |
-| 1.x.x | 2.0.0 | 需要迁移配置 |
+遇到问题？请提供：
+1. OpenClaw 版本
+2. 错误信息（完整日志）
+3. 复现步骤
+4. 任务描述
 
 ---
 
-## 联系支持
+## ✅ 安装完成检查清单
 
-**文档：** docs/ 目录
+- [ ] Skill 已安装到正确目录
+- [ ] `openclaw skills list` 显示 Skill
+- [ ] Gateway 已重启
+- [ ] 设备已配对
+- [ ] 单一任务测试通过
+- [ ] 标准任务测试通过
+- [ ] 阅读了故障排除指南
+- [ ] 保存了社区支持链接
 
-**问题反馈：** GitHub Issues（待创建）
+---
 
-**社区：** OpenClaw Discord（待添加）
+**安装完成！开始使用混合动态多 Agent 系统吧！** 🚀
+
+---
+
+*部署指南版本：1.0*  
+*最后更新：2026-04-04*
