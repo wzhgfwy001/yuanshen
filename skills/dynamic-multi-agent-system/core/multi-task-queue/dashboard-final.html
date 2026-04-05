@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛪ 魔法教堂监控 - 最终优化版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* 主容器 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 380px 1fr 380px;
+            grid-template-rows: 80px 1fr 200px;
+            gap: 12px;
+            height: 100vh;
+            padding: 20px;
+        }
+        
+        /* 顶部栏 */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%);
+            border: 4px solid #e94560;
+            padding: 0 30px;
+            box-shadow: 0 0 30px rgba(233,69,96,0.5);
+        }
+        
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-icon {
+            font-size: 42px;
+            animation: iconPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            color: #e94560;
+            text-shadow: 0 0 20px rgba(233,69,96,0.8);
+            letter-spacing: 3px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .header-stat {
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 18px;
+            border: 3px solid #e94560;
+            box-shadow: 0 0 15px rgba(233,69,96,0.4);
+        }
+        
+        .header-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251,191,36,0.6);
+        }
+        
+        .header-stat-label {
+            font-size: 10px;
+            color: #a2a8d3;
+            margin-top: 4px;
+        }
+        
+        /* 左侧面板 */
+        .left-panel {
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* 右侧面板 */
+        .right-panel {
+            grid-row: 2 / 4;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* 中央场景 */
+        .center-scene {
+            grid-row: 2 / 4;
+            position: relative;
+            background: #0a0a0f;
+            border: 4px solid #a855f7;
+            overflow: hidden;
+        }
+        
+        /* 底部面板 */
+        .bottom-panel {
+            grid-column: 1 / 2;
+            grid-row: 3 / 4;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* 卡片 */
+        .card {
+            background: linear-gradient(180deg, #2d1b4e, #1a1a2e);
+            border: 3px solid #e94560;
+            box-shadow: 0 0 20px rgba(233,69,96,0.3);
+            padding: 18px;
+        }
+        
+        .card-title {
+            font-size: 13px;
+            color: #fbbf24;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(233,69,96,0.3);
+            padding-bottom: 10px;
+        }
+        
+        /* 任务列表 */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .task-item {
+            padding: 12px;
+            background: rgba(0,0,0,0.4);
+            border: 3px solid #e94560;
+            border-left: 5px solid #22c55e;
+        }
+        
+        .task-item.pending {
+            border-left-color: #fbbf24;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .task-name {
+            font-size: 12px;
+            color: #e0e0e0;
+        }
+        
+        .task-id {
+            font-size: 9px;
+            color: #64748b;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            animation: blink 1s infinite;
+        }
+        
+        .status-dot.running {
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+        
+        .status-dot.pending {
+            background: #fbbf24;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .progress-bar {
+            height: 16px;
+            background: #000;
+            border: 2px solid #e94560;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            transition: width 0.5s;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.3) 10px,
+                rgba(255,255,255,0.3) 20px
+            );
+            animation: progressSlide 1s linear infinite;
+        }
+        
+        @keyframes progressSlide {
+            from { transform: translateX(-20px); }
+            to { transform: translateX(20px); }
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            color: #fff;
+            font-weight: bold;
+            z-index: 1;
+        }
+        
+        /* 中央场景 - 魔法教堂 */
+        .pixel-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0a0f 0%, #1a1a2e 100%);
+        }
+        
+        /* 星空 */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background-image: 
+                radial-gradient(2px 2px at 50px 50px, #fff, transparent),
+                radial-gradient(2px 2px at 150px 80px, #fff, transparent),
+                radial-gradient(2px 2px at 250px 40px, #fff, transparent),
+                radial-gradient(2px 2px at 350px 100px, #fff, transparent),
+                radial-gradient(2px 2px at 450px 60px, #fff, transparent);
+            background-size: 500px 150px;
+            animation: starScroll 30s linear infinite;
+        }
+        
+        @keyframes starScroll {
+            from { background-position: 0 0; }
+            to { background-position: 500px 0; }
+        }
+        
+        /* 教堂建筑 */
+        .church {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 450px;
+        }
+        
+        /* 屋顶 */
+        .roof {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 120px solid transparent;
+            border-right: 120px solid transparent;
+            border-bottom: 80px solid #2d1b4e;
+        }
+        
+        /* 十字架 */
+        .cross {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 60px;
+            background: #fbbf24;
+            box-shadow: 0 0 30px #fbbf24, 0 0 60px #f59e0b;
+            animation: crossGlow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes crossGlow {
+            0%, 100% { 
+                box-shadow: 0 0 30px #fbbf24, 0 0 60px #f59e0b;
+            }
+            50% { 
+                box-shadow: 0 0 50px #fbbf24, 0 0 90px #f59e0b, 0 0 120px rgba(245,158,11,0.6);
+            }
+        }
+        
+        /* 教堂主体 */
+        .church-body {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 250px;
+            background: linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%);
+            border: 4px solid #e94560;
+            box-shadow: 0 0 30px rgba(233,69,96,0.4);
+        }
+        
+        /* 彩色玻璃窗 */
+        .window {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(180deg, 
+                #e94560 0%, 
+                #a855f7 30%, 
+                #3b82f6 60%, 
+                #10b981 100%);
+            border: 4px solid #fbbf24;
+            box-shadow: 0 0 40px rgba(233,69,96,0.6);
+            animation: windowGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes windowGlow {
+            0%, 100% { 
+                opacity: 0.7;
+                box-shadow: 0 0 40px rgba(233,69,96,0.6);
+            }
+            50% { 
+                opacity: 1;
+                box-shadow: 0 0 70px rgba(233,69,96,0.9), 0 0 100px rgba(168,85,247,0.6);
+            }
+        }
+        
+        /* 大门 */
+        .door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 90px;
+            background: #0f0f1a;
+            border: 3px solid #a855f7;
+            border-radius: 35px 35px 0 0;
+        }
+        
+        /* 地板 */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 120px;
+            background: repeating-linear-gradient(
+                90deg,
+                #2d1b4e,
+                #2d1b4e 40px,
+                #1a1a2e 40px,
+                #1a1a2e 80px
+            );
+            border-top: 4px solid #e94560;
+            border-left: 4px solid #a855f7;
+            border-right: 4px solid #a855f7;
+        }
+        
+        /* 祭坛 */
+        .altar {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 50px;
+            background: #2d1b4e;
+            border: 3px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251,191,36,0.5);
+        }
+        
+        /* 蜡烛 */
+        .candle {
+            position: absolute;
+            bottom: 130px;
+            width: 14px;
+            height: 35px;
+            background: linear-gradient(180deg, #fbbf24, #f59e0b);
+            border: 2px solid #fff;
+        }
+        
+        .candle-left { left: 35%; }
+        .candle-right { right: 35%; }
+        
+        .flame {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 20px;
+            background: radial-gradient(ellipse at bottom, #fff 0%, #fbbf24 50%, #f59e0b 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flameFlicker 0.4s infinite;
+            box-shadow: 0 0 25px #fbbf24, 0 0 50px #f59e0b;
+        }
+        
+        @keyframes flameFlicker {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.15); opacity: 0.85; }
+        }
+        
+        /* 女魔法师 */
+        .mage {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 80px;
+            filter: drop-shadow(0 0 20px rgba(233,69,96,0.8));
+            animation: mageFloat 2s ease-in-out infinite;
+            z-index: 10;
+        }
+        
+        @keyframes mageFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-8px); }
+        }
+        
+        /* 魔法书 */
+        .book {
+            position: absolute;
+            bottom: 85px;
+            left: 58%;
+            font-size: 40px;
+            animation: bookFloat 2.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(168,85,247,0.6));
+        }
+        
+        @keyframes bookFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(10deg); }
+        }
+        
+        /* 魔法杖 */
+        .staff {
+            position: absolute;
+            bottom: 85px;
+            right: 38%;
+            font-size: 50px;
+            animation: staffGlow 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(233,69,96,0.8));
+        }
+        
+        @keyframes staffGlow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(233,69,96,0.8)); }
+            50% { filter: drop-shadow(0 0 35px rgba(233,69,96,1), 0 0 50px rgba(168,85,247,0.6)); }
+        }
+        
+        /* 魔法粒子 */
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #e94560;
+            border-radius: 2px;
+            box-shadow: 0 0 20px #e94560;
+            animation: particleFloat 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+            50% { transform: translate(20px, -35px) scale(0.6); opacity: 0.5; }
+        }
+        
+        /* 悬浮数据框 */
+        .tooltip {
+            position: absolute;
+            background: linear-gradient(180deg, #2d1b4e, #1a1a2e);
+            border: 3px solid #e94560;
+            padding: 12px;
+            font-size: 11px;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.5), 0 0 20px rgba(233,69,96,0.4);
+            animation: tooltipFloat 3s ease-in-out infinite;
+            min-width: 130px;
+        }
+        
+        .tooltip-1 { top: 15%; left: 10%; }
+        .tooltip-2 { top: 25%; right: 10%; animation-delay: 0.5s; }
+        .tooltip-3 { bottom: 20%; left: 15%; animation-delay: 1s; }
+        
+        @keyframes tooltipFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .tooltip-label {
+            color: #fbbf24;
+            margin-bottom: 6px;
+            font-size: 10px;
+        }
+        
+        .tooltip-value {
+            color: #22c55e;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        
+        /* 仪表 */
+        .gauge-container {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .gauge {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: #000;
+            border: 4px solid #e94560;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gauge-inner {
+            width: 70px;
+            height: 70px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            border: 3px solid #a855f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gauge-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+        
+        .gauge-label {
+            font-size: 9px;
+            color: #a2a8d3;
+            margin-top: 4px;
+        }
+        
+        /* 进度条列表 */
+        .progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+        }
+        
+        .progress-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .progress-icon {
+            font-size: 14px;
+        }
+        
+        .progress-value {
+            color: #fbbf24;
+        }
+        
+        .progress-track {
+            height: 18px;
+            background: #000;
+            border: 3px solid #e94560;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-track-fill {
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                #e94560,
+                #e94560 6px,
+                #ff6b6b 6px,
+                #ff6b6b 12px
+            );
+            transition: width 0.5s;
+            box-shadow: 0 0 10px rgba(233,69,96,0.6);
+        }
+        
+        .progress-track-fill.beta {
+            background: repeating-linear-gradient(
+                90deg,
+                #f59e0b,
+                #f59e0b 6px,
+                #fbbf24 6px,
+                #fbbf24 12px
+            );
+        }
+        
+        .progress-track-fill.gamma {
+            background: repeating-linear-gradient(
+                90deg,
+                #10b981,
+                #10b981 6px,
+                #34d399 6px,
+                #34d399 12px
+            );
+        }
+        
+        /* 告警 */
+        .alert {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(220,38,38,0.15);
+            border: 2px solid #dc2626;
+            border-left: 5px solid #dc2626;
+            animation: alertFlash 1.5s infinite;
+        }
+        
+        @keyframes alertFlash {
+            0%, 100% { 
+                background: rgba(220,38,38,0.15);
+            }
+            50% { 
+                background: rgba(220,38,38,0.3);
+            }
+        }
+        
+        .alert-title {
+            color: #dc2626;
+            font-size: 11px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+        
+        .alert-desc {
+            color: #fca5a5;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.4);
+            border: 3px solid;
+            font-size: 10px;
+            margin-right: 10px;
+        }
+        
+        .status-indicator.online {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+        
+        .status-indicator.busy {
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        
+        /* 底部指标 */
+        .metrics-container {
+            display: flex;
+            gap: 25px;
+            justify-content: space-around;
+        }
+        
+        .metric-box {
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            border: 3px solid #e94560;
+            padding: 15px 20px;
+            box-shadow: 0 0 15px rgba(233,69,96,0.3);
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            color: #fbbf24;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(251,191,36,0.5);
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            color: #a2a8d3;
+            margin-top: 6px;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10,10,15,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 1s;
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            color: #e94560;
+            animation: loadingBlink 1s infinite;
+        }
+        
+        @keyframes loadingBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loading" id="loading">
+        <div class="loading-text">⛪ 魔法教堂加载中...</div>
+    </div>
+    
+    <div class="dashboard">
+        <!-- 顶部栏 -->
+        <div class="header">
+            <div class="header-logo">
+                <div class="header-icon">⛪</div>
+                <h1>魔法教堂监控中心</h1>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-running">0</div>
+                    <div class="header-stat-label">运行中</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-pending">0</div>
+                    <div class="header-stat-label">等待中</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-completed">0</div>
+                    <div class="header-stat-label">已完成</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-usage">0%</div>
+                    <div class="header-stat-label">资源使用</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 左侧面板 -->
+        <div class="left-panel">
+            <!-- 任务列表 -->
+            <div class="card" style="flex: 1;">
+                <div class="card-title">📋 活跃任务</div>
+                <div class="task-list" id="task-list"></div>
+            </div>
+            
+            <!-- 底部状态 -->
+            <div class="card">
+                <div class="card-title">🔔 系统状态</div>
+                <div>
+                    <span class="status-indicator online">● 在线</span>
+                    <span class="status-indicator busy">● 忙碌</span>
+                    <span style="color: #a2a8d3; font-size: 10px; margin-left: 10px;">
+                        更新：<span id="last-update">--:--:--</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中央场景 -->
+        <div class="center-scene">
+            <div class="pixel-scene">
+                <!-- 星空 -->
+                <div class="stars"></div>
+                
+                <!-- 教堂 -->
+                <div class="church">
+                    <!-- 十字架 -->
+                    <div class="cross"></div>
+                    
+                    <!-- 屋顶 -->
+                    <div class="roof"></div>
+                    
+                    <!-- 主体 -->
+                    <div class="church-body">
+                        <!-- 彩色玻璃窗 -->
+                        <div class="window"></div>
+                        
+                        <!-- 大门 -->
+                        <div class="door"></div>
+                    </div>
+                </div>
+                
+                <!-- 地板 -->
+                <div class="floor"></div>
+                
+                <!-- 祭坛 -->
+                <div class="altar"></div>
+                
+                <!-- 蜡烛 -->
+                <div class="candle candle-left"><div class="flame"></div></div>
+                <div class="candle candle-right"><div class="flame"></div></div>
+                
+                <!-- 女魔法师 -->
+                <div class="mage">👩‍🦰</div>
+                
+                <!-- 魔法书 -->
+                <div class="book">📖</div>
+                
+                <!-- 魔法杖 -->
+                <div class="staff">🪄</div>
+                
+                <!-- 魔法粒子 -->
+                <div class="particle" style="left: 20%; top: 30%;"></div>
+                <div class="particle" style="left: 80%; top: 25%; animation-delay: 0.5s;"></div>
+                <div class="particle" style="left: 50%; top: 20%; animation-delay: 1s;"></div>
+                <div class="particle" style="left: 30%; top: 40%; animation-delay: 1.5s;"></div>
+                <div class="particle" style="left: 70%; top: 35%; animation-delay: 2s;"></div>
+                <div class="particle" style="left: 45%; top: 45%; animation-delay: 2.5s;"></div>
+                
+                <!-- 悬浮数据框 -->
+                <div class="tooltip tooltip-1">
+                    <div class="tooltip-label">⚡ 魔力值</div>
+                    <div class="tooltip-value" id="tooltip-mana">98%</div>
+                </div>
+                
+                <div class="tooltip tooltip-2">
+                    <div class="tooltip-label">🎯 进度</div>
+                    <div class="tooltip-value" id="tooltip-progress">65%</div>
+                </div>
+                
+                <div class="tooltip tooltip-3">
+                    <div class="tooltip-label">⏱️ 耗时</div>
+                    <div class="tooltip-value" id="tooltip-time">2m34s</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧面板 -->
+        <div class="right-panel">
+            <!-- 圆形仪表 -->
+            <div class="card">
+                <div class="card-title">📈 系统监控</div>
+                <div class="gauge-container">
+                    <div class="gauge">
+                        <div class="gauge-inner">
+                            <div class="gauge-number" id="gauge-health">80</div>
+                            <div class="gauge-label">健康</div>
+                        </div>
+                    </div>
+                    <div class="gauge">
+                        <div class="gauge-inner">
+                            <div class="gauge-number" id="gauge-usage">40</div>
+                            <div class="gauge-label">使用</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 模型用量 -->
+            <div class="card">
+                <div class="card-title">🤖 模型用量</div>
+                <div class="progress-list">
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">
+                                <span class="progress-icon">🔮</span>
+                                qwen3.5-plus
+                            </span>
+                            <span class="progress-value">1.0M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-track-fill" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">
+                                <span class="progress-icon">🧠</span>
+                                gpt-4
+                            </span>
+                            <span class="progress-value">0.5M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-track-fill beta" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">
+                                <span class="progress-icon">📚</span>
+                                claude-3
+                            </span>
+                            <span class="progress-value">0.3M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-track-fill gamma" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 告警 -->
+            <div class="card" style="flex: 1;">
+                <div class="card-title">⚠️ 告警</div>
+                <div id="alert-list">
+                    <div class="alert">
+                        <div class="alert-title">连接超时</div>
+                        <div class="alert-desc">子 Agent #3 响应超时，已重试 (3/5)</div>
+                    </div>
+                    <div class="alert">
+                        <div class="alert-title">资源紧张</div>
+                        <div class="alert-desc">子灵使用率超 80%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部面板 -->
+        <div class="bottom-panel">
+            <div class="card">
+                <div class="card-title">📊 实时指标</div>
+                <div class="metrics-container">
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-tasks">0</div>
+                        <div class="metric-label">总任务</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-subagents">0</div>
+                        <div class="metric-label">子灵</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-success">100%</div>
+                        <div class="metric-label">成功率</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-efficiency">95%</div>
+                        <div class="metric-label">效率</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟数据
+        const mockData = {
+            pending: { count: 2, tasks: [
+                { id: 'TASK-001', name: '科幻小说创作', status: 'pending', progress: 0 },
+                { id: 'TASK-002', name: '数据分析报告', status: 'pending', progress: 0 }
+            ]},
+            running: { count: 1, tasks: [
+                { id: 'TASK-003', name: '悬疑小说大纲', status: 'running', active_subagents: 4, progress: 0.65, started_at: new Date(Date.now() - 154000).toISOString() }
+            ], active_subagents: 4 },
+            completed: { count: 12, today: 5 },
+            resources: { usage_rate: 0.33 }
+        };
+        
+        function updateDashboard() {
+            const data = mockData;
+            
+            // 更新顶部统计
+            document.getElementById('header-running').textContent = data.running.count;
+            document.getElementById('header-pending').textContent = data.pending.count;
+            document.getElementById('header-completed').textContent = data.completed.today;
+            document.getElementById('header-usage').textContent = Math.round(data.resources.usage_rate * 100) + '%';
+            
+            // 更新任务列表
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = [...data.pending.tasks, ...data.running.tasks].map(task => `
+                <div class="task-item ${task.status}">
+                    <div class="task-header">
+                        <div>
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-id">${task.id}</div>
+                        </div>
+                        <div class="status-dot ${task.status}"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(task.progress * 100).toFixed(0)}%"></div>
+                        <div class="progress-text">${(task.progress * 100).toFixed(0)}%</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 更新指标
+            document.getElementById('metric-tasks').textContent = data.pending.count + data.running.count + data.completed.count;
+            document.getElementById('metric-subagents').textContent = data.running.active_subagents;
+            
+            // 更新仪表
+            const health = Math.round(80 + Math.random() * 20);
+            const usage = Math.round(data.resources.usage_rate * 100);
+            document.getElementById('gauge-health').textContent = health;
+            document.getElementById('gauge-usage').textContent = usage;
+            
+            // 更新悬浮数据
+            document.getElementById('tooltip-mana').textContent = (95 + Math.random() * 5).toFixed(0) + '%';
+            document.getElementById('tooltip-progress').textContent = (data.running.tasks[0]?.progress * 100 || 0).toFixed(0) + '%';
+            
+            const elapsed = Math.floor((Date.now() - new Date(data.running.tasks[0]?.started_at || Date.now()).getTime()) / 1000);
+            const min = Math.floor(elapsed / 60);
+            const sec = elapsed % 60;
+            document.getElementById('tooltip-time').textContent = `${min}m${sec.toString().padStart(2, '0')}s`;
+            
+            // 更新时间
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+        
+        // 初始更新
+        updateDashboard();
+        
+        // 每 3 秒更新一次
+        setInterval(updateDashboard, 3000);
+        
+        // 移除加载动画
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            loading.style.opacity = '0';
+            setTimeout(() => loading.style.display = 'none', 1000);
+        }, 2000);
+    </script>
+</body>
+</html>
