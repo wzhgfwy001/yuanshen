@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛪ 魔法教堂监控 - 最终完整版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* 主容器 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 400px 1fr 400px;
+            grid-template-rows: 90px 1fr 220px;
+            gap: 16px;
+            height: 100vh;
+            padding: 24px;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 50%),
+                linear-gradient(180deg, #030014 0%, #0a0a0f 50%, #030014 100%);
+        }
+        
+        /* 卡片 */
+        .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(180deg, #8b5cf6, #ec4899);
+            border-radius: 2px;
+        }
+        
+        /* 顶部栏 */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(236,72,153,0.05) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 20px;
+            padding: 0 32px;
+        }
+        
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border-radius: 12px;
+            font-size: 24px;
+            box-shadow: 0 0 30px rgba(139,92,246,0.6);
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 3px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .header-stat {
+            text-align: center;
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(139,92,246,0.3);
+        }
+        
+        .header-stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-stat-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        
+        /* 左侧面板 */
+        .left-panel {
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        /* 右侧面板 */
+        .right-panel {
+            grid-row: 2 / 4;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        /* 中央场景 */
+        .center-scene {
+            grid-row: 2 / 4;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(139,92,246,0.1) 0%, transparent 60%);
+            border-radius: 20px;
+            border: 1px solid rgba(139,92,246,0.3);
+            overflow: hidden;
+        }
+        
+        /* 底部面板 */
+        .bottom-panel {
+            grid-column: 1 / 2;
+            grid-row: 3 / 4;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        /* 任务列表 */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .task-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 3px solid #8b5cf6;
+        }
+        
+        .task-item.running { border-left-color: #10b981; }
+        .task-item.pending { border-left-color: #f59e0b; }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .task-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .task-id {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+        
+        .status-dot.pending {
+            background: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #ec4899);
+            border-radius: 3px;
+            transition: width 1s;
+        }
+        
+        /* 中央场景容器 */
+        .scene-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 六翼天使 */
+        .seraph {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            z-index: 1;
+            animation: seraphFloat 4s ease-in-out infinite;
+        }
+        
+        @keyframes seraphFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-15px); }
+        }
+        
+        /* 天使光环 */
+        .seraph-halo {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            border: 4px solid rgba(251,191,36,0.6);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 40px rgba(251,191,36,0.6),
+                0 0 80px rgba(251,191,36,0.4),
+                inset 0 0 40px rgba(251,191,36,0.2);
+            animation: haloRotate 20s linear infinite;
+        }
+        
+        @keyframes haloRotate {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+        
+        /* 天使翅膀 - 六翼 */
+        .seraph-wings {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 100px;
+        }
+        
+        /* 上层翅膀 */
+        .wing-upper {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 0 0 30px rgba(255,255,255,0.6);
+        }
+        
+        .wing-upper-left {
+            left: 0;
+            transform-origin: right center;
+            animation: wingFlapLeft 3s ease-in-out infinite;
+        }
+        
+        .wing-upper-right {
+            right: 0;
+            transform-origin: left center;
+            animation: wingFlapRight 3s ease-in-out infinite;
+        }
+        
+        @keyframes wingFlapLeft {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(-10deg); }
+        }
+        
+        @keyframes wingFlapRight {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            75% { transform: rotate(10deg); }
+        }
+        
+        /* 中层翅膀 */
+        .wing-middle {
+            position: absolute;
+            width: 70px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 20px;
+        }
+        
+        .wing-middle-left {
+            left: 10px;
+        }
+        
+        .wing-middle-right {
+            right: 10px;
+        }
+        
+        /* 下层翅膀 */
+        .wing-lower {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 40px;
+        }
+        
+        .wing-lower-left {
+            left: 20px;
+        }
+        
+        .wing-lower-right {
+            right: 20px;
+        }
+        
+        /* 天使身体 */
+        .seraph-body {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.6);
+        }
+        
+        /* 教堂建筑 */
+        .church-container {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 500px;
+        }
+        
+        .church-body {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 320px;
+            background: linear-gradient(180deg, rgba(88,28,135,0.8) 0%, rgba(29,25,66,0.9) 100%);
+            border: 2px solid rgba(139,92,246,0.4);
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .church-roof {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-bottom: 120px solid rgba(88,28,135,0.9);
+        }
+        
+        .church-cross {
+            position: absolute;
+            top: -90px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 70px;
+            background: linear-gradient(180deg, #fbbf24, #f59e0b);
+            clip-path: path('M8 0h20v24h-20z M0 28h36v16h-36z');
+            filter: drop-shadow(0 0 20px rgba(251,191,36,0.8));
+        }
+        
+        .church-window {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 110px;
+            background: linear-gradient(180deg, rgba(236,72,153,0.8), rgba(139,92,246,0.8));
+            border: 3px solid rgba(251,191,36,0.6);
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(139,92,246,0.6);
+        }
+        
+        .church-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 100px;
+            background: rgba(3,0,20,0.95);
+            border: 2px solid rgba(139,92,246,0.4);
+            border-radius: 40px 40px 0 0;
+        }
+        
+        .church-floor {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(139,92,246,0.2), rgba(3,0,20,0.8));
+            border-top: 2px solid rgba(139,92,246,0.5);
+        }
+        
+        .church-altar {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 60px;
+            background: linear-gradient(180deg, rgba(88,28,135,0.8), rgba(29,25,66,0.9));
+            border: 2px solid rgba(251,191,36,0.5);
+        }
+        
+        .church-candle {
+            position: absolute;
+            bottom: 130px;
+            width: 16px;
+            height: 40px;
+            background: linear-gradient(180deg, #fbbf24, #f59e0b);
+        }
+        
+        .church-candle-left { left: 35%; }
+        .church-candle-right { right: 35%; }
+        
+        .candle-flame {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 28px;
+            background: radial-gradient(ellipse at bottom, #fff, #fbbf24, #f59e0b);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flameFlicker 0.5s infinite;
+        }
+        
+        @keyframes flameFlicker {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+        }
+        
+        /* 女魔法师 - 完整形象 */
+        .mage-character {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: mageLevitate 3s ease-in-out infinite;
+        }
+        
+        @keyframes mageLevitate {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        /* 魔法帽 */
+        .mage-hat {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 35px solid transparent;
+            border-right: 35px solid transparent;
+            border-bottom: 70px solid #2d1b4e;
+            filter: drop-shadow(0 0 10px rgba(139,92,246,0.6));
+        }
+        
+        .mage-hat::after {
+            content: '';
+            position: absolute;
+            top: 65px;
+            left: -40px;
+            width: 80px;
+            height: 12px;
+            background: #1a1a2e;
+            border: 2px solid #8b5cf6;
+            border-radius: 6px;
+        }
+        
+        .mage-hat-gem {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #ec4899, #8b5cf6);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ec4899, 0 0 40px rgba(236,72,153,0.6);
+            animation: gemGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes gemGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px #ec4899, 0 0 40px rgba(236,72,153,0.6);
+            }
+            50% { 
+                box-shadow: 0 0 35px #ec4899, 0 0 60px rgba(236,72,153,0.9);
+            }
+        }
+        
+        /* 魔法师头部 */
+        .mage-head {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 60px;
+            background: radial-gradient(ellipse at top, #f5d0c5, #e8b4a0);
+            border-radius: 25px 25px 30px 30px;
+        }
+        
+        /* 长发 */
+        .mage-hair {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(180deg, #2d1b4e, #1a1a2e);
+            border-radius: 30px 30px 0 0;
+            z-index: -1;
+        }
+        
+        .mage-hair::before {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: -10px;
+            width: 20px;
+            height: 80px;
+            background: #2d1b4e;
+            border-radius: 10px;
+        }
+        
+        .mage-hair::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            right: -10px;
+            width: 20px;
+            height: 80px;
+            background: #2d1b4e;
+            border-radius: 10px;
+        }
+        
+        /* 大圈眼镜 */
+        .mage-glasses {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 16px;
+        }
+        
+        .glass-lens {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #8b5cf6;
+            border-radius: 50%;
+            background: rgba(139,92,246,0.2);
+            box-shadow: 0 0 8px rgba(139,92,246,0.4);
+        }
+        
+        .glass-lens-left { left: 0; }
+        .glass-lens-right { right: 0; }
+        
+        .glass-bridge {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 2px;
+            background: #8b5cf6;
+        }
+        
+        /* 眼睛 */
+        .mage-eyes {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 8px;
+        }
+        
+        .eye {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 50%;
+        }
+        
+        .eye-left { left: 0; }
+        .eye-right { right: 0; }
+        
+        /* 嘴巴 */
+        .mage-mouth {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 8px;
+            background: #d48792;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        /* 魔法长袍 */
+        .mage-robe {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 100px;
+            background: linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 50%, #0f0f1a 100%);
+            border-radius: 35px 35px 0 0;
+            border: 2px solid rgba(139,92,246,0.4);
+        }
+        
+        .mage-robe::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 5px;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(139,92,246,0.2), transparent);
+            border-radius: 30px 30px 0 0;
+        }
+        
+        /* 魔法装饰 */
+        .mage-robe-gem {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ec4899, #8b5cf6);
+            border-radius: 50%;
+            border: 2px solid #fbbf24;
+            box-shadow: 0 0 15px #ec4899;
+        }
+        
+        /* 魔法书 */
+        .magic-book {
+            position: absolute;
+            bottom: 75px;
+            left: 58%;
+            font-size: 44px;
+            animation: bookFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes bookFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(8deg); }
+        }
+        
+        /* 魔法杖 */
+        .magic-staff {
+            position: absolute;
+            bottom: 75px;
+            right: 38%;
+            font-size: 56px;
+            animation: staffGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes staffGlow {
+            0%, 100% { filter: drop-shadow(0 0 25px rgba(236,72,153,0.8)); }
+            50% { filter: drop-shadow(0 0 45px rgba(236,72,153,1)); }
+        }
+        
+        /* 魔法粒子 */
+        .magic-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ec4899;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ec4899;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+            50% { transform: translate(20px, -40px) scale(0.5); opacity: 0.4; }
+        }
+        
+        /* 悬浮数据框 */
+        .tooltip {
+            position: absolute;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 150px;
+            animation: tooltipFloat 3s ease-in-out infinite;
+        }
+        
+        .tooltip-1 { top: 15%; left: 8%; }
+        .tooltip-2 { top: 25%; right: 8%; animation-delay: 0.5s; }
+        .tooltip-3 { bottom: 18%; left: 12%; animation-delay: 1s; }
+        
+        @keyframes tooltipFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        .tooltip-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .tooltip-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        /* 圆形仪表 */
+        .gauge-container {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .gauge-outer {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+        
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+        
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.1);
+            stroke-width: 8;
+        }
+        
+        .gauge-fill {
+            fill: none;
+            stroke: url(#gaugeGradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 314;
+            transition: stroke-dashoffset 1.5s;
+        }
+        
+        .gauge-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(139,92,246,0.2);
+            border-radius: 50%;
+            border: 2px solid rgba(139,92,246,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gauge-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        
+        .gauge-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+        }
+        
+        /* 进度条列表 */
+        .progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .progress-track {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        
+        .progress-track-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s;
+        }
+        
+        .progress-track-fill.alpha { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+        .progress-track-fill.beta { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .progress-track-fill.gamma { background: linear-gradient(90deg, #10b981, #34d399); }
+        
+        /* 告警 */
+        .alert {
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-left: 3px solid #ef4444;
+            border-radius: 12px;
+        }
+        
+        .alert-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: 6px;
+        }
+        
+        .alert-desc {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 11px;
+            margin-right: 10px;
+        }
+        
+        .status-indicator.online { color: #10b981; }
+        .status-indicator.busy { color: #f59e0b; }
+        
+        /* 底部指标 */
+        .metrics-container {
+            display: flex;
+            gap: 20px;
+            justify-content: space-around;
+        }
+        
+        .metric-box {
+            text-align: center;
+            padding: 20px 28px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+        }
+        
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 8px;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(139,92,246,0.2);
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spinnerRotate 1s linear infinite;
+        }
+        
+        @keyframes spinnerRotate {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            animation: loadingFade 1.5s infinite;
+        }
+        
+        @keyframes loadingFade {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">INITIALIZING MAGIC CHURCH...</div>
+    </div>
+    
+    <div class="dashboard">
+        <!-- 顶部栏 -->
+        <div class="header">
+            <div class="header-logo">
+                <div class="header-icon">⛪</div>
+                <h1>MAGIC CHURCH MONITOR</h1>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-running">0</div>
+                    <div class="header-stat-label">RUNNING</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-pending">0</div>
+                    <div class="header-stat-label">PENDING</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-completed">0</div>
+                    <div class="header-stat-label">COMPLETED</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-usage">0%</div>
+                    <div class="header-stat-label">USAGE</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 左侧面板 -->
+        <div class="left-panel">
+            <div class="card" style="flex: 1;">
+                <div class="card-title">ACTIVE TASKS</div>
+                <div class="task-list" id="task-list"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">SYSTEM STATUS</div>
+                <div>
+                    <span class="status-indicator online"><span style="width:6px;height:6px;background:currentColor;border-radius:50%;display:inline-block;"></span> ONLINE</span>
+                    <span class="status-indicator busy"><span style="width:6px;height:6px;background:currentColor;border-radius:50%;display:inline-block;"></span> BUSY</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中央场景 -->
+        <div class="center-scene">
+            <div class="scene-container">
+                <!-- 六翼天使 -->
+                <div class="seraph">
+                    <div class="seraph-halo"></div>
+                    <div class="seraph-wings">
+                        <!-- 上层翅膀 -->
+                        <div class="wing-upper wing-upper-left"></div>
+                        <div class="wing-upper wing-upper-right"></div>
+                        <!-- 中层翅膀 -->
+                        <div class="wing-middle wing-middle-left"></div>
+                        <div class="wing-middle wing-middle-right"></div>
+                        <!-- 下层翅膀 -->
+                        <div class="wing-lower wing-lower-left"></div>
+                        <div class="wing-lower wing-lower-right"></div>
+                    </div>
+                    <div class="seraph-body"></div>
+                </div>
+                
+                <!-- 教堂 -->
+                <div class="church-container">
+                    <div class="church-cross"></div>
+                    <div class="church-roof"></div>
+                    <div class="church-body">
+                        <div class="church-window"></div>
+                        <div class="church-door"></div>
+                    </div>
+                    <div class="church-floor"></div>
+                    <div class="church-altar"></div>
+                    <div class="church-candle church-candle-left"><div class="candle-flame"></div></div>
+                    <div class="church-candle church-candle-right"><div class="candle-flame"></div></div>
+                </div>
+                
+                <!-- 女魔法师 -->
+                <div class="mage-character">
+                    <!-- 魔法帽 -->
+                    <div class="mage-hat"></div>
+                    <div class="mage-hat-gem"></div>
+                    <!-- 头部 -->
+                    <div class="mage-head"></div>
+                    <div class="mage-hair"></div>
+                    <!-- 大圈眼镜 -->
+                    <div class="mage-glasses">
+                        <div class="glasses-lens glass-lens-left"></div>
+                        <div class="glasses-lens glass-lens-right"></div>
+                        <div class="glass-bridge"></div>
+                    </div>
+                    <!-- 眼睛 -->
+                    <div class="mage-eyes">
+                        <div class="eye eye-left"></div>
+                        <div class="eye eye-right"></div>
+                    </div>
+                    <!-- 嘴巴 -->
+                    <div class="mage-mouth"></div>
+                    <!-- 魔法长袍 -->
+                    <div class="mage-robe"></div>
+                    <div class="mage-robe-gem"></div>
+                </div>
+                
+                <!-- 魔法书 -->
+                <div class="magic-book">📖</div>
+                
+                <!-- 魔法杖 -->
+                <div class="magic-staff">🪄</div>
+                
+                <!-- 魔法粒子 -->
+                <div class="magic-particle" style="left: 15%; top: 30%;"></div>
+                <div class="magic-particle" style="left: 85%; top: 25%; animation-delay: 0.5s;"></div>
+                <div class="magic-particle" style="left: 50%; top: 20%; animation-delay: 1s;"></div>
+                <div class="magic-particle" style="left: 25%; top: 40%; animation-delay: 1.5s;"></div>
+                <div class="magic-particle" style="left: 75%; top: 35%; animation-delay: 2s;"></div>
+                
+                <!-- 悬浮数据框 -->
+                <div class="tooltip tooltip-1">
+                    <div class="tooltip-label">⚡ MANA</div>
+                    <div class="tooltip-value" id="tooltip-mana">98%</div>
+                </div>
+                
+                <div class="tooltip tooltip-2">
+                    <div class="tooltip-label">🎯 PROGRESS</div>
+                    <div class="tooltip-value" id="tooltip-progress">65%</div>
+                </div>
+                
+                <div class="tooltip tooltip-3">
+                    <div class="tooltip-label">⏱️ ELAPSED</div>
+                    <div class="tooltip-value" id="tooltip-time">2m34s</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧面板 -->
+        <div class="right-panel">
+            <div class="card">
+                <div class="card-title">SYSTEM MONITOR</div>
+                <div class="gauge-container">
+                    <div class="gauge-outer">
+                        <svg class="gauge-svg" viewBox="0 0 120 120">
+                            <defs>
+                                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#8b5cf6"/>
+                                    <stop offset="100%" style="stop-color:#ec4899"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                            <circle class="gauge-fill" id="gauge-health" cx="60" cy="60" r="50"/>
+                        </svg>
+                        <div class="gauge-center">
+                            <div class="gauge-number" id="gauge-health-value">80</div>
+                            <div class="gauge-label">HEALTH</div>
+                        </div>
+                    </div>
+                    <div class="gauge-outer">
+                        <svg class="gauge-svg" viewBox="0 0 120 120">
+                            <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                            <circle class="gauge-fill" id="gauge-usage" cx="60" cy="60" r="50"/>
+                        </svg>
+                        <div class="gauge-center">
+                            <div class="gauge-number" id="gauge-usage-value">40</div>
+                            <div class="gauge-label">USAGE</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">MODEL USAGE</div>
+                <div class="progress-list">
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">🔮 Qwen3.5-Plus</span>
+                            <span class="progress-value">1.0M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-track-fill alpha" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">🧠 GPT-4</span>
+                            <span class="progress-value">0.5M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-track-fill beta" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">📚 Claude-3</span>
+                            <span class="progress-value">0.3M</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-track-fill gamma" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="flex: 1;">
+                <div class="card-title">ALERTS</div>
+                <div id="alert-list">
+                    <div class="alert">
+                        <div class="alert-title">CONNECTION TIMEOUT</div>
+                        <div class="alert-desc">Sub-Agent #3 response timeout, retrying (3/5)</div>
+                    </div>
+                    <div class="alert">
+                        <div class="alert-title">HIGH RESOURCE USAGE</div>
+                        <div class="alert-desc">Sub-agent usage exceeded 80%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部面板 -->
+        <div class="bottom-panel">
+            <div class="card">
+                <div class="card-title">REAL-TIME METRICS</div>
+                <div class="metrics-container">
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-tasks">0</div>
+                        <div class="metric-label">TOTAL TASKS</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-subagents">0</div>
+                        <div class="metric-label">SUB-AGENTS</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-success">100%</div>
+                        <div class="metric-label">SUCCESS RATE</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="metric-efficiency">95%</div>
+                        <div class="metric-label">EFFICIENCY</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const mockData = {
+            pending: { count: 2, tasks: [
+                { id: 'TASK-001', name: '科幻小说创作', status: 'pending', progress: 0 },
+                { id: 'TASK-002', name: '数据分析报告', status: 'pending', progress: 0 }
+            ]},
+            running: { count: 1, tasks: [
+                { id: 'TASK-003', name: '悬疑小说大纲', status: 'running', active_subagents: 4, progress: 0.65, started_at: new Date(Date.now() - 154000).toISOString() }
+            ], active_subagents: 4 },
+            completed: { count: 12, today: 5 },
+            resources: { usage_rate: 0.33 }
+        };
+        
+        function updateDashboard() {
+            const data = mockData;
+            
+            document.getElementById('header-running').textContent = data.running.count;
+            document.getElementById('header-pending').textContent = data.pending.count;
+            document.getElementById('header-completed').textContent = data.completed.today;
+            document.getElementById('header-usage').textContent = Math.round(data.resources.usage_rate * 100) + '%';
+            
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = [...data.pending.tasks, ...data.running.tasks].map(task => `
+                <div class="task-item ${task.status}">
+                    <div class="task-header">
+                        <div>
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-id">${task.id}</div>
+                        </div>
+                        <div class="status-dot ${task.status}"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(task.progress * 100).toFixed(0)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('metric-tasks').textContent = data.pending.count + data.running.count + data.completed.count;
+            document.getElementById('metric-subagents').textContent = data.running.active_subagents;
+            
+            const health = Math.round(80 + Math.random() * 20);
+            const usage = Math.round(data.resources.usage_rate * 100);
+            document.getElementById('gauge-health-value').textContent = health;
+            document.getElementById('gauge-usage-value').textContent = usage;
+            
+            const circumference = 2 * Math.PI * 50;
+            document.getElementById('gauge-health').style.strokeDashoffset = circumference - (health / 100) * circumference;
+            document.getElementById('gauge-usage').style.strokeDashoffset = circumference - (usage / 100) * circumference;
+            
+            document.getElementById('tooltip-mana').textContent = (95 + Math.random() * 5).toFixed(0) + '%';
+            document.getElementById('tooltip-progress').textContent = (data.running.tasks[0]?.progress * 100 || 0).toFixed(0) + '%';
+            
+            const elapsed = Math.floor((Date.now() - new Date(data.running.tasks[0]?.started_at || Date.now()).getTime()) / 1000);
+            const min = Math.floor(elapsed / 60);
+            const sec = elapsed % 60;
+            document.getElementById('tooltip-time').textContent = `${min}m${sec.toString().padStart(2, '0')}s`;
+        }
+        
+        updateDashboard();
+        setInterval(updateDashboard, 3000);
+        
+        setTimeout(() => {
+            const loading = document.getElementById('loading');
+            loading.style.opacity = '0';
+            setTimeout(() => loading.style.display = 'none', 1000);
+        }, 2500);
+    </script>
+</body>
+</html>
