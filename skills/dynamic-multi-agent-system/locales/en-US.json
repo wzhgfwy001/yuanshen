@@ -1,0 +1,127 @@
+# English (US) - 英文
+
+{
+  "common": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "close": "Close",
+    "open": "Open",
+    "new": "New",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "skip": "Skip"
+  },
+  
+  "task": {
+    "create": "Create Task",
+    "edit": "Edit Task",
+    "delete": "Delete Task",
+    "start": "Start Task",
+    "pause": "Pause Task",
+    "resume": "Resume Task",
+    "cancel": "Cancel Task",
+    "complete": "Complete Task",
+    "status": "Status",
+    "progress": "Progress",
+    "priority": "Priority",
+    "deadline": "Deadline",
+    "assignee": "Assignee",
+    "description": "Description",
+    "attachments": "Attachments",
+    "comments": "Comments",
+    "history": "History"
+  },
+  
+  "agent": {
+    "create": "Create Agent",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "idle": "Idle",
+    "busy": "Busy",
+    "offline": "Offline",
+    "assignment": "Assignment",
+    "performance": "Performance",
+    "skills": "Skills"
+  },
+  
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "tasks": "Tasks",
+    "agents": "Agents",
+    "resources": "Resources",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  
+  "feedback": {
+    "submit": "Submit Feedback",
+    "type": "Feedback Type",
+    "content": "Content",
+    "contact": "Contact",
+    "thanks": "Thank you for feedback",
+    "bug": "Bug Report",
+    "suggestion": "Feature Request",
+    "question": "Question",
+    "praise": "Praise"
+  },
+  
+  "export": {
+    "title": "Export Results",
+    "format": "Export Format",
+    "path": "Export Path",
+    "success": "Export Successful",
+    "failed": "Export Failed",
+    "markdown": "Markdown",
+    "json": "JSON",
+    "txt": "Text",
+    "pdf": "PDF"
+  },
+  
+  "error": {
+    "network": "Network Error",
+    "timeout": "Request Timeout",
+    "notFound": "Not Found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server Error",
+    "invalidInput": "Invalid Input",
+    "fileNotFound": "File Not Found",
+    "permissionDenied": "Permission Denied"
+  },
+  
+  "notification": {
+    "newTask": "New Task",
+    "taskComplete": "Task Complete",
+    "taskFailed": "Task Failed",
+    "agentReady": "Agent Ready",
+    "systemUpdate": "System Update",
+    "maintenance": "System Maintenance"
+  }
+}

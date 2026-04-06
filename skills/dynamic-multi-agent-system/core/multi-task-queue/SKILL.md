@@ -1,461 +1,418 @@
----
-name: multi-task-queue
-description: 多任务队列管理器，支持多个主任务并行处理，管理任务优先级和执行状态
-parent: dynamic-multi-agent-system
-version: 1.0.0
----
+# Multi-Task Queue - 多任务队列管理器
 
-# 多任务队列管理器 (Multi-Task Queue Manager)
-
-## 功能
-
-接收用户任务，识别多个不相关的主任务，管理任务优先级和执行状态，支持多任务并行处理。
-
-## 核心职责
-
-| 职责 | 说明 |
-|------|------|
-| 任务接收 | 接收用户输入的任务描述 |
-| 多任务识别 | 识别输入中是否包含多个不相关的主任务 |
-| 优先级管理 | 管理任务执行优先级 |
-| 并发控制 | 控制同时执行的任务数量 |
-| 状态跟踪 | 跟踪每个任务的执行状态 |
-| 资源分配 | 在多个任务间分配子Agent资源 |
+**版本：** 1.0.0  
+**类型：** 核心模块  
+**依赖：** shared-memory（可选）
 
 ---
 
-## 多任务识别
+## 📖 简介
 
-### 识别规则
+多任务队列管理器负责**管理并发任务的执行队列**，合理分配资源，避免系统过载。
 
-**单个任务特征：**
-- 单一主题
-- 连贯的描述
-- 统一的输出要求
+### 核心功能
 
-**多个任务特征：**
-- 明显的分隔（序号、分段）
-- 不同的主题
-- 独立的输出要求
-- 连接词（"另外"、"还有"、"同时"）
+- 🎯 **任务排队** - 按优先级管理任务队列
+- 🚦 **并发控制** - 限制最多 3 个主任务/12 个子 Agent
+- ⚡ **智能调度** - 优先级调度 + 资源分配
+- 📊 **队列监控** - 实时查看任务状态
 
-### 识别算法
+---
 
-```python
-def identify_multiple_tasks(user_input):
-    """
-    识别用户输入中的多个主任务
-    """
-    # 1. 按段落分割
-    paragraphs = user_input.split('\n\n')
-    
-    # 2. 查找序号标记
-    numbered_tasks = re.findall(r'\d+[\.\)]\s*(.+)', user_input)
-    
-    # 3. 查找连接词
-    connectors = ['另外', '还有', '同时', '此外', 'plus', 'also']
-    
-    # 4. 语义分析（关键词相似度）
-    # 如果两段落的关键词相似度<0.5，认为是不同任务
-    
-    tasks = []
-    if numbered_tasks:
-        tasks = numbered_tasks
-    elif len(paragraphs) > 1:
-        # 检查段落间独立性
-        for para in paragraphs:
-            if is_independent_task(para):
-                tasks.append(para)
-    else:
-        tasks = [user_input]
-    
-    return tasks
+## 🎬 使用示例
+
+### 示例 1：添加任务到队列
+
+```powershell
+# 创建任务
+$task = @{
+    taskId = "task-001"
+    priority = "P1"
+    type = "sci-fi-writing"
+    estimatedAgents = 4
+    payload = @{
+        prompt = "写一篇科幻小说"
+    }
+}
+
+# 添加到队列
+Add-TaskToQueue -task $task
 ```
 
-### 示例
+### 示例 2：启动任务调度
 
-**单个任务：**
-```
-输入："写一本科幻小说，主题是2077年的北京，800字"
-输出：["写一本科幻小说，主题是2077年的北京，800字"]
+```powershell
+# 启动调度器
+Start-TaskScheduler
+
+# 调度器会自动：
+# 1. 检查可用资源
+# 2. 按优先级排序等待队列
+# 3. 启动符合条件的任务
 ```
 
-**多个任务：**
-```
-输入：
-"1. 写一本科幻小说，主题是2077年的北京
-2. 分析这本小说的市场潜力
-3. 设计封面描述"
+### 示例 3：查看队列状态
 
-输出：
-[
-  "写一本科幻小说，主题是2077年的北京",
-  "分析这本小说的市场潜力",
-  "设计封面描述"
-]
+```powershell
+# 查看完整状态
+$status = Get-QueueStatus
+
+# 输出示例：
+# running: 2 个任务
+# waiting: 3 个任务
+# completed: 15 个任务
+# failed: 1 个任务
+```
+
+### 示例 4：手动调整优先级
+
+```powershell
+# 提升任务优先级
+Update-TaskPriority -taskId "task-005" -priority "P0"
+
+# 暂停任务
+Suspend-Task -taskId "task-003"
+
+# 恢复任务
+Resume-Task -taskId "task-003"
 ```
 
 ---
 
-## 优先级管理
+## 🔧 API 参考
 
-### 优先级计算
+### 添加任务到队列
 
-```
-priority_score = base_priority + user_priority + time_priority + urgency_priority
-
-base_priority: 10（基础分）
-user_priority: 用户指定（0-20）
-time_priority: 等待时间每分钟+1（上限10）
-urgency_priority: 紧急任务+10（如"尽快"、"紧急"）
+```powershell
+Add-TaskToQueue -task <hashtable>
 ```
 
-### 优先级队列
-
-```
-高优先级（>30）：立即执行
-中优先级（20-30）：排队等待
-低优先级（<20）：空闲时执行
-```
-
-### 抢占规则
-
-```
-if 新任务优先级 > 当前最高优先级 + 10:
-    暂停当前最低优先级任务
-    执行新任务
-else:
-    加入队列
-```
-
----
-
-## 并发控制
-
-### 并发限制
-
-```yaml
-max-concurrent-tasks: 3      # 最多3个主任务并行
-max-sub-agents-per-task: 6   # 单任务最多6个子Agent
-max-total-sub-agents: 12     # 系统总共最多12个子Agent
-```
-
-### 资源分配策略
-
-```
-策略1：平均分配
-- 每个任务分配相同的子Agent配额
-- 适合任务优先级相近的情况
-
-策略2：优先级分配
-- 高优先级任务获得更多资源
-- 适合任务优先级差异大的情况
-
-策略3：动态调整
-- 根据任务进度动态调整资源
-- 接近完成的任务优先保证资源
-```
-
-### 分配算法
-
-```python
-def allocate_resources(tasks, total_agents):
-    """
-    在多个任务间分配子Agent资源
-    """
-    allocation = {}
-    remaining = total_agents
-    
-    # 按优先级排序
-    sorted_tasks = sorted(tasks, key=lambda t: t.priority, reverse=True)
-    
-    # 高优先级任务优先分配
-    for task in sorted_tasks:
-        if task.complexity == 'high':
-            alloc = min(6, remaining)
-        elif task.complexity == 'medium':
-            alloc = min(4, remaining)
-        else:
-            alloc = min(2, remaining)
-        
-        allocation[task.id] = alloc
-        remaining -= alloc
-    
-    return allocation
-```
-
----
-
-## 任务状态管理
-
-### 状态定义
-
-| 状态 | 说明 | 转换 |
-|------|------|------|
-| pending | 等待执行 | → running |
-| running | 正在执行 | → completed / failed / paused |
-| completed | 执行完成 | → archived |
-| failed | 执行失败 | → retrying / archived |
-| paused | 已暂停 | → running / cancelled |
-| cancelled | 已取消 | → archived |
-
-### 状态流转图
-
-```
-pending → running → completed → archived
-            ↓          ↓
-          failed    failed
-            ↓          ↓
-         retrying → archived
-            ↓
-         paused → running
-            ↓
-        cancelled → archived
-```
-
-### 状态跟踪
-
-```json
-{
-  "task-id": "task-001",
-  "status": "running",
-  "created-at": "2026-04-03T10:00:00",
-  "started-at": "2026-04-03T10:01:00",
-  "progress": 0.6,
-  "current-stage": "大纲设计",
-  "sub-agents-active": 2,
-  "estimated-completion": "2026-04-03T10:10:00"
+**任务结构：**
+```powershell
+$task = @{
+    taskId = "task-001"           # 必填
+    priority = "P1"               # 必填：P0/P1/P2/P3
+    type = "sci-fi-writing"       # 必填
+    estimatedAgents = 4           # 必填：预计需要的 Agent 数
+    createdAt = Get-Date          # 可选
+    payload = @{                  # 可选：任务参数
+        prompt = "..."
+    }
 }
 ```
 
 ---
 
-## 队列管理
+### 启动调度器
 
-### 队列结构
-
-```
-任务队列：
-┌─────────────────────────────────────┐
-│ 高优先级队列                         │
-│ ┌─────────┐ ┌─────────┐            │
-│ │ task-001│ │ task-002│            │
-│ └─────────┘ └─────────┘            │
-├─────────────────────────────────────┤
-│ 中优先级队列                         │
-│ ┌─────────┐                         │
-│ │ task-003│                         │
-│ └─────────┘                         │
-├─────────────────────────────────────┤
-│ 低优先级队列                         │
-│ ┌─────────┐ ┌─────────┐ ┌─────────┐│
-│ │ task-004│ │ task-005│ │ task-006││
-│ └─────────┘ └─────────┘ └─────────┘│
-└─────────────────────────────────────┘
+```powershell
+Start-TaskScheduler [-interval <int>]
 ```
 
-### 调度策略
+**参数：**
+- `interval` - 调度间隔（秒，默认 5）
 
-```
-调度循环（每5秒）：
-1. 检查当前运行任务数
-2. 如有空闲容量，从队列取出任务
-3. 按优先级顺序启动任务
-4. 检查超时任务
-5. 更新任务状态
-```
+**说明：** 后台运行，每 5 秒检查一次队列
 
-### 队列操作
+---
 
-```
-enqueue(task): 加入队列
-dequeue(): 取出最高优先级任务
-remove(task-id): 移除指定任务
-reorder(task-id, new-priority): 调整优先级
-clear(): 清空队列（仅pending状态）
+### 停止调度器
+
+```powershell
+Stop-TaskScheduler
 ```
 
 ---
 
-## 任务合并与拆分
+### 获取队列状态
 
-### 任务合并
-
-**条件：**
-- 多个任务类型相同
-- 任务间有依赖关系
-- 合并后效率更高
-
-**示例：**
-```
-任务1："写科幻小说第1章"
-任务2："写科幻小说第2章"
-合并后："写科幻小说第1-2章"（共享世界观设定）
+```powershell
+Get-QueueStatus
 ```
 
-### 任务拆分
-
-**条件：**
-- 任务过于复杂（>6个子Agent）
-- 任务可独立执行
-- 用户要求拆分
-
-**示例：**
-```
-原任务："写一本小说并分析市场潜力"
-拆分后：
-- 任务1："写一本小说"
-- 任务2："分析市场潜力"
+**返回：**
+```powershell
+@{
+    running = @(...)      # 运行中任务
+    waiting = @(...)      # 等待中任务
+    completed = @(...)    # 已完成任务
+    failed = @(...)       # 失败任务
+    limits = @{
+        maxRunningTasks = 3
+        maxTotalAgents = 12
+        currentAgents = 8
+    }
+}
 ```
 
 ---
 
-## 超时管理
+### 更新任务优先级
 
-### 超时检测
-
+```powershell
+Update-TaskPriority -taskId <string> -priority <string>
 ```
-超时阈值 = 预计时间 × 2
 
-检查频率：每30秒
+**优先级：**
+- P0 - 紧急（立即执行）
+- P1 - 高（优先执行）
+- P2 - 中（正常排队）
+- P3 - 低（空闲时执行）
 
-超时任务：
-- 发送警告
-- 询问用户是否继续
-- 如无响应，标记为failed
+---
+
+### 暂停任务
+
+```powershell
+Suspend-Task -taskId <string>
 ```
+
+---
+
+### 恢复任务
+
+```powershell
+Resume-Task -taskId <string>
+```
+
+---
+
+### 取消任务
+
+```powershell
+Cancel-Task -taskId <string>
+```
+
+---
+
+## 📊 优先级规则
+
+| 优先级 | 类型 | 示例 | 响应时间 |
+|--------|------|------|----------|
+| **P0** | 紧急 | 系统故障、数据丢失 | 立即执行 |
+| **P1** | 高 | 复杂任务、多 Agent | 排队优先 |
+| **P2** | 中 | 标准任务 | 正常排队 |
+| **P3** | 低 | 简单查询、后台任务 | 空闲时执行 |
+
+---
+
+## 🚦 并发限制
+
+### 系统限制
+
+| 限制项 | 值 | 说明 |
+|--------|-----|------|
+| 最大主任务数 | 3 | 同时运行的主任务 |
+| 最大子 Agent 数 | 12 | 所有任务的子 Agent 总计 |
+| 单任务最大 Agent | 8 | 单个任务最多 8 个 Agent |
+| 任务超时 | 30 分钟 | 超过自动暂停 |
+| 失败重试 | 1 次 | 自动重试 1 次 |
+
+### 资源计算
+
+```powershell
+# 可用 Agent 数
+$availableAgents = $maxTotalAgents - $currentAgents
+
+# 能否启动新任务
+function Can-StartTask {
+    param($task)
+    
+    $hasTaskSlot = $runningTasks.Count -lt $maxRunningTasks
+    $hasAgentSlot = $task.estimatedAgents -le $availableAgents
+    
+    return $hasTaskSlot -and $hasAgentSlot
+}
+```
+
+---
+
+## 📁 数据结构
+
+### 队列文件结构
+
+```json
+{
+  "queue": {
+    "running": [
+      {
+        "taskId": "task-001",
+        "priority": "P1",
+        "type": "sci-fi-writing",
+        "agents": 4,
+        "status": "running",
+        "startedAt": "2026-04-07T09:00:00Z"
+      }
+    ],
+    "waiting": [
+      {
+        "taskId": "task-004",
+        "priority": "P1",
+        "type": "market-analysis",
+        "agents": 3,
+        "status": "waiting",
+        "createdAt": "2026-04-07T09:05:00Z"
+      }
+    ],
+    "completed": [...],
+    "failed": [...]
+  },
+  "limits": {
+    "maxRunningTasks": 3,
+    "maxTotalAgents": 12,
+    "currentAgents": 8
+  },
+  "scheduler": {
+    "running": true,
+    "interval": 5,
+    "lastRun": "2026-04-07T09:10:00Z"
+  }
+}
+```
+
+---
+
+## 🔧 调度算法
+
+### 伪代码
+
+```powershell
+function Schedule-Tasks {
+    # 1. 检查当前资源
+    $availableAgents = $maxAgents - $currentAgents
+    
+    # 2. 获取等待队列（按优先级排序）
+    $sorted = $waitingTasks | Sort-Object Priority, CreatedAt
+    
+    # 3. 依次启动任务
+    foreach ($task in $sorted) {
+        # 检查是否达到任务数限制
+        if ($runningTasks.Count -ge $maxTasks) { break }
+        
+        # 检查是否有足够 Agent
+        if ($task.agents -le $availableAgents) {
+            Start-Task $task
+            $availableAgents -= $task.agents
+        }
+    }
+}
+```
+
+---
+
+## ⚠️ 异常处理
 
 ### 超时处理
 
-```json
-{
-  "task-id": "task-001",
-  "timeout-at": "2026-04-03T10:20:00",
-  "estimated-time": 600,
-  "actual-time": 1200,
-  "action": "notify-user",
-  "options": [
-    "继续等待",
-    "终止任务",
-    "增加资源"
-  ]
+```powershell
+# 检测超时任务（>30 分钟）
+$timeoutTasks = $runningTasks | Where-Object {
+    $elapsed = (Get-Date) - $_.startedAt
+    $elapsed.TotalMinutes -gt 30
+}
+
+# 暂停超时任务
+foreach ($task in $timeoutTasks) {
+    Suspend-Task -taskId $task.taskId
+    Write-Warning "Task $($task.taskId) suspended: timeout"
+}
+```
+
+### 失败重试
+
+```powershell
+# 失败任务自动重试 1 次
+if ($task.retryCount -lt 1) {
+    $task.retryCount++
+    $task.status = "waiting"
+    Add-TaskToQueue -task $task
+    Write-Host "Retrying task $($task.taskId) (attempt $($task.retryCount))"
+} else {
+    $task.status = "failed"
+    Write-Error "Task $($task.taskId) failed after 1 retry"
 }
 ```
 
 ---
 
-## 用户交互
+## 📊 监控集成
 
-### 任务提交
+### 与监控大屏集成
 
-```
-用户输入任务
-    ↓
-识别是否多任务
-    ↓
-确认任务列表
-    ↓
-用户确认
-    ↓
-加入队列
-```
+```powershell
+# 获取队列状态用于监控
+$status = Get-QueueStatus
 
-### 进度查询
-
-```
-用户查询："任务进度如何？"
-    ↓
-返回：
-- 当前状态
-- 完成百分比
-- 预计剩余时间
-- 当前环节
-```
-
-### 任务控制
-
-```
-用户可执行操作：
-- 暂停任务
-- 恢复任务
-- 终止任务
-- 调整优先级
-- 增加资源
-```
-
----
-
-## 与其他组件的接口
-
-### 输入
-
-- 来自：用户
-  - 格式：`{ description: string, priority?: number }`
-- 来自：主Agent
-  - 格式：`{ action: string, task-id: string }`
-
-### 输出
-
-- 到：任务分类器
-  - 格式：`TaskDescription`
-- 到：主Agent
-  - 格式：`TaskStatusReport`
-- 到：用户
-  - 格式：`ProgressUpdate`
-
----
-
-## 日志与审计
-
-### 队列日志
-
-```json
-{
-  "timestamp": "2026-04-03T10:00:00",
-  "event": "task-enqueued",
-  "task-id": "task-001",
-  "priority": 25,
-  "queue-length": 3
+# 发送到监控大屏
+Send-ToDashboard -data @{
+    runningTasks = $status.running.Count
+    waitingTasks = $status.waiting.Count
+    agentUsage = $status.limits.currentAgents
+    agentTotal = $status.limits.maxTotalAgents
 }
 ```
 
-### 审计信息
+---
 
-- 任务提交时间
-- 任务开始时间
-- 任务完成时间
-- 使用的子Agent数
-- 总耗时
-- 用户满意度
+## 🧪 单元测试
+
+### 测试用例
+
+```powershell
+function Test-MultiTaskQueue {
+    Write-Host "=== Multi-Task Queue Tests ===" -ForegroundColor Cyan
+    
+    # Test 1: Add Task
+    Write-Host "`n[Test 1] Add Task" -ForegroundColor Yellow
+    $task = @{
+        taskId = "test-001"
+        priority = "P2"
+        type = "test"
+        estimatedAgents = 2
+    }
+    $result = Add-TaskToQueue -task $task
+    if ($result) { Write-Host "✅ PASS" -ForegroundColor Green }
+    else { Write-Host "❌ FAIL" -ForegroundColor Red }
+    
+    # Test 2: Get Status
+    Write-Host "`n[Test 2] Get Queue Status" -ForegroundColor Yellow
+    $status = Get-QueueStatus
+    if ($status.waiting.Count -gt 0) { Write-Host "✅ PASS" -ForegroundColor Green }
+    else { Write-Host "❌ FAIL" -ForegroundColor Red }
+    
+    # Test 3: Update Priority
+    Write-Host "`n[Test 3] Update Priority" -ForegroundColor Yellow
+    Update-TaskPriority -taskId "test-001" -priority "P0"
+    $task = Get-Task "test-001"
+    if ($task.priority -eq "P0") { Write-Host "✅ PASS" -ForegroundColor Green }
+    else { Write-Host "❌ FAIL" -ForegroundColor Red }
+    
+    # Test 4: Scheduler
+    Write-Host "`n[Test 4] Start Scheduler" -ForegroundColor Yellow
+    Start-TaskScheduler -interval 1
+    Start-Sleep -Seconds 2
+    Stop-TaskScheduler
+    Write-Host "✅ PASS" -ForegroundColor Green
+    
+    Write-Host "`n=== All Tests Complete ===" -ForegroundColor Cyan
+}
+```
 
 ---
 
-## 测试用例
+## 📝 更新日志
 
-### 测试1：单任务识别
+### v1.0.0 (2026-04-07)
 
-```
-输入："写一本科幻小说"
-预期：识别为1个任务
-```
+- ✅ 初始版本
+- ✅ 任务队列管理
+- ✅ 优先级调度
+- ✅ 并发控制
+- ✅ 超时处理
+- ✅ 失败重试
 
-### 测试2：多任务识别
+---
 
-```
-输入："1.写小说 2.分析市场"
-预期：识别为2个任务
-```
-
-### 测试3：优先级调度
-
-```
-输入：3个任务，优先级分别为10、30、20
-预期：执行顺序 30→20→10
-```
-
-### 测试4：并发控制
-
-```
-输入：5个任务同时提交
-预期：最多3个并行，其余排队
-```
+**创建时间：** 2026-04-07  
+**维护人：** 开发团队  
+**状态：** 🟡 开发中

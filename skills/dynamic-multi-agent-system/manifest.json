@@ -1,6 +1,6 @@
 {
   "name": "dynamic-multi-agent-system",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "混合动态多Agent协作系统，支持任务自动分解、子Agent动态组建、全流程质量控制",
   "author": "Dynamic Multi-Agent System Team",
   "license": "MIT",
@@ -23,11 +23,16 @@
     "planning"
   ],
   "tags": [
-    "multi-agent",
-    "collaboration",
-    "automation",
-    "workflow",
-    "orchestration"
+    "AI 智能",
+    "效率提升",
+    "内容创作",
+    "开发工具",
+    "数据分析",
+    "多 Agent 协作",
+    "任务自动化",
+    "工作流",
+    "AI 助手",
+    "智能创作"
   ],
   "examples": [
     "写一本科幻小说",

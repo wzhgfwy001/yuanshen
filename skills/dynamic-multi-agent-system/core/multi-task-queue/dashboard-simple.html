@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多 Agent 系统监控 - 简约版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 20px; font-size: 24px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h3 { color: #666; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card .value { font-size: 32px; font-weight: bold; color: #333; }
+        .card .sub { font-size: 13px; color: #888; margin-top: 5px; }
+        .status { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .status.active { background: #d4edda; color: #155724; }
+        .status.idle { background: #fff3cd; color: #856404; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .section { background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .section h2 { color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #666; font-weight: 500; font-size: 13px; }
+        td { font-size: 14px; }
+        .progress { height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #007bff, #0056b3); transition: width 0.3s; }
+        .refresh { position: fixed; bottom: 20px; right: 20px; background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .refresh:hover { background: #0056b3; }
+        .last-update { color: #888; font-size: 12px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 混合动态多 Agent 系统监控</h1>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>总任务数</h3>
+                <div class="value" id="totalTasks">0</div>
+                <div class="sub">今日累计</div>
+            </div>
+            <div class="card">
+                <h3>进行中</h3>
+                <div class="value" id="runningTasks">0</div>
+                <div class="sub"><span class="status active" id="statusRunning">活跃</span></div>
+            </div>
+            <div class="card">
+                <h3>已完成</h3>
+                <div class="value" id="completedTasks">0</div>
+                <div class="sub">成功率：<span id="successRate">100</span>%</div>
+            </div>
+            <div class="card">
+                <h3>子 Agent 数量</h3>
+                <div class="value" id="agentCount">0</div>
+                <div class="sub">当前活跃</div>
+            </div>
+            <div class="card">
+                <h3>Token 消耗</h3>
+                <div class="value" id="tokenUsage">0</div>
+                <div class="sub">今日总计</div>
+            </div>
+            <div class="card">
+                <h3>平均响应时间</h3>
+                <div class="value" id="avgResponse">0s</div>
+                <div class="sub">任务平均</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 任务队列</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>任务 ID</th>
+                        <th>类型</th>
+                        <th>状态</th>
+                        <th>进度</th>
+                        <th>子 Agent</th>
+                        <th>耗时</th>
+                    </tr>
+                </thead>
+                <tbody id="taskTable">
+                    <tr><td colspan="6" style="text-align:center;color:#888;">暂无任务</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🤖 子 Agent 状态</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent ID</th>
+                        <th>角色</th>
+                        <th>当前任务</th>
+                        <th>状态</th>
+                        <th>CPU</th>
+                        <th>内存</th>
+                    </tr>
+                </thead>
+                <tbody id="agentTable">
+                    <tr><td colspan="6" style="text-align:center;color:#888;">暂无活跃 Agent</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="last-update">最后更新：<span id="lastUpdate">-</span></div>
+    </div>
+
+    <button class="refresh" onclick="loadData()">🔄 刷新</button>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/queue/status';
+        
+        async function loadData() {
+            try {
+                const response = await fetch(API_URL + '?mock=true');
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.log('使用模拟数据');
+                updateDashboard(getMockData());
+            }
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
+        }
+
+        function getMockData() {
+            return {
+                totalTasks: 127,
+                runningTasks: 3,
+                completedTasks: 124,
+                agentCount: 8,
+                tokenUsage: 45230,
+                avgResponse: 2.3,
+                successRate: 99.2,
+                tasks: [
+                    { id: 'task-001', type: '创新任务', status: 'running', progress: 65, agents: 4, duration: '45s' },
+                    { id: 'task-002', type: '标准任务', status: 'running', progress: 30, agents: 2, duration: '12s' },
+                    { id: 'task-003', type: '单一任务', status: 'pending', progress: 0, agents: 1, duration: '-' }
+                ],
+                agents: [
+                    { id: 'agent-01', role: '创意作家', task: 'task-001', status: 'active', cpu: 23, memory: 45 },
+                    { id: 'agent-02', role: '研究员', task: 'task-001', status: 'active', cpu: 15, memory: 32 },
+                    { id: 'agent-03', role: '编辑', task: 'task-001', status: 'idle', cpu: 5, memory: 18 }
+                ]
+            };
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('totalTasks').textContent = data.totalTasks || 0;
+            document.getElementById('runningTasks').textContent = data.runningTasks || 0;
+            document.getElementById('completedTasks').textContent = data.completedTasks || 0;
+            document.getElementById('agentCount').textContent = data.agentCount || 0;
+            document.getElementById('tokenUsage').textContent = (data.tokenUsage || 0).toLocaleString();
+            document.getElementById('avgResponse').textContent = (data.avgResponse || 0) + 's';
+            document.getElementById('successRate').textContent = data.successRate || 100;
+
+            const taskTable = document.getElementById('taskTable');
+            if (data.tasks && data.tasks.length > 0) {
+                taskTable.innerHTML = data.tasks.map(task => `
+                    <tr>
+                        <td>${task.id}</td>
+                        <td>${task.type}</td>
+                        <td><span class="status ${task.status === 'running' ? 'active' : task.status === 'completed' ? 'idle' : 'error'}">${task.status}</span></td>
+                        <td><div class="progress"><div class="progress-bar" style="width:${task.progress}%"></div></div></td>
+                        <td>${task.agents}</td>
+                        <td>${task.duration}</td>
+                    </tr>
+                `).join('');
+            }
+
+            const agentTable = document.getElementById('agentTable');
+            if (data.agents && data.agents.length > 0) {
+                agentTable.innerHTML = data.agents.map(agent => `
+                    <tr>
+                        <td>${agent.id}</td>
+                        <td>${agent.role}</td>
+                        <td>${agent.task || '-'}</td>
+                        <td><span class="status ${agent.status === 'active' ? 'active' : 'idle'}">${agent.status}</span></td>
+                        <td>${agent.cpu}%</td>
+                        <td>${agent.memory}%</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        loadData();
+        setInterval(loadData, 5000);
+    </script>
+</body>
+</html>

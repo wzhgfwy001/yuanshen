@@ -2,6 +2,17 @@
 
 Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
 
+## Skill 平台
+
+### ClawHub 中文镜像站
+- **网址：** https://cn.clawhub-mirror.com/
+- **用途：** 搜索/安装 OpenClaw Skills
+- **备注：** 比腾讯 SkillHub 更干净，优先使用
+
+### 腾讯 SkillHub
+- **用途：** 已上架应用管理
+- **应用：** 混合动态多 Agent 协作系统 v1.1.0
+
 ## What Goes Here
 
 Things like:

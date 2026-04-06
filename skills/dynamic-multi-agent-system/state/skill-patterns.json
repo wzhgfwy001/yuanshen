@@ -1,0 +1,35 @@
+﻿{
+    "metadata":  {
+                     "createdAt":  "2026-04-06T10:48:30.3050064+08:00",
+                     "version":  "1.0.0"
+                 },
+    "patterns":  [
+                     {
+                         "solidifyRecommended":  false,
+                         "lastSuccessAt":  "2026-04-06T10:48:30.4089637+08:00",
+                         "avgQualityScore":  92,
+                         "type":  "test-pattern",
+                         "createdAt":  "2026-04-06T10:48:30.4089637+08:00",
+                         "config":  {
+                                        "key":  "value"
+                                    },
+                         "agentRoles":  [
+                                            "role1",
+                                            "role2"
+                                        ],
+                         "executions":  [
+                                            {
+                                                "tokenUsage":  5000,
+                                                "userSatisfaction":  95,
+                                                "qualityScore":  92,
+                                                "duration":  120,
+                                                "date":  "2026-04-06T10:48:30.4135297+08:00",
+                                                "taskId":  "test-001"
+                                            }
+                                        ],
+                         "solidifyAt":  null,
+                         "version":  "1.0.0",
+                         "successCount":  1
+                     }
+                 ]
+}

@@ -282,6 +282,20 @@ if __name__ == "__main__":
     )
     monitor.add_task(test_task)
     
+    @app.route('/dashboard-simple.html')
+    def serve_dashboard():
+        """服务监控大屏 HTML"""
+        from flask import send_file
+        import os
+        dashboard_path = os.path.join(os.path.dirname(__file__), 'dashboard-simple.html')
+        return send_file(dashboard_path)
+    
+    @app.route('/')
+    def index():
+        """首页重定向到监控大屏"""
+        from flask import redirect
+        return redirect('/dashboard-simple.html')
+    
     @app.route('/api/queue/status')
     def get_queue_status():
         """获取队列状态"""

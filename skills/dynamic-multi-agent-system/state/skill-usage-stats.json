@@ -1,0 +1,20 @@
+﻿{
+    "metadata":  {
+                     "createdAt":  "2026-04-06T10:48:30.3615405+08:00"
+                 },
+    "stats":  [
+                  {
+                      "totalTokenSaved":  10000,
+                      "createdAt":  "2026-04-06T10:48:30.5042379+08:00",
+                      "version":  "1.0.0",
+                      "totalUses":  1,
+                      "skillId":  "test-skill",
+                      "topUsers":  [
+
+                                   ],
+                      "lastUsedAt":  "2026-04-06T10:48:30.5042379+08:00",
+                      "avgScore":  90,
+                      "totalTimeSaved":  60
+                  }
+              ]
+}
