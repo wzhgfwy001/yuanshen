@@ -75,6 +75,11 @@
 - 暗流组织（吞噬者前哨余孽）
 - 樱花省（已被华夏吞并，阴阳师/忍者妄图复辟）
 
+**龙腾学院三院：**
+- 天道学院（特殊天赋/暂不公开时空规则）
+- 太玄学院（精神/元素/秘法）
+- 天枢学院（武道/战技/科技）
+
 **小说大纲文件：**
 - `skills/dynamic-multi-agent-system/docs/STORY-OUTLINE-UPDATED.md`
 - `skills/dynamic-multi-agent-system/docs/VISUAL-DIAGRAMS.md`
