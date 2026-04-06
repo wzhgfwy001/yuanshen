@@ -10,13 +10,15 @@ from typing import Callable, List, Dict, Any
 class FilterPanel(ctk.CTkFrame):
     """筛选条件面板"""
     
-    def __init__(self, parent, on_filter: Callable):
+    def __init__(self, parent, on_filter: Callable, data_service=None):
         super().__init__(parent)
         self.on_filter = on_filter
+        self.data_service = data_service
         
         self.region_vars = {}
         self.school_vars = {}
         self.major_vars = {}
+        self.selected_schools = []  # 已选学校列表
         
         self._create_ui()
     
@@ -73,6 +75,7 @@ class FilterPanel(ctk.CTkFrame):
         
         self.school_search = ctk.CTkEntry(school_frame, placeholder_text="搜索学校...")
         self.school_search.grid(row=0, column=1, padx=5, pady=5)
+        self.school_search.bind('<KeyRelease>', self._on_school_search_change)
         
         ctk.CTkButton(
             school_frame,
@@ -81,9 +84,25 @@ class FilterPanel(ctk.CTkFrame):
             width=40
         ).grid(row=0, column=2, padx=5)
         
+        # 学校搜索结果下拉框
+        self.school_results_frame = ctk.CTkFrame(school_frame, fg_color="white", height=100)
+        self.school_results_frame.grid(row=1, column=0, columnspan=3, sticky="ew", padx=5, pady=(0, 5))
+        self.school_results_frame.grid_remove()  # 初始隐藏
+        
         # 已选学校显示
-        self.selected_schools_label = ctk.CTkLabel(school_frame, text="已选：无", justify="left")
-        self.selected_schools_label.grid(row=1, column=0, columnspan=3, padx=5, pady=5)
+        self.selected_schools_frame = ctk.CTkFrame(school_frame)
+        self.selected_schools_frame.grid(row=2, column=0, columnspan=3, sticky="ew", padx=5, pady=5)
+        
+        ctk.CTkLabel(
+            self.selected_schools_frame,
+            text="已选学校：",
+            font=ctk.CTkFont(size=12)
+        ).grid(row=0, column=0, padx=5, sticky="w")
+        
+        self.selected_schools_container = ctk.CTkFrame(self.selected_schools_frame, fg_color="transparent")
+        self.selected_schools_container.grid(row=1, column=0, columnspan=3, sticky="w", padx=5, pady=5)
+        
+        self._update_selected_schools_display()
         
         # 专业筛选
         major_frame = ctk.CTkFrame(self)
@@ -175,18 +194,130 @@ class FilterPanel(ctk.CTkFrame):
         for var in self.major_vars.values():
             var.set(False)
     
+    def _on_school_search_change(self, event=None):
+        """学校搜索框内容变化时触发"""
+        keyword = self.school_search.get()
+        if not keyword or len(keyword) < 1:
+            self.school_results_frame.grid_remove()
+            return
+        
+        if self.data_service:
+            results = self.data_service.search_schools(keyword)
+            self._show_school_results(results)
+        else:
+            # 如果没有数据服务，显示模拟结果
+            mock_results = [
+                {'school_id': '1', 'school_name': f'{keyword}大学', 'province': '北京', 'level': '985'},
+                {'school_id': '2', 'school_name': f'{keyword}科技大学', 'province': '上海', 'level': '211'},
+                {'school_id': '3', 'school_name': f'{keyword}师范大学', 'province': '江苏', 'level': '双一流'},
+            ]
+            self._show_school_results(mock_results)
+    
+    def _show_school_results(self, results):
+        """显示学校搜索结果"""
+        # 清空现有结果
+        for widget in self.school_results_frame.winfo_children():
+            widget.destroy()
+        
+        if not results:
+            ctk.CTkLabel(
+                self.school_results_frame,
+                text="未找到匹配的学校",
+                text_color="gray",
+                font=ctk.CTkFont(size=12)
+            ).pack(padx=10, pady=10)
+            self.school_results_frame.grid()
+            return
+        
+        # 显示结果
+        for i, school in enumerate(results[:5]):  # 最多显示5个
+            school_text = f"{school.get('school_name', '')}"
+            if school.get('province') or school.get('level'):
+                school_text += f" ({school.get('province', '')}·{school.get('level', '')})"
+            
+            btn = ctk.CTkButton(
+                self.school_results_frame,
+                text=school_text,
+                command=lambda s=school: self._select_school(s),
+                fg_color="transparent",
+                hover_color="#f1f5f9",
+                text_color="black",
+                anchor="w",
+                height=30
+            )
+            btn.pack(fill="x", padx=5, pady=2)
+        
+        self.school_results_frame.grid()
+    
+    def _select_school(self, school):
+        """选择学校"""
+        school_name = school.get('school_name', '')
+        if school_name and school_name not in self.selected_schools:
+            self.selected_schools.append(school_name)
+            self._update_selected_schools_display()
+        
+        # 清空搜索框和结果
+        self.school_search.delete(0, "end")
+        self.school_results_frame.grid_remove()
+    
+    def _update_selected_schools_display(self):
+        """更新已选学校显示"""
+        # 清空现有显示
+        for widget in self.selected_schools_container.winfo_children():
+            widget.destroy()
+        
+        if not self.selected_schools:
+            ctk.CTkLabel(
+                self.selected_schools_container,
+                text="无",
+                text_color="gray",
+                font=ctk.CTkFont(size=12)
+            ).grid(row=0, column=0, padx=5, pady=5)
+            return
+        
+        # 显示已选学校标签
+        for i, school in enumerate(self.selected_schools):
+            tag_frame = ctk.CTkFrame(self.selected_schools_container, fg_color="#dbeafe", corner_radius=10)
+            tag_frame.grid(row=0, column=i, padx=5, pady=5)
+            
+            ctk.CTkLabel(
+                tag_frame,
+                text=school,
+                font=ctk.CTkFont(size=11),
+                text_color="#1e40af"
+            ).pack(side="left", padx=8, pady=3)
+            
+            remove_btn = ctk.CTkButton(
+                tag_frame,
+                text="×",
+                command=lambda s=school: self._remove_school(s),
+                width=20,
+                height=20,
+                fg_color="transparent",
+                hover_color="#93c5fd",
+                text_color="#1e40af",
+                font=ctk.CTkFont(size=14, weight="bold")
+            )
+            remove_btn.pack(side="left", padx=(0, 5))
+    
+    def _remove_school(self, school_name):
+        """移除已选学校"""
+        if school_name in self.selected_schools:
+            self.selected_schools.remove(school_name)
+            self._update_selected_schools_display()
+    
     def _search_school(self):
-        """搜索学校（待实现）"""
+        """搜索学校"""
         keyword = self.school_search.get()
         if keyword:
-            messagebox.showinfo("搜索", f"搜索学校：{keyword}\n（功能开发中）")
+            self._on_school_search_change()
     
     def _apply_filter(self):
         """应用筛选"""
         # 收集筛选条件
         filter_config = {
             "regions": [r for r, var in self.region_vars.items() if var.get()],
-            "schools": [],  # 待实现
+            "schools": self.selected_schools,
             "majors": [m for m, var in self.major_vars.items() if var.get()],
             "level": self.level_var.get(),
             "match_types": []
@@ -212,7 +343,9 @@ class FilterPanel(ctk.CTkFrame):
         self.match稳.set(True)
         self.match保.set(True)
         self.school_search.delete(0, "end")
-        self.selected_schools_label.configure(text="已选：无")
+        self.school_results_frame.grid_remove()
+        self.selected_schools = []
+        self._update_selected_schools_display()
 
 
 if __name__ == "__main__":

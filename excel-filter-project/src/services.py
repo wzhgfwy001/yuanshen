@@ -8,7 +8,7 @@ import sqlite3
 import json
 from datetime import datetime
 
-from models import Student, School, Major, MatchResult, FilterConfig
+from .models import Student, School, Major, MatchResult, FilterConfig
 
 
 class DataService:
@@ -227,16 +227,284 @@ class DataService:
         conn.commit()
         conn.close()
     
+    def search_schools(self, keyword: str) -> List[Dict[str, str]]:
+        """
+        搜索学校
+        
+        Args:
+            keyword: 搜索关键词
+        
+        Returns:
+            匹配的学校列表 [{school_id, school_name, province, level}, ...]
+        """
+        if not keyword or len(keyword) < 1:
+            return []
+        
+        keyword_lower = keyword.lower()
+        seen = set()
+        results = []
+        
+        for major in self.schools:
+            school_key = (major.school_id, major.school_name)
+            if school_key in seen:
+                continue
+            
+            if (keyword_lower in major.school_name.lower() or 
+                keyword_lower in major.school_id.lower()):
+                results.append({
+                    'school_id': major.school_id,
+                    'school_name': major.school_name,
+                    'province': getattr(major, 'province', ''),
+                    'level': getattr(major, 'level', '')
+                })
+                seen.add(school_key)
+                if len(results) >= 20:  # 限制返回数量
+                    break
+        
+        return results
+
+    def get_all_school_names(self) -> List[str]:
+        """获取所有学校名称（去重）"""
+        seen = set()
+        result = []
+        for major in self.schools:
+            if major.school_name and major.school_name not in seen:
+                result.append(major.school_name)
+                seen.add(major.school_name)
+        return sorted(result)
+
     def export_results(self, results: List[MatchResult], file_path: str) -> bool:
         """导出筛选结果到 Excel"""
         try:
-            data = [r.to_dict() for r in results]
+            data = []
+            for r in results:
+                d = r.to_dict()
+                d['学校名称'] = d.pop('school_name', '')
+                d['专业名称'] = d.pop('major_name', '')
+                d['匹配类型'] = d.pop('match_type', '')
+                d['分数差'] = d.pop('score_gap', 0)
+                d['往年最低分'] = d.pop('min_score', 0)
+                d['往年最低排名'] = d.pop('min_rank', 0)
+                d['学生姓名'] = d.pop('student_name', '')
+                data.append(d)
+            
             df = pd.DataFrame(data)
-            df.to_excel(file_path, index=False)
+            # 重新排列列顺序
+            columns = ['学生姓名', '学校名称', '专业名称', '匹配类型', '分数差', '往年最低分', '往年最低排名']
+            df = df[[c for c in columns if c in df.columns]]
+            df.to_excel(file_path, index=False, engine='openpyxl')
             return True
         except Exception as e:
             print(f"导出结果失败：{e}")
             return False
+
+    def export_to_pdf(self, results: List[MatchResult], file_path: str, student_name: str = "") -> bool:
+        """导出筛选结果到 PDF"""
+        try:
+            from reportlab.lib.pagesizes import A4, landscape
+            from reportlab.lib import colors
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.lib.units import cm
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            import os
+            
+            # 尝试注册中文字体
+            font_paths = [
+                "C:/Windows/Fonts/simhei.ttf",
+                "C:/Windows/Fonts/msyh.ttc",
+                "C:/Windows/Fonts/simsun.ttc",
+                "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+                "/System/Library/Fonts/PingFang.ttc",
+            ]
+            
+            font_registered = False
+            for fp in font_paths:
+                if os.path.exists(fp):
+                    try:
+                        pdfmetrics.registerFont(TTFont('ChineseFont', fp))
+                        font_registered = True
+                        break
+                    except:
+                        continue
+            
+            if not font_registered:
+                print("警告：未找到中文字体，PDF中文可能显示异常")
+            
+            doc = SimpleDocTemplate(
+                file_path,
+                pagesize=landscape(A4),
+                rightMargin=1*cm, leftMargin=1*cm,
+                topMargin=1*cm, bottomMargin=1*cm
+            )
+            
+            elements = []
+            styles = getSampleStyleSheet()
+            
+            # 标题
+            title_style = ParagraphStyle(
+                'ChineseTitle',
+                parent=styles['Title'],
+                fontName='ChineseFont' if font_registered else 'Helvetica',
+                fontSize=18,
+                spaceAfter=20
+            )
+            
+            header_style = ParagraphStyle(
+                'ChineseHeader',
+                parent=styles['Normal'],
+                fontName='ChineseFont' if font_registered else 'Helvetica',
+                fontSize=14,
+                spaceAfter=10
+            )
+            
+            title_text = f"高考志愿筛选结果"
+            if student_name:
+                title_text += f" - {student_name}"
+            elements.append(Paragraph(title_text, title_style))
+            
+            # 统计信息
+            chong = len([r for r in results if r.match_type == '冲'])
+            wen = len([r for r in results if r.match_type == '稳'])
+            bao = len([r for r in results if r.match_type == '保'])
+            
+            stats_text = f"共 {len(results)} 条结果 | 冲：{chong} | 稳：{wen} | 保：{bao}"
+            elements.append(Paragraph(stats_text, header_style))
+            elements.append(Spacer(1, 0.5*cm))
+            
+            # 表格数据
+            table_data = [['序号', '学校名称', '专业名称', '类型', '分数差', '往年最低分', '往年最低排名']]
+            
+            for i, r in enumerate(results[:200], 1):  # PDF最多显示200条
+                table_data.append([
+                    str(i),
+                    r.school_name[:20],
+                    r.major_name[:15],
+                    r.match_type,
+                    f"{r.score_gap:+.1f}",
+                    str(int(r.min_score)),
+                    str(r.min_rank)
+                ])
+            
+            col_widths = [1.5*cm, 5*cm, 4*cm, 1.5*cm, 2*cm, 2.5*cm, 2.5*cm]
+            
+            table = Table(table_data, colWidths=col_widths)
+            
+            style = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2563eb')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('FONTNAME', (0, 0), (-1, -1), 'ChineseFont' if font_registered else 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f1f5f9')]),
+            ])
+            
+            # 类型颜色
+            type_colors = {'冲': colors.HexColor('#ef4444'), '稳': colors.HexColor('#16a34a'), '保': colors.HexColor('#2563eb')}
+            for i, r in enumerate(results[:200], 1):
+                if r.match_type in type_colors:
+                    style.add('TEXTCOLOR', (3, i), (3, i), type_colors[r.match_type])
+            
+            table.setStyle(style)
+            elements.append(table)
+            
+            # 页脚
+            footer_style = ParagraphStyle(
+                'Footer',
+                parent=styles['Normal'],
+                fontName='ChineseFont' if font_registered else 'Helvetica',
+                fontSize=8,
+                textColor=colors.grey
+            )
+            elements.append(Spacer(1, 1*cm))
+            from datetime import datetime
+            footer_text = f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Excel筛选查找器 v1.3"
+            elements.append(Paragraph(footer_text, footer_style))
+            
+            doc.build(elements)
+            return True
+        except ImportError:
+            print(f"PDF导出需要 reportlab 库：pip install reportlab")
+            return False
+        except Exception as e:
+            print(f"PDF导出失败：{e}")
+            return False
+
+    def save_history(self, student: Student, results: List[MatchResult], config: FilterConfig) -> bool:
+        """保存筛选历史到数据库"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS filter_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    student_id TEXT,
+                    student_name TEXT,
+                    student_score REAL,
+                    student_rank INTEGER,
+                    config_json TEXT,
+                    results_count INTEGER,
+                    created_at TEXT
+                )
+            ''')
+            
+            cursor.execute('''
+                INSERT INTO filter_history 
+                (student_id, student_name, student_score, student_rank, config_json, results_count, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                student.student_id,
+                student.student_name,
+                student.total_score,
+                student.rank,
+                json.dumps(config.to_dict(), ensure_ascii=False),
+                len(results),
+                datetime.now().isoformat()
+            ))
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"保存历史失败：{e}")
+            return False
+
+    def load_history(self, limit: int = 10) -> List[Dict]:
+        """加载筛选历史"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT id, student_name, student_score, student_rank, results_count, created_at
+                FROM filter_history
+                ORDER BY id DESC
+                LIMIT ?
+            ''', (limit,))
+            
+            rows = cursor.fetchall()
+            conn.close()
+            
+            return [
+                {
+                    'id': r[0],
+                    'student_name': r[1],
+                    'student_score': r[2],
+                    'student_rank': r[3],
+                    'results_count': r[4],
+                    'created_at': r[5]
+                }
+                for r in rows
+            ]
+        except Exception as e:
+            print(f"加载历史失败：{e}")
+            return []
     
     def get_all_majors(self) -> List[Major]:
         """获取所有专业数据"""

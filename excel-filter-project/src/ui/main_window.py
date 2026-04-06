@@ -6,8 +6,8 @@ from tkinter import filedialog, messagebox
 from typing import Optional
 import tkinter as tk
 
-from models import Student, MatchResult, FilterConfig
-from services import DataService, FilterService
+from ..models import Student, MatchResult, FilterConfig
+from ..services import DataService, FilterService
 
 
 class MainWindow(ctk.CTkFrame):
@@ -37,12 +37,18 @@ class MainWindow(ctk.CTkFrame):
         self.left_panel = ctk.CTkFrame(self)
         self.left_panel.grid(row=0, column=0, rowspan=2, padx=10, pady=10, sticky="ns")
         
+        # 创建筛选面板
+        self.filter_panel = None
+        
         # 右侧面板（结果展示）
         self.right_panel = ctk.CTkFrame(self)
         self.right_panel.grid(row=0, column=1, rowspan=2, padx=10, pady=10, sticky="nsew")
         
         self._create_left_panel()
         self._create_right_panel()
+        
+        # 创建筛选面板
+        self._create_filter_panel()
     
     def _create_left_panel(self):
         """创建左侧面板"""
@@ -101,27 +107,6 @@ class MainWindow(ctk.CTkFrame):
             font=ctk.CTkFont(size=14, weight="bold")
         ).grid(row=0, column=0, pady=5)
         
-        # 学校层次
-        ctk.CTkLabel(filter_frame, text="学校层次:").grid(row=1, column=0, sticky="w", pady=5)
-        self.level_var = tk.StringVar(value="all")
-        level_combo = ctk.CTkComboBox(
-            filter_frame,
-            variable=self.level_var,
-            values=["全部", "985", "211", "双一流", "普通本科"]
-        )
-        level_combo.grid(row=2, column=0, sticky="ew", pady=5)
-        
-        # 匹配类型
-        ctk.CTkLabel(filter_frame, text="匹配类型:").grid(row=3, column=0, sticky="w", pady=5)
-        
-        self.tier_chong_var = tk.BooleanVar(value=True)
-        self.tier_wen_var = tk.BooleanVar(value=True)
-        self.tier_bao_var = tk.BooleanVar(value=True)
-        
-        ctk.CTkCheckBox(filter_frame, text="冲", variable=self.tier_chong_var).grid(row=4, column=0, sticky="w")
-        ctk.CTkCheckBox(filter_frame, text="稳", variable=self.tier_wen_var).grid(row=5, column=0, sticky="w")
-        ctk.CTkCheckBox(filter_frame, text="保", variable=self.tier_bao_var).grid(row=6, column=0, sticky="w")
-        
         # 开始筛选按钮
         btn_filter = ctk.CTkButton(
             filter_frame,
@@ -130,7 +115,7 @@ class MainWindow(ctk.CTkFrame):
             height=40,
             font=ctk.CTkFont(size=16, weight="bold")
         )
-        btn_filter.grid(row=7, column=0, pady=20, sticky="ew")
+        btn_filter.grid(row=1, column=0, pady=20, sticky="ew")
         
         # 导出结果按钮
         btn_export = ctk.CTkButton(
@@ -139,7 +124,7 @@ class MainWindow(ctk.CTkFrame):
             command=self._export_results,
             state="disabled"
         )
-        btn_export.grid(row=8, column=0, pady=5, sticky="ew")
+        btn_export.grid(row=2, column=0, pady=5, sticky="ew")
         self.btn_export = btn_export
         
         # 导入学校数据按钮（顶部工具栏）
@@ -175,22 +160,8 @@ class MainWindow(ctk.CTkFrame):
         )
         self.stats_label.grid(row=1, column=0, pady=5)
         
-        # 结果表格（使用 ScrollableFrame）
-        self.results_frame = ctk.CTkScrollableFrame(self.right_panel)
-        self.results_frame.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
-        self.results_frame.grid_columnconfigure(0, weight=1)
-        
-        # 表头
-        headers = ["序号", "学校", "专业", "类型", "分数差", "往年分", "往年排名"]
-        for i, header in enumerate(headers):
-            label = ctk.CTkLabel(
-                self.results_frame,
-                text=header,
-                font=ctk.CTkFont(weight="bold"),
-                padx=10,
-                pady=5
-            )
-            label.grid(row=0, column=i, sticky="w")
+        # 结果面板
+        self.result_panel = None
     
     def _select_student(self):
         """选择学生"""
@@ -256,26 +227,70 @@ class MainWindow(ctk.CTkFrame):
             else:
                 messagebox.showerror("错误", "导入失败，请检查文件格式")
     
-    def _do_filter(self):
-        """执行筛选"""
+    def _create_filter_panel(self):
+        """创建筛选面板"""
+        from ui.filter_panel import FilterPanel
+        
+        # 移除旧的筛选区域
+        for widget in self.left_panel.winfo_children():
+            if widget.grid_info()['row'] == 2:
+                widget.destroy()
+                break
+        
+        # 创建新的筛选面板
+        self.filter_panel = FilterPanel(
+            self.left_panel,
+            on_filter=self._apply_filter,
+            data_service=self.data_service
+        )
+        self.filter_panel.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+    
+    def _apply_filter(self, filter_config):
+        """应用筛选条件"""
         if not self.current_student:
             messagebox.showwarning("提示", "请先选择学生")
             return
         
         # 构建筛选配置
         config = FilterConfig(
-            levels=[self.level_var.get()] if self.level_var.get() != "全部" else [],
-            include_tier_chong=self.tier_chong_var.get(),
-            include_tier_wen=self.tier_wen_var.get(),
-            include_tier_bao=self.tier_bao_var.get()
+            provinces=filter_config.get("regions", []),
+            levels=[filter_config.get("level", "全部")] if filter_config.get("level", "全部") != "全部" else [],
+            categories=filter_config.get("majors", []),
+            include_tier_chong="冲" in filter_config.get("match_types", []),
+            include_tier_wen="稳" in filter_config.get("match_types", []),
+            include_tier_bao="保" in filter_config.get("match_types", [])
         )
         
         # 执行筛选
         results = self.filter_service.filter(self.current_student, config)
         self.current_results = results
         
+        # 保存筛选历史
+        if self.data_service:
+            self.data_service.save_history(self.current_student, results, config)
+        
         # 更新显示
         self.update_results(results)
+    
+    def _do_filter(self):
+        """执行筛选（使用筛选面板的配置）"""
+        if not self.current_student:
+            messagebox.showwarning("提示", "请先选择学生")
+            return
+        
+        if self.filter_panel:
+            # 手动触发筛选面板的筛选
+            self.filter_panel._apply_filter()
+        else:
+            # 回退到简单筛选
+            config = FilterConfig(
+                include_tier_chong=True,
+                include_tier_wen=True,
+                include_tier_bao=True
+            )
+            results = self.filter_service.filter(self.current_student, config)
+            self.current_results = results
+            self.update_results(results)
     
     def _export_results(self):
         """导出结果"""
@@ -306,21 +321,44 @@ class MainWindow(ctk.CTkFrame):
     
     def update_results(self, results):
         """更新结果列表"""
-        # 清空现有结果
-        for widget in self.results_frame.winfo_children():
-            widget.destroy()
-        
-        # 重新创建表头
-        headers = ["序号", "学校", "专业", "类型", "分数差", "往年分", "往年排名"]
-        for i, header in enumerate(headers):
-            label = ctk.CTkLabel(
-                self.results_frame,
-                text=header,
-                font=ctk.CTkFont(weight="bold"),
-                padx=10,
-                pady=5
+        # 创建或更新结果面板
+        if not self.result_panel:
+            from ui.result_panel import ResultPanel
+            
+            # 移除旧的表格
+            for widget in self.right_panel.winfo_children():
+                if widget.grid_info()['row'] == 2:
+                    widget.destroy()
+                    break
+            
+            # 创建新的结果面板
+            self.result_panel = ResultPanel(
+                self.right_panel,
+                data_service=self.data_service,
+                student_name=self.current_student.student_name if self.current_student else ""
             )
-            label.grid(row=0, column=i, sticky="w")
+            self.result_panel.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        
+        # 转换结果为字典格式
+        results_dict = []
+        for r in results:
+            results_dict.append({
+                'student_id': r.student_id,
+                'student_name': r.student_name,
+                'school_id': r.school_id,
+                'school': r.school_name,
+                'major_id': r.major_id,
+                'major': r.major_name,
+                'type': r.match_type,
+                'score_diff': r.score_gap,
+                'rank_gap': r.rank_gap,
+                'prev_score': r.min_score,
+                'prev_rank': r.min_rank
+            })
+        
+        # 加载结果到面板
+        student_name = self.current_student.student_name if self.current_student else ""
+        self.result_panel.load_results(results_dict, student_name)
         
         # 统计
         chong_count = sum(1 for r in results if r.match_type == '冲')
@@ -330,28 +368,6 @@ class MainWindow(ctk.CTkFrame):
         self.stats_label.configure(
             text=f"共 {len(results)} 条结果 | 冲：{chong_count} | 稳：{wen_count} | 保：{bao_count}"
         )
-        
-        # 添加结果行
-        for i, result in enumerate(results[:100], 1):  # 限制显示 100 条
-            # 类型颜色
-            tier_color = {'冲': 'red', '稳': 'orange', '保': 'green'}.get(result.match_type, 'gray')
-            
-            ctk.CTkLabel(self.results_frame, text=str(i), padx=10, pady=3).grid(row=i, column=0, sticky="w")
-            ctk.CTkLabel(self.results_frame, text=result.school_name, padx=10, pady=3).grid(row=i, column=1, sticky="w")
-            ctk.CTkLabel(self.results_frame, text=result.major_name, padx=10, pady=3).grid(row=i, column=2, sticky="w")
-            
-            tier_label = ctk.CTkLabel(
-                self.results_frame, 
-                text=result.match_type, 
-                padx=10, 
-                pady=3,
-                text_color=tier_color
-            )
-            tier_label.grid(row=i, column=3, sticky="w")
-            
-            ctk.CTkLabel(self.results_frame, text=f"{result.score_gap:+.1f}", padx=10, pady=3).grid(row=i, column=4, sticky="w")
-            ctk.CTkLabel(self.results_frame, text=str(result.min_score), padx=10, pady=3).grid(row=i, column=5, sticky="w")
-            ctk.CTkLabel(self.results_frame, text=str(result.min_rank), padx=10, pady=3).grid(row=i, column=6, sticky="w")
         
         # 启用导出按钮
         if results:

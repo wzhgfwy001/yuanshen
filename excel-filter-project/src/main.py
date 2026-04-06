@@ -11,9 +11,9 @@ import json
 from datetime import datetime
 
 # 导入自定义模块
-from models import Student, School, Major, MatchResult
-from services import DataService, FilterService
-from ui.main_window import MainWindow
+from .models import Student, School, Major, MatchResult
+from .services import DataService, FilterService
+from .ui.main_window import MainWindow
 
 
 class ExcelFilterApp:

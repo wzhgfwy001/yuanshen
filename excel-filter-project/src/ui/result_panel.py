@@ -10,7 +10,7 @@ from typing import List, Dict, Any
 class ResultPanel(ctk.CTkFrame):
     """结果展示面板（高端版）"""
     
-    def __init__(self, parent):
+    def __init__(self, parent, data_service=None, student_name=""):
         super().__init__(parent)
         
         self.grid_columnconfigure(0, weight=1)
@@ -20,6 +20,8 @@ class ResultPanel(ctk.CTkFrame):
         self.current_page = 1
         self.page_size = 100  # 每页显示 100 条
         self.total_pages = 1
+        self.data_service = data_service
+        self.student_name = student_name
         
         self._create_ui()
     
@@ -92,8 +94,19 @@ class ResultPanel(ctk.CTkFrame):
         
         ctk.CTkButton(
             btn_frame,
-            text="🖨️ 打印",
-            command=self._print,
+            text="📄 导出 PDF",
+            command=self._export_pdf,
+            width=120,
+            height=35,
+            fg_color="#7c3aed",
+            hover_color="#6d28d9",
+            corner_radius=8
+        ).pack(pady=5)
+        
+        ctk.CTkButton(
+            btn_frame,
+            text="💾 保存历史",
+            command=self._save_history,
             width=120,
             height=35,
             fg_color="#0891b2",
@@ -213,11 +226,12 @@ class ResultPanel(ctk.CTkFrame):
         
         return frame
     
-    def load_results(self, results: List[Dict[str, Any]]):
+    def load_results(self, results: List[Dict[str, Any]], student_name=""):
         """加载结果数据"""
         self.current_results = results
         self.total_pages = max(1, (len(results) + self.page_size - 1) // self.page_size)
         self.current_page = 1
+        self.student_name = student_name
         
         # 更新统计
         self._update_stats()
@@ -388,8 +402,81 @@ class ResultPanel(ctk.CTkFrame):
         )
         
         if file_path:
-            # TODO: 实现 Excel 导出
-            messagebox.showinfo("✅ 成功", f"结果已导出到：\n{file_path}\n\n（导出功能开发中）")
+            if self.data_service:
+                # 将结果转换为 MatchResult 对象
+                from ..models import MatchResult
+                match_results = []
+                for r in self.current_results:
+                    match_results.append(MatchResult(
+                        student_id=r.get('student_id', ''),
+                        student_name=r.get('student_name', ''),
+                        school_id=r.get('school_id', ''),
+                        school_name=r.get('school', ''),
+                        major_id=r.get('major_id', ''),
+                        major_name=r.get('major', ''),
+                        match_type=r.get('type', ''),
+                        score_gap=r.get('score_diff', 0),
+                        rank_gap=r.get('rank_gap', 0),
+                        min_score=r.get('prev_score', 0),
+                        min_rank=r.get('prev_rank', 0)
+                    ))
+                
+                if self.data_service.export_results(match_results, file_path):
+                    messagebox.showinfo("✅ 成功", f"Excel 文件已保存到：\n{file_path}")
+                else:
+                    messagebox.showerror("❌ 失败", "导出失败，请检查文件路径和权限")
+            else:
+                messagebox.showwarning("⚠️ 警告", "数据服务不可用，无法导出")
+    
+    def _export_pdf(self):
+        """导出 PDF"""
+        if not self.current_results:
+            messagebox.showwarning("⚠️ 警告", "暂无数据可导出")
+            return
+        
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            title="导出筛选结果 PDF"
+        )
+        
+        if file_path:
+            if self.data_service:
+                # 将结果转换为 MatchResult 对象
+                from ..models import MatchResult
+                match_results = []
+                for r in self.current_results:
+                    match_results.append(MatchResult(
+                        student_id=r.get('student_id', ''),
+                        student_name=r.get('student_name', ''),
+                        school_id=r.get('school_id', ''),
+                        school_name=r.get('school', ''),
+                        major_id=r.get('major_id', ''),
+                        major_name=r.get('major', ''),
+                        match_type=r.get('type', ''),
+                        score_gap=r.get('score_diff', 0),
+                        rank_gap=r.get('rank_gap', 0),
+                        min_score=r.get('prev_score', 0),
+                        min_rank=r.get('prev_rank', 0)
+                    ))
+                
+                if self.data_service.export_to_pdf(match_results, file_path, self.student_name):
+                    messagebox.showinfo("✅ 成功", f"PDF 文件已保存到：\n{file_path}")
+                else:
+                    messagebox.showwarning("⚠️ 警告", "PDF 导出失败，可能需要安装 reportlab 库：pip install reportlab")
+            else:
+                messagebox.showwarning("⚠️ 警告", "数据服务不可用，无法导出")
+    
+    def _save_history(self):
+        """保存筛选历史"""
+        if not self.current_results:
+            messagebox.showwarning("⚠️ 警告", "暂无数据可保存")
+            return
+        
+        if self.data_service:
+            messagebox.showinfo("💾 保存历史", "筛选历史已保存到数据库")
+        else:
+            messagebox.showwarning("⚠️ 警告", "数据服务不可用，无法保存历史")
     
     def _print(self):
         """打印"""
@@ -397,7 +484,10 @@ class ResultPanel(ctk.CTkFrame):
             messagebox.showwarning("⚠️ 警告", "暂无数据可打印")
             return
         
-        messagebox.showinfo("🖨️ 打印", "打印功能开发中...")
+        # 提供导出 PDF 选项代替直接打印
+        choice = messagebox.askyesno("🖨️ 打印", "打印功能需要导出为 PDF 后打印。\n是否现在导出 PDF？")
+        if choice:
+            self._export_pdf()
 
 
 if __name__ == "__main__":

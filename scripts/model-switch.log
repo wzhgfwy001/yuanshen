@@ -63,3 +63,94 @@
 [2026-04-06 23:08:30] [INFO] Testing model: modelstudio/qwen3.5-plus
 [2026-04-06 23:08:36] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
 [2026-04-06 23:08:37] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 00:09:07] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 00:09:08] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 00:09:08] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 00:09:08] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 00:09:17] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 00:09:17] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 00:09:17] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 00:09:17] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 00:09:21] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 00:09:21] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 00:09:21] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 00:09:26] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 00:09:26] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 01:10:06] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 01:10:06] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 01:10:06] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 01:10:06] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 01:10:11] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 01:10:11] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 01:10:11] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 01:10:11] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 01:10:15] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 01:10:15] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 01:10:15] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 01:10:20] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 01:10:20] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 02:11:02] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 02:11:03] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 02:11:03] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 02:11:03] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 02:11:14] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 02:11:14] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 02:11:14] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 02:11:14] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 02:11:20] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 02:11:20] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 02:11:20] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 02:11:26] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 02:11:26] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 03:11:56] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 03:11:57] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 03:11:57] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 03:11:57] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 03:12:04] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 03:12:04] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 03:12:04] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 03:12:04] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 03:12:09] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 03:12:09] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 03:12:09] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 03:12:13] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 03:12:13] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 04:12:56] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 04:12:56] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 04:12:56] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 04:12:56] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 04:13:01] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 04:13:01] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 04:13:01] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 04:13:01] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 04:13:06] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 04:13:06] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 04:13:06] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 04:13:10] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 04:13:10] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 05:13:52] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 05:13:53] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 05:13:53] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 05:13:53] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 05:13:58] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 05:13:58] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 05:13:58] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 05:13:58] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 05:14:02] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 05:14:02] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 05:14:02] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 05:14:07] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 05:14:07] [ERROR] All models are unavailable, cannot switch
+[2026-04-07 06:14:36] [INFO] ========== Model Health Check Started ==========
+[2026-04-07 06:14:36] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-07 06:14:36] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-07 06:14:36] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-07 06:14:44] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-07 06:14:44] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-07 06:14:44] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-07 06:14:44] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-07 06:14:51] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-07 06:14:51] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-07 06:14:51] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-07 06:14:57] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-07 06:14:57] [ERROR] All models are unavailable, cannot switch
