@@ -48,6 +48,19 @@
 - 主模型：minimax/MiniMax-M2.7
 - 备选：deepseek/deepseek-chat, modelstudio/qwen3.5-plus
 
+### 2026-04-06 小说大纲更新
+
+**更新内容：**
+- 宁千阳身世：双胞胎弟弟，出生时被宁月初吸收全部能力
+- 宁千阳觉醒机制：与姐姐能力共享，双双提升至S+级
+- 凌不悔替代"凌大爷"成为正式名称
+- 宇宙入侵线：近1000年飞船加速培养精英的原因揭露
+- 新增文档：STORY-OUTLINE-UPDATED.md
+
+**小说大纲文件：**
+- `skills/dynamic-multi-agent-system/docs/STORY-OUTLINE-UPDATED.md`
+- `skills/dynamic-multi-agent-system/docs/VISUAL-DIAGRAMS.md`
+
 ### 2026-04-06 P0 运营计划启动 + Token 优化实施
 
 **阶段 1 完成（09:45）：**
