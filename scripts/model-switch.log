@@ -414,3 +414,29 @@
 [2026-04-08 00:35:24] [INFO] Testing model: modelstudio/qwen3.5-plus
 [2026-04-08 00:35:28] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
 [2026-04-08 00:35:28] [ERROR] All models are unavailable, cannot switch
+[2026-04-08 01:36:14] [INFO] ========== Model Health Check Started ==========
+[2026-04-08 01:36:14] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-08 01:36:14] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-08 01:36:15] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-08 01:36:25] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-08 01:36:25] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-08 01:36:25] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-08 01:36:25] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-08 01:36:32] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-08 01:36:32] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-08 01:36:32] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-08 01:36:38] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-08 01:36:38] [ERROR] All models are unavailable, cannot switch
+[2026-04-08 02:37:08] [INFO] ========== Model Health Check Started ==========
+[2026-04-08 02:37:09] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-08 02:37:09] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-08 02:37:09] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-08 02:37:16] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-08 02:37:16] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-08 02:37:16] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-08 02:37:16] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-08 02:37:21] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-08 02:37:21] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-08 02:37:21] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-08 02:37:26] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-08 02:37:26] [ERROR] All models are unavailable, cannot switch
