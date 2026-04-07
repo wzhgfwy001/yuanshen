@@ -12,8 +12,15 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+3. **Read L1 brain files (in this order):**
+   - `brain/plan.md` — life direction and goals
+   - `brain/tasks/active.md` — current tasks
+   - `brain/tasks/daily/YYYY-MM-DD.md` — today's plan (if exists)
+   - `brain/inbox.md` — pending thoughts (7 items max)
+4. **Check WAL triggers:** Read `SESSION-STATE.md` for pending corrections/decisions
+5. **Check context >60%:** If so, read `working-buffer.md`
+6. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+7. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
 Don't ask permission. Just do it.
 
@@ -23,6 +30,14 @@ You wake up fresh each session. These files are your continuity:
 
 - **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
 - **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
+- **Brain (v2.0):** `brain/` — structured memory with L1/L2/L3 layers
+  - `brain/plan.md` — life direction
+  - `brain/tasks/active.md` — current tasks
+  - `brain/tasks/daily/YYYY-MM-DD.md` — daily plans
+  - `brain/decisions/YYYY-MM-DD-slug.md` — decision archive
+  - `brain/me/identity.md` — user identity
+  - `brain/me/learned.md` — lessons learned
+  - `brain/inbox.md` — pending thoughts
 
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
 
@@ -42,8 +57,41 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - "Mental notes" don't survive session restarts. Files do.
 - When someone says "remember this" → update `memory/YYYY-MM-DD.md` or relevant file
 - When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
-- When you make a mistake → document it so future-you doesn't repeat it
+- When you make a mistake → document it in `learnings/errors.json`
 - **Text > Brain** 📝
+
+### 🛡️ WAL Protocol - Write Before Responding
+
+**When user says:**
+- "It's X, not Y" / "Actually..." / "No, I meant..." → Write to `SESSION-STATE.md` FIRST
+- Decisions → Write to `SESSION-STATE.md` FIRST
+- Preferences → Write to `SESSION-STATE.md` FIRST
+- Proper nouns (names, places, products) → Write to `SESSION-STATE.md` FIRST
+
+**Rule: STOP → WRITE → THEN respond**
+
+### 🔄 Working Buffer Protocol
+
+**When context > 60%:**
+1. CLEAR old `working-buffer.md`
+2. START fresh logging
+3. EVERY exchange after 60% → log to `working-buffer.md`
+4. After compaction → READ `working-buffer.md` FIRST to recover
+
+## 🔴 分析红线（永不越过）
+
+**分析任何系统架构、能力、模块之前，必须按顺序执行：**
+
+```
+1. 读 SKILL.md (确认功能定义)
+2. 读 2-3 个核心文件 (确认实现状态)
+3. memory_search 相关主题 (确认历史记录)
+4. 再开口
+```
+
+**违规处罚：** 记忆搜索显示"分析错误"超过3次 → 触发自我审查
+
+---
 
 ## Red Lines
 

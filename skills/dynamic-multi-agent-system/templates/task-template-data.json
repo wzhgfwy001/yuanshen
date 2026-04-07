@@ -1,0 +1,208 @@
+{
+  "categories": {
+    "writing": {"name": "写作模板", "icon": "✍️", "desc": "各类写作任务"},
+    "code": {"name": "代码模板", "icon": "💻", "desc": "代码开发与调试"},
+    "analysis": {"name": "分析模板", "icon": "📊", "desc": "数据分析与报告"},
+    "learning": {"name": "学习模板", "icon": "📚", "desc": "学习笔记与总结"},
+    "translation": {"name": "翻译模板", "icon": "🌐", "desc": "文档翻译与本地化"},
+    "social-media": {"name": "社媒模板", "icon": "📱", "desc": "社交媒体运营"},
+    "video": {"name": "视频模板", "icon": "🎬", "desc": "视频脚本创作"},
+    "business": {"name": "商业模板", "icon": "💼", "desc": "商业计划与分析"},
+    "academic": {"name": "学术模板", "icon": "🎓", "desc": "学术论文与研究"},
+    "creative": {"name": "创意模板", "icon": "🎨", "desc": "创意写作与设计"}
+  },
+  "templates": {
+    "article-daily-news": {
+      "id": "article-daily-news", "category": "writing", "name": "每日资讯文章", "description": "快速撰写每日新闻资讯类文章", "version": "1.0.0",
+      "agents": ["researcher", "writer", "editor"], "complexity": 2, "estimatedTime": "5-10min",
+      "prompt": "请撰写一篇今日资讯文章：\n\n**主题：** {topic}\n**字数：** {wordCount}字\n**风格：** {style}\n\n**要求：**\n1. 开头有新闻导语（who/what/when/where/why）\n2. 主体3-5段，逻辑清晰\n3. 结尾有总结或展望\n4. 客观中立，数据准确",
+      "outputFormat": "markdown", "tags": ["新闻", "资讯", "日报"]
+    },
+    "article-opinion": {
+      "id": "article-opinion", "category": "writing", "name": "观点评论文章", "description": "撰写观点鲜明、论证有力的评论文章", "version": "1.0.0",
+      "agents": ["researcher", "writer", "editor"], "complexity": 3, "estimatedTime": "10-15min",
+      "prompt": "请撰写一篇观点评论文章：\n\n**主题：** {topic}\n**立场：** {stance}\n**字数：** {wordCount}字\n\n**要求：**\n1. 开头亮出核心观点\n2. 提供2-3个有力论据\n3. 反驳可能的反对意见\n4. 结尾升华主题",
+      "outputFormat": "markdown", "tags": ["评论", "观点", "议论文"]
+    },
+    "copy-product-desc": {
+      "id": "copy-product-desc", "category": "writing", "name": "产品描述文案", "description": "撰写有吸引力的产品描述和卖点文案", "version": "1.0.0",
+      "agents": ["copywriter", "editor"], "complexity": 2, "estimatedTime": "5-8min",
+      "prompt": "请撰写产品描述文案：\n\n**产品名称：** {productName}\n**产品特点：** {features}\n**目标用户：** {targetAudience}\n**字数：** {wordCount}字\n\n**要求：**\n1. 突出核心卖点（USP）\n2. 解决用户痛点\n3. 使用有感染力的语言\n4. 包含行动号召（CTA）",
+      "outputFormat": "markdown", "tags": ["产品", "文案", "营销"]
+    },
+    "email-newsletter": {
+      "id": "email-newsletter", "category": "writing", "name": "邮件 Newsletter", "description": "撰写定期邮件通讯", "version": "1.0.0",
+      "agents": ["writer", "editor"], "complexity": 2, "estimatedTime": "5-10min",
+      "prompt": "请撰写邮件 Newsletter：\n\n**主题：** {theme}\n**本期重点：** {highlight}\n**字数：** {wordCount}字\n\n**要求：**\n1. 标题吸引人，提高打开率\n2. 结构清晰，分段合理\n3. 包含相关链接\n4. 结尾有明确的下一步行动",
+      "outputFormat": "markdown", "tags": ["邮件", "通讯", "订阅"]
+    },
+    "writing-market-report": {
+      "id": "writing-market-report", "category": "writing", "name": "市场分析报告", "description": "市场分析、行业报告写作模板", "version": "1.0.0",
+      "agents": ["researcher", "analyst", "writer"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请撰写市场分析报告：\n\n**行业：** {industry}\n**分析范围：** {scope}\n**目标读者：** {audience}",
+      "outputFormat": "markdown", "tags": ["市场", "分析", "报告"]
+    },
+    "code-api-wrapper": {
+      "id": "code-api-wrapper", "category": "code", "name": "API 封装器开发", "description": "为外部API创建封装库", "version": "1.0.0",
+      "agents": ["architect", "coder", "tester"], "complexity": 4, "estimatedTime": "30-60min",
+      "prompt": "请开发一个 API 封装器：\n\n**API 类型：** {apiType}\n**语言：** {language}\n**功能需求：** {requirements}\n\n**要求：**\n1. 完整的方法封装\n2. 错误处理和重试机制\n3. 类型定义完备\n4. 包含单元测试\n5. 使用文档注释",
+      "outputFormat": "code", "tags": ["API", "封装", "SDK"]
+    },
+    "code-data-pipeline": {
+      "id": "code-data-pipeline", "category": "code", "name": "数据管道开发", "description": "构建 ETL 数据处理管道", "version": "1.0.0",
+      "agents": ["data-engineer", "tester"], "complexity": 4, "estimatedTime": "40-60min",
+      "prompt": "请开发数据处理管道：\n\n**数据源：** {dataSource}\n**处理逻辑：** {processingLogic}\n**目标存储：** {targetStorage}\n\n**要求：**\n1. 支持增量/全量同步\n2. 数据清洗和转换\n3. 异常数据处理\n4. 进度日志记录\n5. 可配置参数",
+      "outputFormat": "code", "tags": ["ETL", "数据", "管道"]
+    },
+    "code-cli-tool": {
+      "id": "code-cli-tool", "category": "code", "name": "命令行工具开发", "description": "开发实用的命令行工具", "version": "1.0.0",
+      "agents": ["coder", "tester"], "complexity": 3, "estimatedTime": "20-30min",
+      "prompt": "请开发命令行工具：\n\n**工具名称：** {toolName}\n**核心功能：** {coreFeatures}\n**运行环境：** {runtime}\n\n**要求：**\n1. 清晰的命令行参数\n2. 友好的帮助文档\n3. 彩色输出\n4. 错误提示清晰\n5. 支持配置文件",
+      "outputFormat": "code", "tags": ["CLI", "工具", "命令行"]
+    },
+    "code-python-analysis": {
+      "id": "code-python-analysis", "category": "code", "name": "Python 数据分析", "description": "Python数据分析代码模板", "version": "1.0.0",
+      "agents": ["data-engineer"], "complexity": 3, "estimatedTime": "20-30min",
+      "prompt": "请生成Python数据分析代码：\n\n**数据源：** {dataSource}\n**分析目标：** {goal}",
+      "outputFormat": "code", "tags": ["Python", "数据", "分析"]
+    },
+    "code-bug-fix": {
+      "id": "code-bug-fix", "category": "code", "name": "Bug 调试与修复", "description": "代码调试和Bug修复模板", "version": "1.0.0",
+      "agents": ["coder", "tester"], "complexity": 2, "estimatedTime": "10-15min",
+      "prompt": "请调试并修复以下Bug：\n\n**错误描述：** {errorDesc}\n**相关代码：** {code}",
+      "outputFormat": "code", "tags": ["调试", "Bug", "修复"]
+    },
+    "analysis-market-research": {
+      "id": "analysis-market-research", "category": "analysis", "name": "市场调研报告", "description": "完成一份市场调研分析报告", "version": "1.0.0",
+      "agents": ["researcher", "analyst", "writer"], "complexity": 4, "estimatedTime": "40-60min",
+      "prompt": "请撰写市场调研报告：\n\n**调研主题：** {topic}\n**调研范围：** {scope}\n**目标受众：** {audience}\n\n**报告结构：**\n1. 执行摘要\n2. 市场概况\n3. 竞争分析\n4. 用户洞察\n5. 趋势预测\n6. 建议与结论",
+      "outputFormat": "markdown", "tags": ["市场", "调研", "报告"]
+    },
+    "analysis-swot": {
+      "id": "analysis-swot", "category": "analysis", "name": "SWOT 分析报告", "description": "进行SWOT态势分析", "version": "1.0.0",
+      "agents": ["analyst"], "complexity": 2, "estimatedTime": "10-15min",
+      "prompt": "请进行 SWOT 分析：\n\n**分析对象：** {subject}\n**分析目的：** {purpose}\n\n**要求：**\n1. Strengths（优势）- 内在积极因素\n2. Weaknesses（劣势）- 内在消极因素\n3. Opportunities（机会）- 外在积极因素\n4. Threats（威胁）- 外在消极因素\n5. 给出战略建议",
+      "outputFormat": "markdown", "tags": ["SWOT", "战略", "分析"]
+    },
+    "analysis-data-trend": {
+      "id": "analysis-data-trend", "category": "analysis", "name": "数据趋势分析", "description": "分析数据变化趋势并预测", "version": "1.0.0",
+      "agents": ["data-analyst", "visualizer"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请进行数据趋势分析：\n\n**数据范围：** {dataRange}\n**分析维度：** {dimensions}\n**预测周期：** {forecastPeriod}\n\n**要求：**\n1. 数据清洗和预处理\n2. 描述性统计分析\n3. 趋势可视化\n4. 季节性分析（如适用）\n5. 未来预测\n6. 异常点标注",
+      "outputFormat": "markdown", "tags": ["趋势", "预测", "数据"]
+    },
+    "analysis-competitor": {
+      "id": "analysis-competitor", "category": "analysis", "name": "竞品分析报告", "description": "竞品分析、市场调研模板", "version": "1.0.0",
+      "agents": ["researcher", "analyst"], "complexity": 2, "estimatedTime": "15-20min",
+      "prompt": "请撰写竞品分析报告：\n\n**竞品名称：** {competitorName}\n**我方产品：** {ourProduct}",
+      "outputFormat": "markdown", "tags": ["竞品", "分析", "市场"]
+    },
+    "business-one-pager": {
+      "id": "business-one-pager", "category": "business", "name": "商业单页书", "description": "快速生成商业单页概要", "version": "1.0.0",
+      "agents": ["analyst", "writer"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请撰写商业单页书：\n\n**业务名称：** {businessName}\n**核心价值：** {coreValue}\n**目标市场：** {targetMarket}\n\n**内容要求：**\n1. 问题/痛点\n2. 解决方案\n3. 商业模式\n4. 市场机会\n5. 竞争优势\n6. 团队/背景\n7. 融资需求（如适用）",
+      "outputFormat": "markdown", "tags": ["商业", "单页", "BP"]
+    },
+    "business-competitor-brief": {
+      "id": "business-competitor-brief", "category": "business", "name": "竞品简报", "description": "快速生成竞品分析简报", "version": "1.0.0",
+      "agents": ["researcher", "analyst"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请撰写竞品简报：\n\n**竞品名称：** {competitorName}\n**我方产品：** {ourProduct}\n\n**简报内容：**\n1. 产品概况\n2. 核心功能对比\n3. 定价策略\n4. 市场定位\n5. 优势/劣势分析\n6. 对我方启示",
+      "outputFormat": "markdown", "tags": ["竞品", "分析", "商业"]
+    },
+    "creative-story-short": {
+      "id": "creative-story-short", "category": "creative", "name": "短篇故事创作", "description": "创作情感丰富的短篇故事", "version": "1.0.0",
+      "agents": ["storyteller", "editor"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请创作短篇故事：\n\n**主题：** {theme}\n**风格：** {style}\n**字数：** {wordCount}字\n\n**要求：**\n1. 有吸引力的开头\n2. 立体的人物塑造\n3. 合理的情节发展\n4. 出人意料又合理的高潮\n5. 意味深长的结尾",
+      "outputFormat": "markdown", "tags": ["故事", "创意", "小说"]
+    },
+    "creative-brand-story": {
+      "id": "creative-brand-story", "category": "creative", "name": "品牌故事", "description": "撰写有感染力的品牌故事", "version": "1.0.0",
+      "agents": ["copywriter", "brand-strategist"], "complexity": 2, "estimatedTime": "10-15min",
+      "prompt": "请撰写品牌故事：\n\n**品牌名称：** {brandName}\n**品牌理念：** {brandPhilosophy}\n**创始人背景：** {founderStory}\n\n**要求：**\n1. 讲述品牌起源故事\n2. 传递品牌价值观\n3. 与目标用户建立情感连接\n4. 真实可信，有感染力\n5. 结尾与品牌 slogan 一致",
+      "outputFormat": "markdown", "tags": ["品牌", "故事", "营销"]
+    },
+    "academic-literature-review": {
+      "id": "academic-literature-review", "category": "academic", "name": "文献综述", "description": "撰写某一领域的文献综述", "version": "1.0.0",
+      "agents": ["researcher", "writer"], "complexity": 5, "estimatedTime": "60-90min",
+      "prompt": "请撰写文献综述：\n\n**研究主题：** {researchTopic}\n**文献范围：** {literatureScope}\n**综述重点：** {focus}\n\n**结构要求：**\n1. 引言（研究背景与意义）\n2. 核心概念定义\n3. 主要理论框架\n4. 研究方法评述\n5. 主要发现汇总\n6. 研究空白与展望",
+      "outputFormat": "markdown", "tags": ["文献", "综述", "学术"]
+    },
+    "academic-research-proposal": {
+      "id": "academic-research-proposal", "category": "academic", "name": "研究计划书", "description": "撰写研究项目计划书", "version": "1.0.0",
+      "agents": ["researcher", "writer"], "complexity": 5, "estimatedTime": "60-90min",
+      "prompt": "请撰写研究计划书：\n\n**研究题目：** {researchTitle}\n**研究类型：** {researchType}\n**预计周期：** {duration}\n\n**计划书内容：**\n1. 研究背景与问题\n2. 文献综述\n3. 研究目标与假设\n4. 研究方法\n5. 预期成果\n6. 时间安排\n7. 资源需求\n8. 风险评估",
+      "outputFormat": "markdown", "tags": ["研究", "计划", "学术"]
+    },
+    "learning-course-notes": {
+      "id": "learning-course-notes", "category": "learning", "name": "课程笔记整理", "description": "整理和总结学习课程内容", "version": "1.0.0",
+      "agents": ["learner", "summarizer"], "complexity": 2, "estimatedTime": "10-15min",
+      "prompt": "请整理课程笔记：\n\n**课程名称：** {courseName}\n**课程来源：** {courseSource}\n**章节：** {chapter}\n\n**笔记要求：**\n1. 提取核心概念\n2. 记录关键知识点\n3. 附上典型例题\n4. 标注常见误区\n5. 列出思考题",
+      "outputFormat": "markdown", "tags": ["学习", "笔记", "课程"]
+    },
+    "learning-book-summary": {
+      "id": "learning-book-summary", "category": "learning", "name": "书籍读书笔记", "description": "撰写书籍阅读总结", "version": "1.0.0",
+      "agents": ["reader", "summarizer"], "complexity": 2, "estimatedTime": "15-20min",
+      "prompt": "请撰写读书笔记：\n\n**书名：** {bookTitle}\n**作者：** {author}\n**阅读目的：** {purpose}\n\n**笔记内容：**\n1. 书籍核心观点\n2. 最有价值的章节\n3. 读后感想\n4. 行动计划（3条）\n5. 推荐理由",
+      "outputFormat": "markdown", "tags": ["读书", "笔记", "书籍"]
+    },
+    "video-explainer": {
+      "id": "video-explainer", "category": "video", "name": "知识讲解视频脚本", "description": "创作知识科普类视频脚本", "version": "1.0.0",
+      "agents": ["scriptwriter", "editor"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请创作知识讲解视频脚本：\n\n**主题：** {topic}\n**时长：** {duration}\n**风格：** {style}\n\n**脚本结构：**\n1. 开场 Hook（0-30秒）- 吸引注意力\n2. 问题引入（30秒-1分钟）\n3. 核心内容（主体部分）\n4. 总结回顾（1分钟）\n5. 行动号召（结尾）\n\n**要求：**\n- 语言口语化\n- 节奏明快\n- 适当使用悬念",
+      "outputFormat": "markdown", "tags": ["视频", "脚本", "讲解"]
+    },
+    "video-advertisement": {
+      "id": "video-advertisement", "category": "video", "name": "广告视频脚本", "description": "创作广告视频分镜头脚本", "version": "1.0.0",
+      "agents": ["creative-director", "scriptwriter"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请创作广告视频脚本：\n\n**产品/品牌：** {product}\n**广告类型：** {adType}\n**目标受众：** {audience}\n**时长：** {duration}\n\n**脚本要求：**\n1. 包含场景描述\n2. 对白/旁白明确\n3. 视觉参考说明\n4. 音效/音乐提示\n5. 符合品牌调性",
+      "outputFormat": "markdown", "tags": ["广告", "视频", "脚本"]
+    },
+    "video-short-script": {
+      "id": "video-short-script", "category": "video", "name": "短视频脚本创作", "description": "短视频、宣传片脚本", "version": "1.0.0",
+      "agents": ["scriptwriter"], "complexity": 2, "estimatedTime": "10-15min",
+      "prompt": "请创作短视频脚本：\n\n**主题：** {topic}\n**时长：** {duration}",
+      "outputFormat": "markdown", "tags": ["视频", "脚本", "短片"]
+    },
+    "translation-tech-article": {
+      "id": "translation-tech-article", "category": "translation", "name": "技术文章翻译", "description": "翻译专业技术文章", "version": "1.0.0",
+      "agents": ["translator", "tech-reviewer"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请翻译技术文章：\n\n**原文语言：** {sourceLang}\n**目标语言：** {targetLang}\n**专业领域：** {domain}\n\n**翻译要求：**\n1. 术语准确统一\n2. 表达流畅自然\n3. 保留原文风格\n4. 必要时添加译者注\n5. 保持代码示例原样",
+      "outputFormat": "markdown", "tags": ["翻译", "技术", "文章"]
+    },
+    "translation-tech-doc": {
+      "id": "translation-tech-doc", "category": "translation", "name": "技术文档翻译", "description": "技术文档翻译模板", "version": "1.0.0",
+      "agents": ["translator"], "complexity": 2, "estimatedTime": "15-20min",
+      "prompt": "请翻译技术文档：\n\n**原文语言：** {sourceLang}\n**目标语言：** {targetLang}",
+      "outputFormat": "markdown", "tags": ["翻译", "文档", "本地化"]
+    },
+    "social-kol-content": {
+      "id": "social-kol-content", "category": "social-media", "name": "KOL 内容创作", "description": "为意见领袖创作社交内容", "version": "1.0.0",
+      "agents": ["content-strategist", "copywriter"], "complexity": 3, "estimatedTime": "15-20min",
+      "prompt": "请创作 KOL 社交内容：\n\n**KOL 人设：** {persona}\n**平台：** {platform}\n**内容主题：** {topic}\n\n**内容要求：**\n1. 符合 KOL 个人风格\n2. 有互动性（提问/投票）\n3. 视觉元素建议\n4. 适当植入品牌\n5. 引导关注/评论",
+      "outputFormat": "markdown", "tags": ["KOL", "社交", "内容"]
+    },
+    "social-community-ops": {
+      "id": "social-community-ops", "category": "social-media", "name": "社群运营内容", "description": "规划社群运营内容", "version": "1.0.0",
+      "agents": ["community-manager", "copywriter"], "complexity": 2, "estimatedTime": "10-15min",
+      "prompt": "请规划社群运营内容：\n\n**社群类型：** {communityType}\n**目标用户：** {targetUsers}\n**运营周期：** {period}\n\n**内容规划：**\n1. 每日固定内容\n2. 每周主题活动\n3. 用户互动话题\n4. 激励体系设计\n5. 敏感话题处理预案",
+      "outputFormat": "markdown", "tags": ["社群", "运营", "内容"]
+    },
+    "social-media-calendar": {
+      "id": "social-media-calendar", "category": "social-media", "name": "内容日历规划", "description": "社媒运营、内容规划模板", "version": "1.0.0",
+      "agents": ["social-media-specialist"], "complexity": 2, "estimatedTime": "15-20min",
+      "prompt": "请制定社交媒体内容日历：\n\n**品牌/产品：** {brandProduct}\n**周期：** {period}\n**平台：** {platforms}",
+      "outputFormat": "markdown", "tags": ["社媒", "日历", "运营"]
+    },
+    "sci-fi-creation": {
+      "id": "sci-fi-creation", "category": "creative", "name": "科幻小说创作", "description": "科幻小说创作模板", "version": "1.0.0",
+      "agents": ["world-designer", "outline-planner", "writer", "editor"], "complexity": 4, "estimatedTime": "60-90min",
+      "prompt": "请创作科幻小说：\n\n**主题：** {theme}\n**背景：** {setting}\n**风格：** {style}",
+      "outputFormat": "markdown", "tags": ["科幻", "小说", "创作"]
+    },
+    "mystery-creation": {
+      "id": "mystery-creation", "category": "creative", "name": "悬疑小说创作", "description": "悬疑小说创作模板", "version": "1.0.0",
+      "agents": ["plot-designer", "outline-planner", "writer", "editor"], "complexity": 4, "estimatedTime": "60-90min",
+      "prompt": "请创作悬疑小说：\n\n**主题：** {theme}\n**模式：** {mode}\n**篇幅：** {length}",
+      "outputFormat": "markdown", "tags": ["悬疑", "小说", "推理"]
+    }
+  }
+}

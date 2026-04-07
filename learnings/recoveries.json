@@ -1,0 +1,38 @@
+[
+  {
+    "id": "rec-001",
+    "timestamp": "2026-04-07T12:00:00",
+    "recovery_type": "编码问题",
+    "recovery_method": "重新保存为UTF-8编码",
+    "context": {
+      "file": "main_launcher.py",
+      "symptom": "UnicodeDecodeError"
+    },
+    "outcome": "成功解决",
+    "status": "verified"
+  },
+  {
+    "id": "rec-002",
+    "timestamp": "2026-04-07T14:00:00",
+    "recovery_type": "Python版本问题",
+    "recovery_method": "使用Python 3.14执行pyinstaller",
+    "context": {
+      "issue": "打包命令在不同Python版本",
+      "solution": "指定完整路径"
+    },
+    "outcome": "EXE打包成功",
+    "status": "verified"
+  },
+  {
+    "id": "rec-003",
+    "timestamp": "2026-04-07T21:00:00",
+    "recovery_type": "Gateway崩溃",
+    "recovery_method": "重启Gateway",
+    "context": {
+      "symptom": "grammy模块未找到",
+      "solution": "npm install grammy"
+    },
+    "outcome": "Gateway恢复正常",
+    "status": "verified"
+  }
+]

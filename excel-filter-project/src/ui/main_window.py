@@ -229,7 +229,7 @@ class MainWindow(ctk.CTkFrame):
     
     def _create_filter_panel(self):
         """创建筛选面板"""
-        from ui.filter_panel import FilterPanel
+        from src.ui.filter_panel import FilterPanel
         
         # 移除旧的筛选区域
         for widget in self.left_panel.winfo_children():
@@ -323,7 +323,7 @@ class MainWindow(ctk.CTkFrame):
         """更新结果列表"""
         # 创建或更新结果面板
         if not self.result_panel:
-            from ui.result_panel import ResultPanel
+            from src.ui.result_panel import ResultPanel
             
             # 移除旧的表格
             for widget in self.right_panel.winfo_children():

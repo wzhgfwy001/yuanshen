@@ -1,0 +1,20 @@
+﻿[
+    {
+        "value":  75.9,
+        "message":  "Memory Usage: 75.9%",
+        "source":  "memory",
+        "timestamp":  "2026-04-07 07:05:44",
+        "threshold":  75,
+        "severity":  "warning",
+        "category":  "system"
+    },
+    {
+        "value":  0,
+        "message":  "Cache hit rate too low: 0%",
+        "source":  "cacheHitRate",
+        "timestamp":  "2026-04-07 07:05:44",
+        "threshold":  20,
+        "severity":  "critical",
+        "category":  "application"
+    }
+]

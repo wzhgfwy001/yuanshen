@@ -1,0 +1,39 @@
+[  {    "id": "err-004",    "timestamp": "2026-04-08T01:06:00",    "error_type": "分析错误",    "error_message": "架构分析严重偏差：5个判断全错",    "context": {      "situation": "用户问元神架构 vs 主流架构的优缺点",      "my_claim": "缺少向量检索、自我反思、任务分解、任务队列、自主规划",      "actual_fact": "26个核心模块全部存在，包括task-decomposer/multi-task-queue/refinement-analyzer等",      "error_count": 5    },    "root_cause": "看了一眼目录名就下结论，没有实际读取文件验证",    "resolution": "分析前先读SKILL.md和核心文件，不确定时直接承认",    "status": "recorded"  },
+  {
+    "id": "err-001",
+    "timestamp": "2026-04-07T14:18:00",
+    "error_type": "SyntaxWarning",
+    "error_message": "\\+ is an invalid escape sequence",
+    "context": {
+      "file": "main_simple2.py",
+      "line": 271,
+      "issue": "正则表达式未使用raw string"
+    },
+    "resolution": "使用 r'3\\+3' raw string格式",
+    "status": "resolved"
+  },
+  {
+    "id": "err-002",
+    "timestamp": "2026-04-07T12:00:00",
+    "error_type": "UnicodeDecodeError",
+    "error_message": "'gbk' codec can't decode byte",
+    "context": {
+      "file": "main_launcher.py",
+      "issue": "中文字符编码问题"
+    },
+    "resolution": "文件保存为UTF-8编码",
+    "status": "resolved"
+  },
+  {
+    "id": "err-003",
+    "timestamp": "2026-04-07T00:00:00",
+    "error_type": "TkinterWarning",
+    "error_message": "pady参数不支持元组",
+    "context": {
+      "file": "main_simple2.py",
+      "issue": "pady=(0, 6) 格式错误"
+    },
+    "resolution": "pady只支持单个整数",
+    "status": "resolved"
+  }
+]

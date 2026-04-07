@@ -1,7 +1,56 @@
-# HEARTBEAT.md Template
+# HEARTBEAT.md - 优化版
 
-```markdown
-# Keep this file empty (or with only comments) to skip heartbeat API calls.
+## 心跳检查任务
 
-# Add tasks below when you want the agent to check something periodically.
-```
+每15分钟自动执行一次，检查以下内容：
+
+### 1. WAL触发检查
+- 检查 SESSION-STATE.md 是否有未处理的WAL条目
+- 检查是否有需要记录的用户纠正/决定
+
+### 2. Working Buffer检查
+- 检查上下文是否 > 60%
+- 如果是，确保 working-buffer.md 正在记录
+
+### 3. 记忆系统更新
+- 检查今日是否有新任务完成，需要更新brain/
+- 检查inbox.md是否超过7条
+
+### 4. 系统状态
+- 检查OpenClaw运行状态
+- 检查模型是否正常
+
+### 5. 重要检查
+- 检查是否有需要归档的决策
+- 检查tasks/active.md是否有完成的任务
+
+### 6. 错误/恢复学习
+- 检查 learnings/errors.json 是否有新错误
+- 检查 learnings/recoveries.json 是否有新恢复记录
+
+### 7. 性能监控
+- 检查缓存命中率
+- 检查Token消耗趋势
+
+---
+
+## 任务优先级
+
+1. WAL处理（重要）
+2. Working Buffer监控（重要）
+3. 记忆更新（重要）
+4. 系统状态（一般）
+5. 决策归档（按需）
+6. 性能监控（可选）
+
+---
+
+### 🔴 分析规则自检
+- 检查最近是否有"分析错误"记录
+- 如果有，提醒自己遵守"分析红线"规则
+- 不确定时直接说"我没核实"而不是编答案
+
+## 执行时机
+
+- 间隔：每15分钟
+- 安静时段：23:00 - 08:00（不打扰）
