@@ -1,7 +1,7 @@
 ---
 name: dynamic-multi-agent-system
 description: "混合动态多Agent协作系统。自动识别任务类型，动态创建子Agent团队，执行复杂任务。支持单一任务、标准任务、创新任务三种模式。"
-version: "1.3.1"
+version: "1.4.0"
 metadata:
   {
     "openclaw":

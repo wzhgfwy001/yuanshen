@@ -1,6 +1,6 @@
 {
   "name": "dynamic-multi-agent-system",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "混合动态多Agent协作系统 - 智能任务分解+30种Agent动态组建+全自动执行+质量检查+持续进化，Token节省90%",
   "author": "Dynamic Multi-Agent System Team",
   "license": "MIT",
@@ -46,7 +46,8 @@
   ],
   "features": {
     "agent_roles": 30,
-    "task_templates": 32,
+    "task_templates": 33,
+    "novel_templates": 1,
     "export_formats": 5,
     "cache_levels": 3,
     "error_codes": 200
@@ -70,5 +71,12 @@
     "enable-evolution": true,
     "confidence-threshold": 0.7,
     "subagent-timeout": 300
-  }
+  },
+  "changelog": [
+    {
+      "version": "1.4.0",
+      "date": "2026-04-08",
+      "changes": ["新增《吾名午夜》长篇创作模板novel-wuming，6角色Agent团队，锚定文档体系"]
+    }
+  ]
 }

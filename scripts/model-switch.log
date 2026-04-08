@@ -505,3 +505,16 @@
 [2026-04-08 07:42:20] [INFO] Testing model: modelstudio/qwen3.5-plus
 [2026-04-08 07:42:26] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
 [2026-04-08 07:42:26] [ERROR] All models are unavailable, cannot switch
+[2026-04-08 09:30:24] [INFO] ========== Model Health Check Started ==========
+[2026-04-08 09:30:24] [INFO] Current model: minimax/MiniMax-M2.7
+[2026-04-08 09:30:24] [INFO] Fallback models: deepseek/deepseek-chat, modelstudio/qwen3.5-plus
+[2026-04-08 09:30:24] [INFO] Testing model: minimax/MiniMax-M2.7
+[2026-04-08 09:30:30] [WARN] Model minimax/MiniMax-M2.7 not responsive (exit: 1)
+[2026-04-08 09:30:30] [WARN] Current model minimax/MiniMax-M2.7 is unavailable, starting switch...
+[2026-04-08 09:30:30] [INFO] Trying fallback model: deepseek/deepseek-chat
+[2026-04-08 09:30:30] [INFO] Testing model: deepseek/deepseek-chat
+[2026-04-08 09:30:35] [WARN] Model deepseek/deepseek-chat not responsive (exit: 1)
+[2026-04-08 09:30:35] [INFO] Trying fallback model: modelstudio/qwen3.5-plus
+[2026-04-08 09:30:35] [INFO] Testing model: modelstudio/qwen3.5-plus
+[2026-04-08 09:30:40] [WARN] Model modelstudio/qwen3.5-plus not responsive (exit: 1)
+[2026-04-08 09:30:40] [ERROR] All models are unavailable, cannot switch
