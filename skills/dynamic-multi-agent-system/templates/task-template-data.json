@@ -203,6 +203,12 @@
       "agents": ["plot-designer", "outline-planner", "writer", "editor"], "complexity": 4, "estimatedTime": "60-90min",
       "prompt": "请创作悬疑小说：\n\n**主题：** {theme}\n**模式：** {mode}\n**篇幅：** {length}",
       "outputFormat": "markdown", "tags": ["悬疑", "小说", "推理"]
+    },
+    "novel-wuming": {
+      "id": "novel-wuming", "category": "creative", "name": "吾名午夜长篇创作", "description": "《吾名午夜》长篇小说创作模式，去AI味、逻辑缜密", "version": "1.0.0",
+      "agents": ["plot-architect", "world-builder", "character-editor", "content-writer", "consistency-checker", "tone-editor"], "complexity": 5, "estimatedTime": "120min",
+      "prompt": "请创作《吾名午夜》小说章节：\n\n**章节范围：** {chapters}\n**章节标题：** {title}\n**字数要求：** {wordCount}字\n\n**核心原则：**\n1. 去AI味：对话简短、描写不完美、人物有个性\n2. 逻辑缜密：时间线一致、称呼统一、伏笔回收\n3. 世界观一致：九层宝塔、三魂闭环、势力关系\n\n**人物称呼规范：**\n- 凌午夜 / 东方凌薇(凌薇/薇薇) / 南宫墨(墨哥) / 西门吹雪(吹雪) / 北冥瑶(瑶儿) / 中原星辰(星辰)\n\n**质量要求：**\n1. 自我检查：对话是否过于完美？\n2. 一致性检查：时间线/称呼/势力关系\n3. 文风检查：去除AI味、口语化、具体细节",
+      "outputFormat": "markdown", "tags": ["小说", "吾名午夜", "长篇", "去AI味"]
     }
   }
 }
