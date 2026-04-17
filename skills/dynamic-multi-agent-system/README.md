@@ -1,8 +1,36 @@
 # 🤖 AI 工作团队 - 混合动态多 Agent 协作系统
 
-**版本：** v1.2.0  
+[![GitHub stars](https://img.shields.io/github/stars/wzhgfwy001/yuanshen?style=flat-square)](https://github.com/wzhgfwy001/yuanshen)
+[![Version](https://img.shields.io/badge/version-v1.3.1-blue?style=flat-square)](https://github.com/wzhgfwy001/yuanshen)
+[![OpenClaw](https://img.shields.io/badge/compat-OpenClaw%202026.4.1%2B-green?style=flat-square)](https://github.com/openclaw/openclaw)
+[![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)](./LICENSE)
+
+**版本：** v1.3.1  
 **分类：** AI 智能 / 效率提升  
 **兼容性：** OpenClaw 2026.4.1+
+
+---
+
+## 🚀 快速开始（5分钟上手）
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/wzhgfwy001/yuanshen.git
+
+# 2. 进入目录
+cd yuanshen/skills/dynamic-multi-agent-system
+
+# 3. 运行示例
+cd examples/quick-demo && node demo.js
+
+# 4. 查看效果
+# 输出: 你好，世界！✅
+```
+
+**或者直接在OpenClaw中描述任务：**
+```
+翻译 "Hello, World!" 为中文
+```
 
 ---
 
