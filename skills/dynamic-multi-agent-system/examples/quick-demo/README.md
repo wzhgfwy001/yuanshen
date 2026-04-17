@@ -73,12 +73,16 @@
 
 ## 🚀 运行方式
 
+> ⚠️ **注意:** 本目录提供的是**模拟演示**，展示系统的工作流程概念。实际调用请在OpenClaw中进行。
+
 ### 方式1: Node.js直接运行
 
 ```bash
 cd examples/quick-demo
 node demo.js
 ```
+
+> **环境要求:** Node.js 14.0.0 或更高版本
 
 ### 方式2: 在OpenClaw中直接使用
 
@@ -94,8 +98,10 @@ node demo.js
 
 | 文件 | 说明 |
 |------|------|
-| `demo.js` | 可运行的Node.js演示脚本 |
+| `demo.js` | 可运行的Node.js演示脚本（模拟） |
+| `package.json` | Node.js依赖配置 |
 | `README.md` | 本文件，说明文档 |
+| `expected-output.txt` | 预期输出参考 |
 
 ---
 
