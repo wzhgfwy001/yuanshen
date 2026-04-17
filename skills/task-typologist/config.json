@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "description": "任务类型细化系统",
+  "auto_classify": true,
+  "complexity_threshold_for_multiagent": 7
+}

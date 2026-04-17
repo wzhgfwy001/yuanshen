@@ -1,7 +1,7 @@
 {
   "name": "dynamic-multi-agent-system",
-  "version": "1.4.0",
-  "description": "混合动态多Agent协作系统 - 智能任务分解+30种Agent动态组建+全自动执行+质量检查+持续进化，Token节省90%",
+  "version": "1.8.0",
+  "description": "混合动态多Agent协作系统（阳神+元神）- 智能任务分解+30种Agent动态组建+L1/L2/L3记忆分层+WAL Protocol+learnings错误记录+数据分析模块（Excel/CSV/Word/PDF）+全自动执行+质量检查+持续进化",
   "author": "Dynamic Multi-Agent System Team",
   "license": "MIT",
   "homepage": "https://github.com/openclaw/dynamic-multi-agent-system",
@@ -42,7 +42,11 @@
     "批量处理",
     "AI助手",
     "内容创作",
-    "开发工具"
+    "开发工具",
+    "记忆系统",
+    "WAL Protocol",
+    "learnings系统",
+    "元神系统"
   ],
   "features": {
     "agent_roles": 30,
@@ -73,6 +77,21 @@
     "subagent-timeout": 300
   },
   "changelog": [
+    {
+      "version": "1.8.0",
+      "date": "2026-04-10",
+      "changes": ["借鉴Skill Creator规范优化组件文档，创建references/目录精简SKILL.md"]
+    },
+    {
+      "version": "1.6.0",
+      "date": "2026-04-10",
+      "changes": ["整合 data-analyzer v1.0.0，新增数据分析模块（Excel/CSV/Word/PDF分析、统计汇总、报告导出）"]
+    },
+    {
+      "version": "1.5.0",
+      "date": "2026-04-10",
+      "changes": ["合并memory-framework，整合L1/L2/L3记忆分层、WAL Protocol、learnings系统、brain目录结构，升级为完整的元神系统"]
+    },
     {
       "version": "1.4.0",
       "date": "2026-04-08",

@@ -34,5 +34,18 @@
     },
     "outcome": "Gateway恢复正常",
     "status": "verified"
+  },
+  {
+    "id": "rec-004",
+    "timestamp": "2026-04-08T14:35:45Z",
+    "recovery_type": "模型降级",
+    "recovery_method": "自动切换到 fallback 模型 qwen3.5-plus",
+    "context": {
+      "failed_model": "deepseek/deepseek-chat",
+      "fallback_model": "modelstudio/qwen3.5-plus",
+      "symptom": "exit code 1, 模型无响应"
+    },
+    "outcome": "继续服务",
+    "status": "auto-recovered"
   }
 ]

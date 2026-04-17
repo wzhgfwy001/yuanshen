@@ -1,0 +1,332 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "skills-evolution-trigger-v1",
+  "title": "Skills Evolution Trigger Schema",
+  "description": "Skills进化自动化触发机制的数据结构定义",
+  "version": "1.0.0",
+  "created": "2026-04-16T19:41:00+08:00",
+
+  "definitions": {
+
+    "taskTypeStats": {
+      "description": "单个任务类型的追踪统计",
+      "type": "object",
+      "required": ["taskType", "totalAttempts", "successfulAttempts", "failedAttempts", "successRate", "threshold", "status"],
+      "properties": {
+        "taskType": {
+          "type": "string",
+          "description": "任务类型标识（如 code, research, writing）",
+          "examples": ["code", "research", "writing", "data_analysis"]
+        },
+        "subtype": {
+          "type": ["string", "null"],
+          "description": "任务子类型（如 frontend_react, blog_post）",
+          "examples": ["frontend_react", "blog_post", " competitor_analysis"]
+        },
+        "totalAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "总执行次数",
+          "examples": [5]
+        },
+        "successfulAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "成功次数",
+          "examples": [4]
+        },
+        "failedAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "失败次数",
+          "examples": [1]
+        },
+        "successRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "成功率（0.0 - 1.0）",
+          "examples": [0.8]
+        },
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "触发阈值",
+          "default": 0.8,
+          "examples": [0.8]
+        },
+        "minAttemptsRequired": {
+          "type": "integer",
+          "minimum": 3,
+          "default": 3,
+          "description": "最小成功执行次数要求",
+          "examples": [3]
+        },
+        "last_5_results": {
+          "type": "array",
+          "items": { "type": "boolean" },
+          "maxItems": 5,
+          "description": "最近5次执行结果（true=成功）",
+          "examples": [[true, true, true, true, false]]
+        },
+        "avgConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "平均置信度",
+          "examples": [0.85]
+        },
+        "avgSatisfaction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "平均用户满意度（1-5分）",
+          "examples": [4.2]
+        },
+        "hasMajorErrors": {
+          "type": "boolean",
+          "description": "是否有重大错误（如数据丢失、越权操作）",
+          "default": false,
+          "examples": [false]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["tracking", "ready_to_evolve", "evolving", "evolved", "on_hold"],
+          "description": "当前状态",
+          "examples": ["ready_to_evolve"]
+        },
+        "triggeredAt": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "触发时间（当status=ready_to_evolve时）",
+          "examples": ["2026-04-16T19:30:00+08:00"]
+        },
+        "examples": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "成功案例列表",
+          "examples": [["完成了React组件开发", "修复了性能问题"]]
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "最后更新时间"
+        }
+      }
+    },
+
+    "triggerCondition": {
+      "description": "自动化触发条件",
+      "type": "object",
+      "required": ["successRateThreshold", "minSuccessfulAttempts", "minSatisfactionScore", "noMajorErrors"],
+      "properties": {
+        "successRateThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.8,
+          "description": "成功率阈值（> 80%）"
+        },
+        "minSuccessfulAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "最小成功执行次数（≥ 3次）"
+        },
+        "minSatisfactionScore": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 4,
+          "description": "最小用户满意度（≥ 4分）"
+        },
+        "noMajorErrors": {
+          "type": "boolean",
+          "default": true,
+          "description": "无重大错误要求"
+        },
+        "consecutiveSuccess": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "最近连续成功次数要求"
+        }
+      }
+    },
+
+    "skillDraft": {
+      "description": "生成的Skill草稿",
+      "type": "object",
+      "required": ["suggestedSkillName", "taskType", "triggerReason", "coreCapabilities", "bestPractices", "promptTemplate", "successExamples"],
+      "properties": {
+        "suggestedSkillName": {
+          "type": "string",
+          "description": "建议的Skill名称",
+          "examples": ["科幻小说写作Skill", "React组件开发Skill"]
+        },
+        "taskType": {
+          "type": "string",
+          "description": "关联的任务类型",
+          "examples": ["writing"]
+        },
+        "triggerReason": {
+          "type": "object",
+          "properties": {
+            "successRate": { "type": "number" },
+            "totalAttempts": { "type": "integer" },
+            "avgSatisfaction": { "type": "number" },
+            "consecutiveSuccess": { "type": "integer" }
+          }
+        },
+        "coreCapabilities": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "核心能力列表"
+        },
+        "bestPractices": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "最佳实践步骤"
+        },
+        "promptTemplate": {
+          "type": "string",
+          "description": "提示词模板"
+        },
+        "successExamples": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "成功案例"
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "注意事项"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "pending_confirmation", "confirmed", "rejected"],
+          "default": "pending_confirmation"
+        }
+      }
+    },
+
+    "evolutionEvent": {
+      "description": "进化事件记录",
+      "type": "object",
+      "required": ["eventId", "eventType", "taskType", "timestamp", "details"],
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "eventType": {
+          "type": "string",
+          "enum": ["trigger_created", "draft_generated", "confirmed", "rejected", "skill_published"],
+          "description": "事件类型"
+        },
+        "taskType": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "details": {
+          "type": "object",
+          "description": "事件详情"
+        },
+        "notifiedToAgent": {
+          "type": "boolean",
+          "default": false
+        },
+        "userConfirmed": {
+          "type": ["boolean", "null"]
+        },
+        "userConfirmedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+
+    "skillTracking": {
+      "description": "已存在Skill的追踪统计",
+      "type": "object",
+      "properties": {
+        "skillName": {
+          "type": "string"
+        },
+        "invoked": {
+          "type": "integer"
+        },
+        "success": {
+          "type": "integer"
+        },
+        "failed": {
+          "type": "integer"
+        },
+        "successRate": {
+          "type": "number"
+        },
+        "needsImprovement": {
+          "type": "boolean"
+        },
+        "avgExecutionTime": {
+          "type": "string"
+        },
+        "lastInvoked": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+
+  "type": "object",
+
+  "task_tracking": {
+    "description": "所有任务类型的追踪数据",
+    "type": "object",
+    "patternProperties": {
+      "^[a-z_]+$": {
+        "$ref": "#/definitions/taskTypeStats"
+      }
+    }
+  },
+
+  "trigger_config": {
+    "description": "触发器配置",
+    "$ref": "#/definitions/triggerCondition"
+  },
+
+  "skill_tracking": {
+    "description": "已存在Skill的追踪数据",
+    "type": "object",
+    "patternProperties": {
+      "^[a-zA-Z0-9_]+$": {
+        "$ref": "#/definitions/skillTracking"
+      }
+    }
+  },
+
+  "evolution_log": {
+    "description": "进化事件历史",
+    "type": "array",
+    "items": {
+      "$ref": "#/definitions/evolutionEvent"
+    }
+  },
+
+  "pending_drafts": {
+    "description": "待确认的Skill草稿",
+    "type": "array",
+    "items": {
+      "$ref": "#/definitions/skillDraft"
+    }
+  }
+}

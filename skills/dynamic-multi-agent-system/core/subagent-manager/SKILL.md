@@ -5,11 +5,151 @@ parent: dynamic-multi-agent-system
 version: 1.0.0
 ---
 
-# 子Agent管理器 (SubAgent Manager)
+# subagent-manager
+
+**【召唤盟友】Summon Allies — 子Agent管理器** - 
 
 ## 功能
 
 根据任务分解结果，动态创建子Agent，分配模型和职责，管理子Agent生命周期。
+
+## 决策边界集成（agent-authority）
+
+### 功能定位
+
+在子Agent创建时加载其**决策边界配置**，实现：
+- **自主决策范围** — 定义子Agent可以自主处理的操作
+- **回调触发条件** — 定义必须暂停并回调主Agent的场景
+- **默认策略** — 定义模糊/未知任务的行为
+- **能力上限** — 定义资源限制和工具权限
+
+### 配置文件读取
+
+**读取位置：** `./core/subagent-manager/agent-{agentType}.authority.json`
+
+
+**读取时机：** 每次子Agent创建前
+
+**加载逻辑：**
+```javascript
+function loadAuthorityConfig(agentType) {
+  const configPath = `./core/subagent-manager/agent-${agentType}.authority.json`;
+  const fs = require('fs');
+  
+  if (fs.existsSync(configPath)) {
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    console.log(`[authority] Loaded for ${agentType}:`, Object.keys(config));
+    return config;
+  }
+  
+  // 无专属配置，返回默认边界
+  return getDefaultAuthority(agentType);
+}
+```
+
+### 注入上下文
+
+将authority配置作为子Agent上下文的组成部分：
+
+```javascript
+const agentContext = {
+  ...config,
+  decisionBoundary: authority.decisionBoundary,
+  callbackRules: authority.callbackRules,
+  defaultStrategy: authority.defaultStrategy,
+  capabilities: authority.capabilities,
+  
+  // 决策检查钩子
+  onDecision: (action) => checkAuthority(authority, action),
+  onCallback: (condition) => triggerCallback(authority, condition)
+};
+```
+
+### 决策流程
+
+```
+任务进入
+    │
+    ▼
+是否在 deniedScopes？ ──是──▶ 拒绝 + 回调主Agent
+    │否
+    ▼
+是否存在匹配回调条件？ ──是──▶ 暂停 + 通知主Agent
+    │否
+    ▼
+是否在 allowedScopes？ ──是──▶ 追加约束 + 执行
+    │否
+    ▼
+按 defaultStrategy 处理
+```
+
+
+### 边界检查示例
+
+```javascript
+function checkAuthority(authority, action) {
+  const { deniedScopes, allowedScopes } = authority.decisionBoundary;
+  
+  // 1. 检查禁止范围（优先级最高）
+  if (deniedScopes.includes(action)) {
+    return { allowed: false, reason: 'in_deniedScopes' };
+  }
+  
+  // 2. 检查允许范围
+  const scope = allowedScopes.find(s => s.action === action);
+  if (scope) {
+    return { allowed: true, constraints: scope.constraints };
+  }
+  
+  // 3. 不在任何范围内
+  return { allowed: false, reason: 'not_in_allowedScopes' };
+}
+
+function checkCallback(authority, condition) {
+  const { mustCallbackConditions } = authority.callbackRules;
+  
+  for (const cond of mustCallbackConditions) {
+    if (matchesCondition(condition, cond.condition)) {
+      return {
+        mustCallback: true,
+        priority: cond.priority,
+        fallbackAction: cond.fallbackAction
+      };
+    }
+  }
+  
+  return { mustCallback: false };
+}
+```
+
+### 映射来源扩展
+
+在调度日志的映射来源枚举中新增：
+
+| source | 说明 |
+|--------|------|
+| `registry` | 直接使用registry.json，无映射 |
+| `category-mapping.json` | 通过category-mapping软映射 |
+| `agent-authority.json` | 通过agent-authority决策边界 |
+
+**决策边界日志格式：**
+```json
+{
+  "dispatch": {
+    "agentName": "山寺三郎",
+    "category": "writer",
+    "authority": {
+      "loaded": true,
+      "configPath": "agent-writer.authority.json",
+      "allowedScopesCount": 5,
+      "callbackConditionsCount": 3
+    },
+    "timestamp": "2026-04-17T09:00:00+08:00"
+  }
+}
+```
+
+---
 
 ## 子Agent创建规则
 
@@ -25,10 +165,162 @@ version: 1.0.0
 
 ### 角色分配原则
 
+### 1. 基础原则
+
 1. **专业匹配**：子任务类型与Agent专业能力匹配
 2. **负载均衡**：避免单一Agent承担过多任务
 3. **依赖优化**：有依赖关系的子任务分配给不同Agent
 4. **模型适配**：根据任务难度分配不同能力的模型
+
+### 2. 软映射层（category-mapping.json）
+
+**读取时机：** 每次任务分发前
+
+**读取路径：** `./core/subagent-manager/category-mapping.json`
+
+**使用条件：** `_enabled=true` 时生效
+
+**映射逻辑：**
+```
+1. 检查 category-mapping.json 的 _enabled 字段
+2. 如果为 false，使用原始分类（registry.json）
+3. 如果为 true：
+   a. 读取 category_remap 映射表
+   b. 当选择 specialized 分类下的Agent时
+   c. 查询该Agent在 category_remap.specialized 中的目标分类
+   d. 使用目标分类而非 specialized
+4. 记录映射使用日志
+```
+
+**示例：**
+```
+原始选择：specialized/Accounts Payable Agent
+↓ 读取 mapping
+实际使用：finance/Accounts Payable Agent
+```
+
+**日志格式：**
+```json
+{
+  "mapping_used": true,
+  "original_category": "specialized",
+  "original_agent": "Accounts Payable Agent",
+  "mapped_category": "finance",
+  "timestamp": "2026-04-16T19:01:00+08:00"
+}
+```
+
+### 3. 映射表加载器（mapping-loader.js）
+
+**模块位置：** `./core/subagent-manager/mapping-loader.js`
+
+**功能：**
+- 启动时自动加载 `category-mapping.json`
+- 提供 `getMappedCategory()` 获取映射后的分类
+- 缓存映射表避免重复读取
+
+**使用方式：**
+```javascript
+const mappingLoader = require('./mapping-loader');
+
+// 获取映射后的分类
+const result = mappingLoader.getMappedCategory('specialized', 'Accounts Payable Agent');
+// 返回: { mappedCategory: 'finance', wasMapped: true, source: 'category-mapping.json' }
+
+// 检查映射是否启用
+if (mappingLoader.isMappingEnabled()) {
+  // 使用映射
+}
+
+// 重新加载映射表
+mappingLoader.reload();
+```
+
+### 4. 验证追踪
+
+每次任务完成时：
+1. 调用 `category-validation-tracker.js` 的 `increment()` 方法
+2. 传入任务信息：taskId、mappedCategory、agentName
+3. 追踪器自动记录验证进度
+
+```javascript
+const tracker = require('./category-validation-tracker');
+tracker.increment({
+  taskId: task.id,
+  category: selectedCategory,  // 映射后的分类
+  agentName: agentName
+});
+```
+
+---
+
+## 任务分发协议（强制执行）
+
+### 调度流程
+
+```
+任务输入 → 加载映射表 → 应用映射 → 选择Agent → 执行 → 调用tracker
+```
+
+### 强制步骤
+
+**【步骤0】系统启动 - 初始化映射加载器**
+```
+1. subagent-manager 初始化时自动加载 mapping-loader.js
+2. mapping-loader.js 启动时自动调用 loadCategoryMapping()
+3. 映射表缓存到内存，后续任务分发直接使用缓存
+4. 如需重新加载，调用 mappingLoader.reload()
+```
+
+**【步骤1】任务分发前 - 应用映射**
+```
+1. 调用 mappingLoader.getMappedCategory(originalCategory, agentName)
+2. 如果 wasMapped=true：
+   - 使用 mappedCategory 作为目标分类
+   - 记录映射来源为 category-mapping.json
+3. 如果 wasMapped=false：
+   - 使用原始分类
+   - 记录映射来源为 registry
+4. 在输出中记录：
+   - 使用的Agent名称
+   - 匹配到的分类
+   - 映射来源（category-mapping 或 registry）
+```
+
+**【步骤2】任务完成后 - 调用追踪**
+```
+1. 调用 tracker.increment({...})
+2. 传入任务信息：taskId、mappedCategory、agentName
+3. 如果分类错误，调用 tracker.recordError({...})
+```
+
+### 输出日志格式
+
+每次任务分发时，必须在响应中包含：
+```json
+{
+  "dispatch": {
+    "agentName": "Accounts Payable Agent",
+    "originalCategory": "specialized",
+    "mappedCategory": "finance",
+    "mappingSource": "category-mapping.json",
+    "mappingLoader": {
+      "enabled": true,
+      "wasCached": true,
+      "cacheStatus": "loaded"
+    },
+    "timestamp": "2026-04-16T20:19:00+08:00"
+  }
+}
+```
+
+### 映射来源枚举
+
+| source | 说明 |
+|--------|------|
+| `registry` | 直接使用registry.json，无映射 |
+| `category-mapping.json` | 通过category-mapping软映射 |
+| `agent-authority.json` | 通过agent-authority决策边界 |
 
 ---
 
@@ -92,10 +384,40 @@ else:
 
 ## 子Agent任务描述模板
 
+> ⚠️ 子Agent创建时必须使用动漫角色真名，不得使用英文角色名。请从下表选取最契合的角色。
+>
+> | 角色 | 来源 | 适合场景 |
+> |------|------|---------|
+> | 奈良鹿丸 | 火影忍者 | 战术头脑 |
+> | 卡卡西 | 火影忍者 | 严守规则/系统管理 |
+> | 天天 | 火影忍者 | 精准执行/测试 |
+> | 李洛克 | 火影忍者 | 努力型/技术写作 |
+> | 砕蜂 | 死神 | 调查分析 |
+> | 朽木白哉 | 死神 | 审美设计 |
+> | 朽木露琪亚 | 死神 | 洞察人心 |
+> | 更木剑八 | 死神 | 攻守兼备 |
+> | 娜美 | 海贼王 | 导航经济/品牌 |
+> | 香吉士 | 海贼王 | 服务周到 |
+> | 波特卡斯·D·艾斯 | 海贼王 | 火焰能力/数据分析 |
+> | 弗兰奇 | 海贼王 | 机械科学 |
+> | 乌索普 | 海贼王 | 发明创造/DevOps |
+> | 蒙奇·D·路飞 | 海贼王 | 成长型/增长黑客 |
+> | 布鲁克 | 海贼王 | 音乐吸引/SEO |
+> | 志村新八 | 银魂 | 吐槽策划/内容策略 |
+> | 志村妙 | 银魂 | 文档严谨 |
+> | 托拉男 | 银魂 | 经济敏感/财务 |
+> | 桂小太郎 | 银魂 | 运营管理 |
+> | 神威 | 银魂 | 社交达人 |
+> | 卯月幻三郎 | 银魂 | 法规熟悉 |
+> | 凤长三郎 | 银魂 | 项目管理 |
+> | 山寺三郎 | 银魂 | 脚本创作 |
+> | 艾妮斯塔 | 银魂 | UX设计 |
+> | 织田信奈 | 战国 | 工程能力 |
+
 ### 通用模板
 
 ```
-你是一名"{角色名称}"，负责{职责描述}。
+你是「{角色中文名}」（{作品来源}），负责{职责描述}。
 
 ## 任务目标
 {具体目标}
@@ -122,7 +444,9 @@ else:
 ### 示例：写作Agent
 
 ```
-你是一名"写作专家"，负责撰写小说章节内容。
+你是「山寺三郎」（银魂），负责撰写小说脚本和视频剧本。
+
+【身份】你是一部作品的"脚本创作专家"，擅长情节编排、人物对白、场景描写。
 
 ## 任务目标
 根据提供的大纲，撰写第1章内容，约1000字。
@@ -288,7 +612,7 @@ time_priority: 等待时间越长优先级越高
   "agents-created": [
     {
       "agent-id": "agent-search-001",
-      "role": "搜索专家",
+      "role": "奈良鹿丸（战术分析）",
       "model": "qwen3.5-plus",
       "status": "running",
       "session-key": "session-xxx",
@@ -301,6 +625,42 @@ time_priority: 等待时间越长优先级越高
     ["agent-writing-001"]
   ],
   "estimated-completion": "2026-04-03T10:10:00"
+}
+```
+
+---
+
+## 标准交付物输出格式
+
+本SKILL执行完毕后，必须输出以下格式的交付物：
+
+```json
+{
+  "task": "创建子Agent团队任务描述",
+  "result": {
+    "summary": "简要结果（1-2句话）",
+    "details": "详细创建结果，包括Agent数量和分配情况",
+    "data": {
+      "taskId": "uuid",
+      "agentsCreated": [
+        {
+          "agentId": "agent-search-001",
+          "role": "奈良鹿丸（战术分析）",
+          "model": "qwen3.5-plus",
+          "status": "running"
+        }
+      ],
+      "executionOrder": [["agent-search-001"], ["agent-outline-001"], ["agent-writing-001"]],
+      "estimatedCompletion": "2026-04-15T15:00:00Z"
+    }
+  },
+  "quality": {
+    "completeness": 100,
+    "accuracy": 95,
+    "readability": 90
+  },
+  "issues": [],
+  "suggestions": []
 }
 ```
 
@@ -328,7 +688,7 @@ time_priority: 等待时间越长优先级越高
 {
   "agent-id": "agent-search-001",
   "task-id": "task-001",
-  "role": "搜索专家",
+  "role": "奈良鹿丸（战术分析）",
   "model": "qwen3.5-plus",
   "created-at": "2026-04-03T10:00:00",
   "completed-at": "2026-04-03T10:02:00",

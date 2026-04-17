@@ -1,0 +1,36 @@
+
+云开发数据导入指南
+==================
+
+## 文件位置
+- 本科数据: C:\Users\DELL\.openclaw\workspace\cloudbase_data\benke.json
+- 专科数据: C:\Users\DELL\.openclaw\workspace\cloudbase_data\zhuanke.json
+
+## 数据字段说明
+字段名                 类型     说明
+------------------------------------------
+school_name           string  院校名称
+major_name            string  专业名称
+province              string  省份
+city                  string  城市
+school_type           string  办学性质
+school_level          string  院校层次
+predicted_score_2025  number  2025预测分数
+predicted_rank_2025   number  2025预测位次
+adm2024_min_score     number  2024最低分
+adm2023_min_score     number  2023最低分
+adm2022_min_score     number  2022最低分
+...等共49个字段
+
+## 导入步骤
+1. 打开微信开发者工具
+2. 点击"数据库" -> "benke"集合
+3. 点击"导入"按钮
+4. 选择 benke.json 文件
+5. 导入格式选择: JSON
+6. 点击确认
+
+## 验证导入成功
+导入后，在数据库控制台执行以下查询验证：
+db.benke.countDocuments()  // 应该返回 21425
+db.zhuanke.countDocuments()  // 应该返回 11912

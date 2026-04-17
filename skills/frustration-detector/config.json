@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "description": "用户情绪感知与不满检测",
+  
+  "reset_timer_ms": 300000,
+  
+  "thresholds": {
+    "light": 1,
+    "medium": 3,
+    "severe": 5
+  },
+  
+  "weights": {
+    "negative_word": 1,
+    "high_weight_signal": 2,
+    "excitement": 1,
+    "failure": 2
+  },
+  
+  "response_templates": {
+    "light": "我理解可能没有完全符合预期，让我重新理解一下您的需求",
+    "medium": "抱歉让您费心了，能具体说说哪里不符合预期吗？我会更努力地帮助您",
+    "severe": "非常抱歉给您带来困扰。我理解这件事对您很重要，让我换一种方式来处理这个问题"
+  }
+}

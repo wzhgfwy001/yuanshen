@@ -5,7 +5,9 @@ parent: dynamic-multi-agent-system
 version: 1.3.0
 ---
 
-# Skill Evolution & Solidification Tracker v1.1
+# skill-evolution
+
+**【灵魂链接】Soul Link — Skill进化追踪** - 
 
 **版本：** 1.1.0  
 **类型：** 核心模块  
@@ -244,6 +246,75 @@ $report = Get-SkillEvolutionReport
 
 ---
 
+## 固化流程（Solidification Workflow）
+
+当任务类型执行次数达到固化阈值时，按以下步骤操作：
+
+### 步骤1：检查固化条件
+
+读取 `skill-counters.json` 中的 `taskTypeCounts`：
+
+```powershell
+$json = Get-Content "$stateDir\skill-counters.json" | ConvertFrom-Json
+$count = $json.taskTypeCounts."code-review"
+$threshold = 3  # 固化阈值
+
+if ($count -ge $threshold) {
+    Write-Host "固化条件满足: $count >= $threshold"
+    # 继续步骤2
+}
+```
+
+### 步骤2：在 skill-patterns.json 中添加模式记录
+
+```powershell
+$pattern = @{
+    solidifyRecommended = $true
+    solidified = $true
+    solidifyAt = (Get-Date).ToString("o")
+    lastSuccessAt = (Get-Date).ToString("o")
+    avgQualityScore = 90
+    type = "code-review"
+    createdAt = (Get-Date).ToString("o")
+    skillPath = "C:\Users\DELL\.openclaw\workspace\skills\code-review"
+    skillVersion = "1.0.0"
+    executions = @()
+    successCount = $count
+}
+```
+
+### 步骤3：更新 skill-counters.json 中的固化计数
+
+```powershell
+$json.solidification.skills_solidified = $json.solidification.skills_solidified + 1
+$json | ConvertTo-Json -Depth 10 | Set-Content "$stateDir\skill-counters.json"
+```
+
+### 步骤4：更新本文件（SKILL.md）注册表
+
+在上述 Skill注册表 中添加新条目。
+
+### 步骤5：验证固化状态
+
+```powershell
+$patterns = Get-Content "$stateDir\skill-patterns.json" | ConvertFrom-Json
+$cr = $patterns.patterns | Where-Object { $_.type -eq "code-review" }
+$cr.solidified  # 应为 true
+$cr.successCount  # 应为实际执行次数
+```
+
+---
+
+## 已固化技能
+
+| 技能名 | 类型 | 执行次数 | 阈值 | 状态 | 路径 |
+|--------|------|----------|------|------|------|
+| code-review-assistant | code-review | 14 | 3 | ✅ 固化 | `workspace/skills/code-review/` |
+
+---
+
+---
+
 ## 最佳实践
 
 1. **自动记录**：每次任务完成自动调用 `Record-TaskExecution`
@@ -267,6 +338,45 @@ $script:config
 # - maxExecutionsHistory: 历史记录保留数（默认20）
 # - autoDetectEnabled: 自动检测（默认true）
 # - approvalRequired: 是否需要确认（默认true）
+```
+
+---
+
+## 标准交付物输出格式
+
+本SKILL执行完毕后，必须输出以下格式的交付物：
+
+```json
+{
+  "task": "跟踪模式任务描述",
+  "result": {
+    "summary": "简要结果（1-2句话）",
+    "details": "详细跟踪结果，包括模式状态和固化建议",
+    "data": {
+      "patternType": "code-review",
+      "stats": {
+        "successCount": 5,
+        "failureCount": 0,
+        "successRate": 100
+      },
+      "averages": {
+        "qualityScore": 88,
+        "tokenUsage": 6200,
+        "duration": 145
+      },
+      "isSolidified": false,
+      "solidifyReady": true,
+      "estimatedSpeedup": "3-5x"
+    }
+  },
+  "quality": {
+    "completeness": 95,
+    "accuracy": 90,
+    "readability": 85
+  },
+  "issues": [],
+  "suggestions": ["固化后可获得更快的执行速度"]
+}
 ```
 
 ---

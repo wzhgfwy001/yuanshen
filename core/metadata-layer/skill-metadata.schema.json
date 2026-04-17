@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "skill-metadata.schema.json",
+  "title": "Skill Metadata Schema",
+  "description": "Schema for skill metadata stored in SKILL.md frontmatter, enabling doc-to-execution synchronization",
+  "type": "object",
+  "required": ["name", "version", "metadata"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Skill identifier name"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (e.g., 1.0.0)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable skill description"
+    },
+    "intranet": {
+      "type": "string",
+      "enum": ["compatible", "incompatible", "partial"],
+      "description": "Intranet compatibility status"
+    },
+    "intranet_notes": {
+      "type": "string",
+      "description": "Notes for intranet environment"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Execution-layer configuration (openclaw section)",
+      "properties": {
+        "openclaw": {
+          "type": "object",
+          "description": "OpenClaw runtime configuration",
+          "properties": {
+            "emoji": {
+              "type": "string",
+              "description": "Emoji for UI display"
+            },
+            "category": {
+              "type": "string",
+              "enum": ["orchestration", "analysis", "creative", "utility", "integration"],
+              "description": "Skill category for routing"
+            },
+            "capabilities": {
+              "type": "array",
+              "description": "List of capabilities this skill provides",
+              "items": { "type": "string" }
+            },
+            "executionConfig": {
+              "type": "object",
+              "description": "Runtime execution parameters",
+              "properties": {
+                "timeout": {
+                  "type": "number",
+                  "description": "Default timeout in ms"
+                },
+                "maxRetries": {
+                  "type": "number",
+                  "description": "Max retry attempts"
+                },
+                "preferredAgent": {
+                  "type": "string",
+                  "description": "Preferred subagent type"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Preferred model override"
+                },
+                "temperature": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              }
+            },
+            "dependencies": {
+              "type": "array",
+              "description": "Skill dependencies",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "version": { "type": "string" },
+                  "required": { "type": "boolean" }
+                }
+              }
+            },
+            "keywords": {
+              "type": "array",
+              "description": "Trigger keywords for auto-router",
+              "items": { "type": "string" }
+            },
+            "priority": {
+              "type": "number",
+              "description": "Routing priority (higher = evaluated first)"
+            },
+            "hidden": {
+              "type": "boolean",
+              "description": "Hide from public skill listings"
+            }
+          }
+        }
+      }
+    }
+  }
+}

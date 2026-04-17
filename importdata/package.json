@@ -1,0 +1,5 @@
+{
+  "name": "importdata",
+  "version": "1.0.0",
+  "description": "批量导入数据到云数据库"
+}

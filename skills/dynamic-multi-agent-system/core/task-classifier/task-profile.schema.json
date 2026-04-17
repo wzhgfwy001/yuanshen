@@ -1,0 +1,216 @@
+{
+  "_comment": "任务轮廓(TaskProfile)数据结构Schema - 解决分类器→分解器信息断层",
+  "_version": "1.0.0",
+  "_created": "2026-04-16",
+  "_purpose": "分类器输出完整任务上下文，分解器据此执行分解，不再'盲分解'",
+  
+  "type": "object",
+  "required": ["taskType", "complexityLevel", "requiredCapabilities", "executionStrategy"],
+  
+  "properties": {
+    "taskType": {
+      "type": "string",
+      "enum": ["simple", "simple-response", "innovative", "hybrid"],
+      "description": "任务类型：单一任务/标准响应/创新任务/混合任务"
+    },
+    
+    "complexityLevel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "复杂度等级：1=极简 / 2=简单 / 3=中等 / 4=复杂 / 5=极复杂"
+    },
+    
+    "context": {
+      "type": "object",
+      "properties": {
+        "originalText": {
+          "type": "string",
+          "description": "用户原始输入"
+        },
+        "userIntent": {
+          "type": "string",
+          "description": "用户核心意图（摘要）"
+        },
+        "domain": {
+          "type": "string",
+          "description": "领域：写作/代码/数据分析/设计/营销/研究等"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "urgent"],
+          "description": "任务优先级"
+        }
+      },
+      "required": ["originalText", "userIntent"]
+    },
+    
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "qualityRequirements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "质量要求列表"
+        },
+        "formatRequirements": {
+          "type": "string",
+          "description": "输出格式要求（JSON/MD/HTML/TXT等）"
+        },
+        "lengthRequirements": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "integer" },
+            "max": { "type": "integer" },
+            "unit": { "type": "string" }
+          },
+          "description": "长度要求"
+        },
+        "specialRequirements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "特殊要求（如：去AI味、逻辑缜密）"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "截止时间（ISO格式）"
+        }
+      },
+      "description": "关键约束条件"
+    },
+    
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string",
+            "description": "所需能力（如：写作/代码/数据分析/世界观构建）"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["basic", "skilled", "expert"],
+            "description": "能力要求级别"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "优先级：1=必需 / 2=重要 / 3=可选"
+          }
+        },
+        "required": ["capability", "priority"]
+      },
+      "description": "完成任务所需的能力列表"
+    },
+    
+    "executionStrategy": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["serial", "parallel", "hybrid"],
+          "description": "执行模式：串行/并行/混合"
+        },
+        "estimatedSubagents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "预估子Agent数量"
+        },
+        "estimatedDuration": {
+          "type": "string",
+          "description": "预估执行时长（如：5分钟/30分钟/1小时）"
+        },
+        "dependencyHints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "type": { "type": "string", "enum": ["output-input", "review", "parallel"] }
+            }
+          },
+          "description": "子任务间的依赖提示"
+        }
+      },
+      "required": ["mode"],
+      "description": "执行策略建议"
+    },
+    
+    "decomposition": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in-progress", "completed"],
+          "description": "分解状态"
+        },
+        "subtasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "assignedCapability": { "type": "string" },
+              "dependsOn": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "依赖的子任务ID"
+              },
+              "executionMode": {
+                "type": "string",
+                "enum": ["serial", "parallel"],
+                "description": "该子任务的执行模式"
+              },
+              "outputFormat": { "type": "string" },
+              "qualityCheck": {
+                "type": "object",
+                "properties": {
+                  "required": { "type": "boolean" },
+                  "level": { "type": "string", "enum": ["self", "agent", "reviewer"] }
+                }
+              }
+            },
+            "required": ["id", "name", "assignedCapability"]
+          },
+          "description": "子任务列表"
+        },
+        "rootTask": {
+          "type": "string",
+          "description": "根任务ID"
+        }
+      },
+      "description": "任务分解结果（由分类器生成，供分解器使用）"
+    },
+    
+    "_metadata": {
+      "type": "object",
+      "properties": {
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generator": {
+          "type": "string",
+          "description": "生成者（分类器名称）"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "分类置信度"
+        },
+        "version": {
+          "type": "string",
+          "description": "Schema版本"
+        }
+      }
+    }
+  }
+}

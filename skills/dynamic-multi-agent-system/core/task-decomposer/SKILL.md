@@ -5,7 +5,9 @@ parent: dynamic-multi-agent-system
 version: 1.0.0
 ---
 
-# 任务分解器 (Task Decomposer)
+# task-decomposer
+
+**【分裂残渣】Split — 任务分解器** - 
 
 ## 功能
 
@@ -94,6 +96,11 @@ version: 1.0.0
 ---
 
 ## 分解原则
+
+> **【Goal-Driven Execution】分解任务时必须定义成功标准**
+> - 每个子任务必须有明确的"完成定义"
+> - 最终交付物必须有可验证的验收条件
+> - 多步骤任务分解前先声明：Step → verify → check
 
 ### 1. 正交性
 
@@ -330,6 +337,45 @@ version: 1.0.0
 预计时间：600-1200秒
 ```
 
+### 模板4：完整工程团队开发（增强）
+
+```
+任务类型：全套工程团队任务
+触发条件：检测到 FULL_TEAM_TRIGGERS 关键词
+
+触发关键词列表：
+- "开发应用"、"开发系统"、"开发平台"
+- "完整开发"、"全套开发"、"整个工程"
+- "app开发"、"application开发"
+- "开发一个XXX"、"搭建一个XXX"
+- "从零开始开发"、"全新项目"
+
+标准分解（全部11个engineering Agent）：
+1. 需求分析（Product Manager）
+2. 架构设计（Software Architect）
+3. 安全设计（Security Engineer）
+4. 数据库设计（Database Optimizer）
+5. 后端开发（Backend Architect + Senior Developer）
+6. 前端开发（Frontend Developer）
+7. API设计（Backend Architect）
+8. DevOps部署（DevOps Automator）
+9. 代码审查（Code Reviewer）
+10. 质量测试（Tester）
+11. 集成开发（Senior Developer）
+
+依赖关系：
+1→2→3→4→5→6→7→8→9→10→11
+或
+1→2→(3,4,5,6)→7→8→9→10→11
+
+预计时间：1200-3000秒
+
+特殊逻辑：
+- 当检测到 FULL_TEAM_TRIGGERS 时，绕过智能筛选
+- 自动加载该领域全部Agent
+- 不再进行"相关性分析"剪枝
+```
+
 ---
 
 ## 复杂度评估
@@ -377,6 +423,98 @@ version: 1.0.0
 
 ---
 
+## Agency Agent 知识注入
+
+### 触发条件
+
+当任务分类结果包含 `requiresAgencyAgent: true` 时执行知识注入。
+
+### 注入流程
+
+```
+1. 读取 classification.agency-agent.name
+2. 调用 agency-registry/loader.ts 的 parseAgentFile()
+3. 提取 Agent 的 sections（Identity/Rules/Deliverables/Workflow）
+4. 在每个子Agent的prompt中注入专业知识
+```
+
+### prompt注入模板
+
+```typescript
+import { parseAgentFile, injectAgentKnowledge } from '../agency-registry/loader';
+
+// 注入专业知识到子Agent
+function enhanceSubtaskPrompt(subtask: SubTask, agencyAgentName: string): SubTask {
+  // 读取Agent文件
+  const agentPath = path.join(
+    process.env.AGENCY_ROOT || '',
+    'marketing',
+    `${agencyAgentName}.md`
+  );
+  const agent = parseAgentFile(agentPath);
+  
+  if (!agent) return subtask;
+  
+  // 增强prompt
+  const enhancedPrompt = injectAgentKnowledge(subtask.prompt, agent, {
+    includeIdentity: true,
+    includeRules: true,
+    includeDeliverables: true,
+    includeWorkflow: true,
+  });
+  
+  return {
+    ...subtask,
+    prompt: enhancedPrompt,
+    agencyAgent: agent.name,
+  };
+}
+```
+
+### 注入后的prompt结构
+
+```
+你是「{阳神角色}」，负责{职责描述}。
+
+[Agency Agent 专业知识]
+## 身份与思维
+{从Agency Agent提取的Identity}
+
+## 关键规则
+{从Agency Agent提取的Critical Rules}
+
+## 交付标准
+{从Agency Agent提取的Deliverables}
+
+## 工作流程
+{从Agency Agent提取的Workflow Process}
+
+## 任务目标
+{具体目标}
+
+## 输出要求
+{格式要求}
+```
+
+### 示例：小红书运营任务
+
+```json
+{
+  "subtask": {
+    "id": "subtask-1",
+    "name": "内容策划",
+    "agent-role": "内容专家",
+    "prompt": "你是「文字炼金师」，负责撰写小红书内容..."
+  },
+  "agency-agent": {
+    "name": "marketing-xiaohongshu-specialist",
+    "enhanced-prompt": "你是「文字炼金师」，负责撰写小红书内容...\n\n[Agency Agent 专业知识]\n## 身份与思维\n你是一个小红书营销专家...\n\n## 关键规则\n- 保持70%有机生活内容...\n\n## 交付标准\n- 30天内容日历..."
+  }
+}
+```
+
+---
+
 ## 与其他组件的接口
 
 ### 输入
@@ -388,6 +526,40 @@ version: 1.0.0
 
 - 到：队伍组建器 / 执行协调器
 - 格式：`TaskDecompositionResult`（见上方输出格式）
+
+---
+
+## 标准交付物输出格式
+
+本SKILL执行完毕后，必须输出以下格式的交付物：
+
+```json
+{
+  "task": "分解任务描述",
+  "result": {
+    "summary": "简要结果（1-2句话）",
+    "details": "详细分解结果，包括子任务数和依赖关系",
+    "data": {
+      "taskId": "uuid",
+      "originalTask": "任务描述",
+      "subtasks": [...],
+      "dependencyGraph": {...},
+      "executionPlan": {
+        "totalEstimatedTime": 480,
+        "criticalPath": ["素材收集", "大纲设计", "内容撰写", "质量审查"],
+        "parallelismDegree": 1
+      }
+    }
+  },
+  "quality": {
+    "completeness": 90,
+    "accuracy": 88,
+    "readability": 85
+  },
+  "issues": ["依赖深度较大，单点故障风险"],
+  "suggestions": ["可考虑将素材收集与大纲设计并行"]
+}
+```
 
 ---
 
@@ -412,3 +584,31 @@ version: 1.0.0
 - 依赖关系：串行
 - 预计时间：500秒
 ```
+
+### 测试3：Agency Agent知识注入
+
+```
+输入："写一个小红书运营方案"
+classification.agency-agent.name = "marketing-xiaohongshu-specialist"
+预期输出：
+- 子任务prompt包含Agency Agent专业知识
+- 包含Identity/Rules/Deliverables/Workflow
+```
+
+
+## ?? �������
+
+### ����ֽ�ʱ
+- **��� success_pattern**���ο���������ķֽⷽʽ
+- **��� failure_lesson**������֮ǰʧ�ܵķֽ�ģʽ
+- **��¼�ֽ����**�������ֽ�˼·����������
+
+### ���÷�ʽ
+const memory = require('../memory-manager/memory');
+
+// ��ȡ��سɹ�ģʽ
+const successPatterns = memory.getRelevant({ type: taskType });
+
+// ��ȡʧ�ܽ�ѵ
+const failures = memory.search('failure_lesson');
+

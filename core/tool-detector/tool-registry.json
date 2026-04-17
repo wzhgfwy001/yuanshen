@@ -1,0 +1,326 @@
+{
+  "$schema": "./tool-registry.schema.json",
+  "version": "1.0.0",
+  "description": "OpenClaw built-in and extended tool registry",
+  "tools": {
+    "exec": {
+      "toolName": "exec",
+      "description": "Execute shell commands on the local system",
+      "capabilities": ["shell", "powershell", "cmd", "script"],
+      "requirements": ["node environment"],
+      "category": "system",
+      "risk": "high",
+      "builtin": true
+    },
+    "read": {
+      "toolName": "read",
+      "description": "Read file contents from local filesystem",
+      "capabilities": ["file", "text", "image"],
+      "requirements": ["file path"],
+      "category": "file",
+      "risk": "low",
+      "builtin": true
+    },
+    "write": {
+      "toolName": "write",
+      "description": "Create or overwrite files on local filesystem",
+      "capabilities": ["file", "text", "create", "overwrite"],
+      "requirements": ["file path", "content"],
+      "category": "file",
+      "risk": "medium",
+      "builtin": true
+    },
+    "edit": {
+      "toolName": "edit",
+      "description": "Make precise edits to existing files using text replacement",
+      "capabilities": ["file", "patch", "replace"],
+      "requirements": ["file path", "oldText", "newText"],
+      "category": "file",
+      "risk": "medium",
+      "builtin": true
+    },
+    "browser": {
+      "toolName": "browser",
+      "description": "Control web browser for automation and scraping",
+      "capabilities": ["web", "automation", "scrape", "navigate", "screenshot"],
+      "requirements": ["browser process"],
+      "category": "web",
+      "risk": "medium",
+      "builtin": true
+    },
+    "message": {
+      "toolName": "message",
+      "description": "Send and manage messages via channel plugins",
+      "capabilities": ["send", "receive", "channel", "feishu", "discord", "telegram"],
+      "requirements": ["channel plugin"],
+      "category": "communication",
+      "risk": "medium",
+      "builtin": true
+    },
+    "canvas": {
+      "toolName": "canvas",
+      "description": "Control node canvases for UI rendering",
+      "capabilities": ["ui", "render", "present", "snapshot"],
+      "requirements": ["canvas node"],
+      "category": "ui",
+      "risk": "low",
+      "builtin": true
+    },
+    "tts": {
+      "toolName": "tts",
+      "description": "Convert text to speech using configured providers",
+      "capabilities": ["audio", "speech", "voice"],
+      "requirements": ["tts provider config"],
+      "category": "media",
+      "risk": "low",
+      "builtin": true
+    },
+    "image": {
+      "toolName": "image",
+      "description": "Analyze images using configured image model",
+      "capabilities": ["image", "vision", "analysis"],
+      "requirements": ["imageModel config"],
+      "category": "media",
+      "risk": "low",
+      "builtin": true
+    },
+    "image_generate": {
+      "toolName": "image_generate",
+      "description": "Generate images using configured providers",
+      "capabilities": ["image", "generation", "dall-e", "stable-diffusion"],
+      "requirements": ["imageGeneration provider"],
+      "category": "media",
+      "risk": "low",
+      "builtin": true
+    },
+    "music_generate": {
+      "toolName": "music_generate",
+      "description": "Generate music using configured providers",
+      "capabilities": ["audio", "music", "generation"],
+      "requirements": ["musicGeneration provider"],
+      "category": "media",
+      "risk": "low",
+      "builtin": true
+    },
+    "video_generate": {
+      "toolName": "video_generate",
+      "description": "Generate videos using configured providers",
+      "capabilities": ["video", "generation"],
+      "requirements": ["videoGeneration provider"],
+      "category": "media",
+      "risk": "low",
+      "builtin": true
+    },
+    "pdf": {
+      "toolName": "pdf",
+      "description": "Analyze PDF documents",
+      "capabilities": ["pdf", "document", "analysis"],
+      "requirements": ["pdf path or url"],
+      "category": "document",
+      "risk": "low",
+      "builtin": true
+    },
+    "web_fetch": {
+      "toolName": "web_fetch",
+      "description": "Fetch and extract readable content from URLs",
+      "capabilities": ["web", "fetch", "markdown", "scrape"],
+      "requirements": ["url"],
+      "category": "web",
+      "risk": "low",
+      "builtin": true
+    },
+    "process": {
+      "toolName": "process",
+      "description": "Manage running exec sessions",
+      "capabilities": ["exec", "session", "manage"],
+      "requirements": ["session id"],
+      "category": "system",
+      "risk": "medium",
+      "builtin": true
+    },
+    "sessions_yield": {
+      "toolName": "sessions_yield",
+      "description": "End current agent session and wait for results",
+      "capabilities": ["agent", "yield", "subagent"],
+      "requirements": [],
+      "category": "agent",
+      "risk": "low",
+      "builtin": true
+    },
+    "memory_search": {
+      "toolName": "memory_search",
+      "description": "Search MEMORY.md and memory files semantically",
+      "capabilities": ["memory", "search", "recall"],
+      "requirements": ["query"],
+      "category": "memory",
+      "risk": "low",
+      "builtin": true
+    },
+    "memory_get": {
+      "toolName": "memory_get",
+      "description": "Read safe snippets from MEMORY.md or memory files",
+      "capabilities": ["memory", "read", "snippet"],
+      "requirements": ["path"],
+      "category": "memory",
+      "risk": "low",
+      "builtin": true
+    },
+    "feishu_app_scopes": {
+      "toolName": "feishu_app_scopes",
+      "description": "List current Feishu app permissions",
+      "capabilities": ["feishu", "permission", "scopes"],
+      "requirements": ["feishu plugin"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_create_app": {
+      "toolName": "feishu_bitable_create_app",
+      "description": "Create a new Feishu Bitable application",
+      "capabilities": ["feishu", "bitable", "create"],
+      "requirements": ["feishu plugin", "app token"],
+      "category": "feishu",
+      "risk": "medium",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_create_field": {
+      "toolName": "feishu_bitable_create_field",
+      "description": "Create a new field in a Feishu Bitable table",
+      "capabilities": ["feishu", "bitable", "field"],
+      "requirements": ["feishu plugin", "app token", "table id"],
+      "category": "feishu",
+      "risk": "medium",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_create_record": {
+      "toolName": "feishu_bitable_create_record",
+      "description": "Create a new record in a Feishu Bitable table",
+      "capabilities": ["feishu", "bitable", "record", "create"],
+      "requirements": ["feishu plugin", "app token", "table id"],
+      "category": "feishu",
+      "risk": "medium",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_get_meta": {
+      "toolName": "feishu_bitable_get_meta",
+      "description": "Parse a Bitable URL and get app_token, table_id",
+      "capabilities": ["feishu", "bitable", "meta"],
+      "requirements": ["feishu plugin", "bitable url"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_get_record": {
+      "toolName": "feishu_bitable_get_record",
+      "description": "Get a single record from a Feishu Bitable table",
+      "capabilities": ["feishu", "bitable", "record", "read"],
+      "requirements": ["feishu plugin", "app token", "table id", "record id"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_list_fields": {
+      "toolName": "feishu_bitable_list_fields",
+      "description": "List all fields in a Feishu Bitable table",
+      "capabilities": ["feishu", "bitable", "field", "list"],
+      "requirements": ["feishu plugin", "app token", "table id"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_list_records": {
+      "toolName": "feishu_bitable_list_records",
+      "description": "List records from a Feishu Bitable table with pagination",
+      "capabilities": ["feishu", "bitable", "record", "list"],
+      "requirements": ["feishu plugin", "app token", "table id"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_bitable_update_record": {
+      "toolName": "feishu_bitable_update_record",
+      "description": "Update an existing record in a Feishu Bitable table",
+      "capabilities": ["feishu", "bitable", "record", "update"],
+      "requirements": ["feishu plugin", "app token", "table id", "record id"],
+      "category": "feishu",
+      "risk": "medium",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_chat": {
+      "toolName": "feishu_chat",
+      "description": "Get Feishu chat/member information",
+      "capabilities": ["feishu", "chat", "members"],
+      "requirements": ["feishu plugin", "chat id"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_doc": {
+      "toolName": "feishu_doc",
+      "description": "Feishu document read/write operations",
+      "capabilities": ["feishu", "doc", "read", "write"],
+      "requirements": ["feishu plugin", "doc token"],
+      "category": "feishu",
+      "risk": "medium",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_drive": {
+      "toolName": "feishu_drive",
+      "description": "Feishu cloud storage file management",
+      "capabilities": ["feishu", "drive", "file", "folder"],
+      "requirements": ["feishu plugin"],
+      "category": "feishu",
+      "risk": "medium",
+      "builtin": false,
+      "plugin": "feishu"
+    },
+    "feishu_wiki": {
+      "toolName": "feishu_wiki",
+      "description": "Feishu knowledge base navigation",
+      "capabilities": ["feishu", "wiki", "knowledge"],
+      "requirements": ["feishu plugin"],
+      "category": "feishu",
+      "risk": "low",
+      "builtin": false,
+      "plugin": "feishu"
+    }
+  },
+  "builtinTools": [
+    "exec", "read", "write", "edit", "browser", "message", "canvas",
+    "tts", "image", "image_generate", "music_generate", "video_generate",
+    "pdf", "web_fetch", "process", "sessions_yield", "memory_search", "memory_get"
+  ],
+  "pluginTools": {
+    "feishu": [
+      "feishu_app_scopes", "feishu_bitable_create_app", "feishu_bitable_create_field",
+      "feishu_bitable_create_record", "feishu_bitable_get_meta", "feishu_bitable_get_record",
+      "feishu_bitable_list_fields", "feishu_bitable_list_records", "feishu_bitable_update_record",
+      "feishu_chat", "feishu_doc", "feishu_drive", "feishu_wiki"
+    ]
+  },
+  "alternatives": {
+    "browser": {
+      "fallback": "web_fetch",
+      "description": "Use web_fetch for lightweight page access without browser automation"
+    },
+    "message:feishu": {
+      "fallback": "feishu_doc",
+      "description": "Use feishu_doc for persistent document-based communication"
+    },
+    "tts": {
+      "fallback": "none",
+      "description": "No text替代方案 — audio output requires TTS provider"
+    }
+  }
+}

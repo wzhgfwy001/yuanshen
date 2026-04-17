@@ -1,35 +1,46 @@
-﻿{
-    "metadata":  {
-                     "createdAt":  "2026-04-06T10:48:30.3050064+08:00",
-                     "version":  "1.0.0"
-                 },
-    "patterns":  [
-                     {
-                         "solidifyRecommended":  false,
-                         "lastSuccessAt":  "2026-04-06T10:48:30.4089637+08:00",
-                         "avgQualityScore":  92,
-                         "type":  "test-pattern",
-                         "createdAt":  "2026-04-06T10:48:30.4089637+08:00",
-                         "config":  {
-                                        "key":  "value"
-                                    },
-                         "agentRoles":  [
-                                            "role1",
-                                            "role2"
-                                        ],
-                         "executions":  [
-                                            {
-                                                "tokenUsage":  5000,
-                                                "userSatisfaction":  95,
-                                                "qualityScore":  92,
-                                                "duration":  120,
-                                                "date":  "2026-04-06T10:48:30.4135297+08:00",
-                                                "taskId":  "test-001"
-                                            }
-                                        ],
-                         "solidifyAt":  null,
-                         "version":  "1.0.0",
-                         "successCount":  1
-                     }
-                 ]
+{
+    "metadata": {
+        "createdAt": "2026-04-06T10:48:30.3050064+08:00",
+        "version": "1.1.0"
+    },
+    "patterns": [
+        {
+            "solidifyRecommended": false,
+            "lastSuccessAt": "2026-04-06T10:48:30.4089637+08:00",
+            "avgQualityScore": 92,
+            "type": "test-pattern",
+            "createdAt": "2026-04-06T10:48:30.4089637+08:00",
+            "config": {
+                "key": "value"
+            },
+            "agentRoles": ["role1", "role2"],
+            "executions": [{
+                "tokenUsage": 5000,
+                "userSatisfaction": 95,
+                "qualityScore": 92,
+                "duration": 120,
+                "date": "2026-04-06T10:48:30.4135297+08:00",
+                "taskId": "test-001"
+            }],
+            "solidifyAt": null,
+            "version": "1.0.0",
+            "successCount": 1
+        },
+        {
+            "solidifyRecommended": true,
+            "solidified": true,
+            "solidifyAt": "2026-04-11T10:36:00.0000000+08:00",
+            "lastSuccessAt": "2026-04-11T03:33:31.1410000+08:00",
+            "avgQualityScore": 90,
+            "type": "code-review",
+            "createdAt": "2026-04-07T00:00:00.0000000+08:00",
+            "skillPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\code-review",
+            "skillVersion": "1.0.0",
+            "config": {},
+            "agentRoles": ["code-review-assistant"],
+            "executions": [],
+            "version": "1.0.0",
+            "successCount": 14
+        }
+    ]
 }

@@ -1,23 +1,33 @@
 {
-  "skill-counters": {
-    "total-tasks-completed": 1,
-    "successful-tasks": 1,
+  "skillCounters": {
+    "total-tasks-completed": 4,
+    "successful-tasks": 4,
     "failed-tasks": 0,
-    "skills-created": 0,
-    "skills-solidified": 0,
-    "last-task-date": "2026-04-04",
+    "skills-created": 9,
+    "skills-solidified": 1,
+    "last-task-date": "2026-04-11",
     "task-type-counts": {
       "simple": 0,
-      "standard": 1,
+      "standard": 4,
       "hybrid": 0,
       "innovative": 0
     }
   },
   "solidification": {
-    "patterns-accumulating": 1,
-    "patterns-ready": 0,
-    "patterns-solidified": 0,
-    "next-solidification-check": "2026-04-04T20:00:00Z"
+    "patterns_accumulating": 0,
+    "patterns_ready": 0,
+    "patterns_solidified": 1,
+    "skills_created": 9,
+    "skills_solidified": 1,
+    "last_sync": "2026-04-11T11:07:00.000Z",
+    "optimization_suggestions": [],
+    "last_optimization_check": "2026-04-11T11:07:00.000Z"
   },
-  "last-updated": "2026-04-04T19:10:00Z"
+  "taskTypeCounts": {
+    "code-review": 14,
+    "writing-blog": 1,
+    "data-analysis": 1,
+    "project-planner": 1
+  },
+  "last_updated": "2026-04-11T11:07:00.000Z"
 }

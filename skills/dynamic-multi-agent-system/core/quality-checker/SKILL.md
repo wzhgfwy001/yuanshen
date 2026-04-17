@@ -5,11 +5,61 @@ parent: dynamic-multi-agent-system
 version: 1.0.0
 ---
 
-# 质量检查器 (Quality Checker)
+# quality-checker
+
+**【鉴定物品】Identify — 质量检查器** - 
+
+> 📋 **交付物标准**：本SKILL执行后必须输出标准交付物格式，参见 [DELIVERY-TEMPLATE.md](../docs/DELIVERY-TEMPLATE.md)
 
 ## 功能
 
 实施三层质量检查机制，确保每个环节的输出质量，提供即时反馈和改进建议。
+
+## 量化评分逻辑
+
+质量检查输出必须包含以下三个维度的量化评分：
+
+| 维度 | 指标名 | 计算方式 | 达标线 | 优秀线 |
+|------|--------|----------|--------|--------|
+| 完整性 | completeness | 必要检查项完成比例 | 80% | 95% |
+| 准确性 | accuracy | 检查判断正确率 | 85% | 98% |
+| 可读性 | readability | 输出格式规范程度 | 70% | 90% |
+
+### completeness 计算
+
+```
+completeness = (已完成检查项数 / 应完成检查项数) × 100%
+
+检查项清单：
+□ 第一层自检执行
+□ 第二层主Agent确认执行
+□ 第三层审查Agent执行（如适用）
+□ 检查报告生成
+□ 问题清单输出
+□ 评分计算
+□ 决策输出
+```
+
+### accuracy 计算
+
+```
+accuracy = (正确判断数 / 总判断数) × 100%
+
+判断类型：
+- 问题识别是否正确
+- 评分是否合理
+- 决策是否恰当
+```
+
+### readability 计算
+
+```
+readability = 格式规范分 × 0.4 + 结构清晰分 × 0.3 + 表达准确分 × 0.3
+
+格式规范：JSON格式正确、必填字段完整
+结构清晰：层级分明、逻辑通顺
+表达准确：用词准确、无歧义
+```
 
 ## 三层检查架构
 
@@ -103,6 +153,12 @@ version: 1.0.0
 
 ```markdown
 ## 代码质量检查清单
+
+### CLAUDE.md 四原则检查（必检）
+- [ ] **Think Before Coding**：是否有不确定的地方？
+- [ ] **Simplicity First**：是否过度设计？不必要的抽象？
+- [ ] **Surgical Changes**：改动是否精准？是否动了不必要的地方？
+- [ ] **Goal-Driven**：是否达到成功标准？
 
 ### 基础要求
 - [ ] 代码可运行
@@ -373,6 +429,41 @@ version: 1.0.0
 用户满意度 = 用户评分平均值（1-5分）
 
 目标：> 4分
+```
+
+---
+
+## 标准交付物输出格式
+
+本SKILL执行完毕后，必须输出以下格式的交付物：
+
+```json
+{
+  "task": "质量检查任务描述",
+  "result": {
+    "summary": "简要结果（1-2句话）",
+    "details": "详细检查结果",
+    "data": {
+      "decision": "pass|modify|reject",
+      "score": 4.2,
+      "checkResults": {
+        "selfCheck": { "passed": true, "score": 4 },
+        "mainAgentCheck": { "passed": true, "score": 4.2 },
+        "reviewAgentCheck": null
+      },
+      "issuesFound": 1
+    }
+  },
+  "quality": {
+    "completeness": 95,
+    "accuracy": 93,
+    "readability": 88
+  },
+  "issues": [
+    { "location": "第3段", "problem": "对话略显生硬", "suggestion": "增加语气词", "priority": "medium" }
+  ],
+  "suggestions": ["可建立更细粒度的评分维度"]
+}
 ```
 
 ---

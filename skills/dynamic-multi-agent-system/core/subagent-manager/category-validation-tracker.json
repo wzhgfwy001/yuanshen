@@ -1,0 +1,34 @@
+{
+  "_comment": "specialized分类拆分验证追踪器",
+  "_version": "1.0.0",
+  "_created": "2026-04-16",
+  "_purpose": "追踪category-mapping软映射的验证进度，自动触发正式迁移决策",
+  
+  "config": {
+    "startDate": "2026-04-16",
+    "threshold": 30,
+    "errorThreshold": 3,
+    "description": "至少30个任务验证，无明显分类错误时可正式迁移"
+  },
+  
+  "status": {
+    "value": "validation_in_progress",
+    "label": "验证中",
+    "since": "2026-04-16T18:48:00+08:00"
+  },
+  
+  "stats": {
+    "totalTasks": 0,
+    "validTasks": 0,
+    "errorCount": 0
+  },
+  
+  "errors": [],
+  
+  "history": [],
+  
+  "_internal": {
+    "lastUpdated": null,
+    "nextCheckAt": null
+  }
+}

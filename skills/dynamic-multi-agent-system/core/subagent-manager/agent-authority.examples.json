@@ -1,0 +1,163 @@
+{
+  "$schema": "agent-authority.schema.json",
+  "examples": [
+    {
+      "title": "场景1：科幻小说写手Agent",
+      "agentId": "writer-scifi-ch-001",
+      "agentType": "writer",
+      "version": "1.0.0",
+      "description": "专门负责科幻小说第一章创作的写手Agent，遵循用户给定的世界观",
+
+      "decisionBoundary": {
+        "allowedScopes": [
+          {
+            "action": "content.gen.dialogue",
+            "description": "人物对话内容的具体措辞",
+            "maxDepth": 1
+          },
+          {
+            "action": "content.gen.scene",
+            "description": "场景描写的细节扩展",
+            "maxDepth": 2,
+            "constraints": { "maxRetries": 2 }
+          },
+          {
+            "action": "format.structure",
+            "description": "章节长度和段落结构的安排",
+            "maxDepth": 1
+          }
+        ],
+        "deniedScopes": [
+          "worldview.modify",
+          "character.create_major",
+          "plot.override"
+        ],
+        "crossBoundaryRules": {
+          "allowDelegation": true,
+          "delegableTypes": ["editor", "researcher"],
+          "requireExplicitAccept": true
+        }
+      },
+
+      "callbackRules": {
+        "mustCallbackConditions": [
+          {
+            "condition": "worldview.conflict",
+            "reason": "发现写作内容与给定世界观设定冲突",
+            "priority": "high",
+            "fallbackAction": "pause",
+            "includeContext": ["conflict_details", "proposed_solution"]
+          },
+          {
+            "condition": "intent.ambiguous",
+            "reason": "用户意图不明确，无法确定写作方向",
+            "priority": "high",
+            "fallbackAction": "suspend",
+            "includeContext": ["ambiguous_points", "option_a", "option_b"]
+          }
+        ],
+        "optionalCallbackConditions": [
+          {
+            "condition": "character.inconsistent",
+            "reason": "角色行为与已有设定可能不一致",
+            "priority": "medium",
+            "fallbackAction": "use_default"
+          }
+        ],
+        "callbackDebounceSeconds": 10
+      },
+
+      "defaultStrategy": {
+        "onUnknownTask": "ask_parent",
+        "onAmbiguousTask": "ask_parent",
+        "assumptionPolicy": "moderate",
+        "stopConditions": [
+          "quality.below_threshold",
+          "length.exceeds_limit"
+        ]
+      },
+
+      "capabilities": {
+        "maxContextTokens": 8000,
+        "maxExecutionTime": 600,
+        "canAccessTools": ["write", "read", "search"],
+        "cannotAccessTools": ["delete", "execute_code"],
+        "externalActions": {
+          "canSendMessages": false,
+          "canModifyFiles": true,
+          "canCallAPIs": false
+        }
+      }
+    },
+
+    {
+      "title": "场景2：数据分析Agent",
+      "agentId": "analyst-data-001",
+      "agentType": "analyst",
+      "version": "1.0.0",
+      "description": "负责数据分析的Agent，可自主选择分析方法和可视化方案",
+
+      "decisionBoundary": {
+        "allowedScopes": [
+          {
+            "action": "analysis.method",
+            "description": "分析方法和算法的选择",
+            "maxDepth": 2,
+            "constraints": { "timeoutSeconds": 300 }
+          },
+          {
+            "action": "visualization.type",
+            "description": "图表类型和样式选择",
+            "maxDepth": 1
+          },
+          {
+            "action": "data.clean",
+            "description": "数据清洗和预处理",
+            "maxDepth": 1
+          }
+        ],
+        "deniedScopes": [
+          "data.delete",
+          "data.export_external",
+          "model.modify"
+        ]
+      },
+
+      "callbackRules": {
+        "mustCallbackConditions": [
+          {
+            "condition": "data.quality.issue",
+            "reason": "发现数据质量问题，可能影响分析结果",
+            "priority": "critical",
+            "fallbackAction": "pause",
+            "includeContext": ["quality_issues", "affected_columns", "recommendation"]
+          },
+          {
+            "condition": "field.missing",
+            "reason": "缺少分析必需的关键字段",
+            "priority": "high",
+            "fallbackAction": "suspend",
+            "includeContext": ["missing_fields", "task_requirement"]
+          }
+        ]
+      },
+
+      "defaultStrategy": {
+        "onUnknownTask": "ask_parent",
+        "onAmbiguousTask": "pick_most_likely",
+        "assumptionPolicy": "conservative"
+      },
+
+      "capabilities": {
+        "maxContextTokens": 15000,
+        "maxExecutionTime": 900,
+        "canAccessTools": ["read", "analyze", "visualize", "calculate"],
+        "cannotAccessTools": ["write", "execute_code", "send_message"],
+        "externalActions": {
+          "canSendMessages": true,
+          "allowedDomains": ["internal.analytics"]
+        }
+      }
+    }
+  ]
+}

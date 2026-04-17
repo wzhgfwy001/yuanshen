@@ -1,0 +1,128 @@
+{
+  "_comment": "软映射层 - 不修改registry.json，通过映射层实现specialized拆分验证",
+  "_version": "1.0.0",
+  "_created": "2026-04-16",
+  "_purpose": "在不修改核心配置的情况下，验证specialized拆分方案的合理性",
+  
+  "_usage": {
+    "description": "映射层在分类器选择Agent时生效，不影响registry.json原始数据",
+    "flow": "分类器 → 读取category-mapping → 根据映射选择目标分类 → 选择Agent",
+    "rollback": "删除此文件或设置_enabled=false即可恢复原状"
+  },
+  
+  "_enabled": true,
+  
+  "category_remap": {
+    "specialized": {
+      "_comment": "specialized下的Agent重新映射到新分类",
+      "Accounts Payable Agent": "finance",
+      "Agentic Identity Trust": "security",
+      "Agents Orchestrator": "tech_dev",
+      "Automation Governance Architect": "tech_dev",
+      "Blockchain Security Auditor": "blockchain_zk",
+      "Compliance Auditor": "legal",
+      "Corporate Training Designer": "hr",
+      "Customer Service": "customer_success",
+      "Data Consolidation Agent": "data",
+      "Government Digital Presales Consultant": "operations",
+      "Healthcare Customer Service": "customer_success",
+      "Healthcare Marketing Compliance": "healthcare",
+      "Hospitality Guest Services": "customer_success",
+      "HR Onboarding": "hr",
+      "Identity Graph Operator": "data",
+      "Language Translator": "international",
+      "Legal Billing Time Tracking": "legal",
+      "Legal Client Intake": "legal",
+      "Legal Document Review": "legal",
+      "Loan Officer Assistant": "finance",
+      "LSP Index Engineer": "data",
+      "Real Estate Buyer Seller": "finance",
+      "Recruitment Specialist": "hr",
+      "Report Distribution Agent": "data",
+      "Retail Customer Returns": "customer_success",
+      "Sales Data Extraction Agent": "data",
+      "Sales Outreach": "sales",
+      "Specialized Chief of Staff": "operations",
+      "Specialized Civil Engineer": "tech_dev",
+      "Specialized Cultural Intelligence Strategist": "international",
+      "Specialized Developer Advocate": "devrel",
+      "Specialized Document Generator": "tech_dev",
+      "Specialized French Consulting Market": "international",
+      "Specialized Korean Business Navigator": "international",
+      "Specialized MCP Builder": "tech_dev",
+      "Specialized Model QA": "security",
+      "Specialized Salesforce Architect": "tech_dev",
+      "Specialized Workflow Architect": "tech_dev",
+      "Study Abroad Advisor": "education",
+      "Supply Chain Strategist": "operations",
+      "ZK Steward": "blockchain_zk"
+    }
+  },
+  
+  "new_categories": {
+    "_comment": "新分类定义（从specialized拆分出的子分类）",
+    "finance": {
+      "description": "财务金融",
+      "agents": ["Accounts Payable Agent", "Loan Officer Assistant", "Real Estate Buyer Seller"]
+    },
+    "legal": {
+      "description": "法务合规",
+      "agents": ["Compliance Auditor", "Legal Billing Time Tracking", "Legal Client Intake", "Legal Document Review"]
+    },
+    "hr": {
+      "description": "人力资源",
+      "agents": ["Corporate Training Designer", "HR Onboarding", "Recruitment Specialist"]
+    },
+    "data": {
+      "description": "数据分析",
+      "agents": ["Data Consolidation Agent", "Sales Data Extraction Agent", "Report Distribution Agent", "Identity Graph Operator", "LSP Index Engineer"]
+    },
+    "customer_success": {
+      "description": "客户成功/客服",
+      "agents": ["Customer Service", "Healthcare Customer Service", "Hospitality Guest Services", "Retail Customer Returns"]
+    },
+    "tech_dev": {
+      "description": "技术开发",
+      "agents": ["Agents Orchestrator", "Automation Governance Architect", "Specialized Civil Engineer", "Specialized Document Generator", "Specialized MCP Builder", "Specialized Salesforce Architect", "Specialized Workflow Architect"]
+    },
+    "blockchain_zk": {
+      "description": "区块链/ZK",
+      "agents": ["Blockchain Security Auditor", "ZK Steward"]
+    },
+    "operations": {
+      "description": "运营策略",
+      "agents": ["Specialized Chief of Staff", "Supply Chain Strategist", "Government Digital Presales Consultant"]
+    },
+    "sales": {
+      "description": "销售",
+      "agents": ["Sales Outreach"]
+    },
+    "education": {
+      "description": "教育",
+      "agents": ["Study Abroad Advisor"]
+    },
+    "healthcare": {
+      "description": "医疗健康",
+      "agents": ["Healthcare Marketing Compliance"]
+    },
+    "security": {
+      "description": "安全身份",
+      "agents": ["Agentic Identity Trust", "Specialized Model QA"]
+    },
+    "devrel": {
+      "description": "开发者关系",
+      "agents": ["Specialized Developer Advocate"]
+    },
+    "international": {
+      "description": "国际化/区域市场",
+      "agents": ["Specialized Cultural Intelligence Strategist", "Specialized French Consulting Market", "Specialized Korean Business Navigator", "Language Translator"]
+    }
+  },
+  
+  "validation": {
+    "_comment": "验证配置",
+    "total_remapped_agents": 41,
+    "new_category_count": 14,
+    "unchanged_categories": ["marketing", "engineering", "strategy", "integrations", "sales", "design", "support", "testing", "academic", "finance", "product", "project-management", "spatial-computing", "paid-media"]
+  }
+}

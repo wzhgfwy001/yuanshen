@@ -5,7 +5,9 @@ parent: dynamic-multi-agent-system
 version: 1.0.0
 ---
 
-# 资源清理器 (Resource Cleaner)
+# resource-cleaner
+
+**【驱散魔法】Dispel Magic — 资源清理器** - 
 
 ## 功能
 
@@ -358,6 +360,44 @@ version: 1.0.0
 - 清理成功率
 - 平均清理时间
 - 常见失败原因
+
+---
+
+## 标准交付物输出格式
+
+本SKILL执行完毕后，必须输出以下格式的交付物：
+
+```json
+{
+  "task": "清理任务描述",
+  "result": {
+    "summary": "简要结果（1-2句话）",
+    "details": "详细清理结果",
+    "data": {
+      "status": "success",
+      "cleanedResources": {
+        "agents": ["agent-search-001", "agent-outline-001"],
+        "files": ["temp-001.txt"],
+        "cache": ["result-cache-key-1"]
+      },
+      "failedResources": [],
+      "pendingCleanup": [],
+      "resourceFreed": {
+        "sessions": 4,
+        "memoryMB": 256,
+        "diskMB": 12
+      }
+    }
+  },
+  "quality": {
+    "completeness": 100,
+    "accuracy": 98,
+    "readability": 92
+  },
+  "issues": [],
+  "suggestions": []
+}
+```
 
 ---
 

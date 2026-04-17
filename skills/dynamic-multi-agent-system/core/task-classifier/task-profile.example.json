@@ -1,0 +1,185 @@
+{
+  "_comment": "TaskProfile 使用示例",
+  "_version": "1.0.0",
+  "_created": "2026-04-16",
+  
+  "example": {
+    "taskType": "innovative",
+    "complexityLevel": 4,
+    
+    "context": {
+      "originalText": "写一本科幻小说《星际迷途》，主角穿越到未来太阳系，探索人类在宇宙中的位置",
+      "userIntent": "创作一本完整的科幻小说，包含完整世界观、人物成长、情节发展",
+      "domain": "创意写作",
+      "priority": "high"
+    },
+    
+    "constraints": {
+      "qualityRequirements": [
+        "逻辑严谨",
+        "世界观自洽",
+        "人物动机合理",
+        "情节有张力"
+      ],
+      "formatRequirements": "JSON章节结构 + Markdown正文",
+      "lengthRequirements": {
+        "min": 100000,
+        "max": 200000,
+        "unit": "字"
+      },
+      "specialRequirements": [
+        "去AI味",
+        "避免套路化结局",
+        "科学细节要有依据"
+      ]
+    },
+    
+    "requiredCapabilities": [
+      {
+        "capability": "世界观构建",
+        "level": "expert",
+        "priority": 1
+      },
+      {
+        "capability": "剧情架构",
+        "level": "expert",
+        "priority": 1
+      },
+      {
+        "capability": "内容创作",
+        "level": "expert",
+        "priority": 1
+      },
+      {
+        "capability": "逻辑审查",
+        "level": "skilled",
+        "priority": 2
+      },
+      {
+        "capability": "文风编辑",
+        "level": "skilled",
+        "priority": 2
+      }
+    ],
+    
+    "executionStrategy": {
+      "mode": "hybrid",
+      "estimatedSubagents": 6,
+      "estimatedDuration": "2-3小时",
+      "dependencyHints": [
+        {
+          "from": "世界观构建",
+          "to": "剧情架构",
+          "type": "output-input"
+        },
+        {
+          "from": "剧情架构",
+          "to": "内容创作",
+          "type": "output-input"
+        },
+        {
+          "from": "内容创作",
+          "to": "逻辑审查",
+          "type": "review"
+        },
+        {
+          "from": "内容创作",
+          "to": "文风编辑",
+          "type": "review"
+        }
+      ]
+    },
+    
+    "decomposition": {
+      "status": "completed",
+      "rootTask": "main",
+      "subtasks": [
+        {
+          "id": "world-building",
+          "name": "世界观构建",
+          "description": "设计太阳系未来场景、科技水平、星际政治格局",
+          "assignedCapability": "世界观构建",
+          "dependsOn": [],
+          "executionMode": "serial",
+          "outputFormat": "JSON世界观文档",
+          "qualityCheck": {
+            "required": true,
+            "level": "agent"
+          }
+        },
+        {
+          "id": "plot-design",
+          "name": "剧情架构",
+          "description": "设计主线情节、章节结构、人物弧线",
+          "assignedCapability": "剧情架构",
+          "dependsOn": ["world-building"],
+          "executionMode": "serial",
+          "outputFormat": "Markdown大纲",
+          "qualityCheck": {
+            "required": true,
+            "level": "agent"
+          }
+        },
+        {
+          "id": "chapter-writing",
+          "name": "章节创作",
+          "description": "按大纲撰写各章节正文",
+          "assignedCapability": "内容创作",
+          "dependsOn": ["plot-design"],
+          "executionMode": "parallel",
+          "outputFormat": "Markdown正文",
+          "qualityCheck": {
+            "required": true,
+            "level": "self"
+          }
+        },
+        {
+          "id": "logic-review",
+          "name": "逻辑审查",
+          "description": "检查情节逻辑漏洞、科学合理性",
+          "assignedCapability": "逻辑审查",
+          "dependsOn": ["chapter-writing"],
+          "executionMode": "parallel",
+          "outputFormat": "审查报告",
+          "qualityCheck": {
+            "required": true,
+            "level": "reviewer"
+          }
+        },
+        {
+          "id": "style-edit",
+          "name": "文风编辑",
+          "description": "统一文风、去AI味、提升可读性",
+          "assignedCapability": "文风编辑",
+          "dependsOn": ["chapter-writing"],
+          "executionMode": "parallel",
+          "outputFormat": "编辑后正文",
+          "qualityCheck": {
+            "required": true,
+            "level": "reviewer"
+          }
+        },
+        {
+          "id": "final-integrate",
+          "name": "最终整合",
+          "description": "整合各章节、生成目录、输出完整小说",
+          "assignedCapability": "内容创作",
+          "dependsOn": ["logic-review", "style-edit"],
+          "executionMode": "serial",
+          "outputFormat": "完整Markdown小说",
+          "qualityCheck": {
+            "required": true,
+            "level": "agent"
+          }
+        }
+      ]
+    },
+    
+    "_metadata": {
+      "generatedAt": "2026-04-16T18:40:00+08:00",
+      "generator": "task-classifier-v2.0",
+      "confidence": 0.92,
+      "version": "1.0.0"
+    }
+  }
+}

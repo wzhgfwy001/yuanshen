@@ -2,28 +2,44 @@
 
 ## 版本信息
 
-- **当前版本：** v1.5-optimized
-- **更新日期：** 2026-04-07
+- **当前版本：** v1.3
+- **更新日期：** 2026-04-11
 - **状态：** 🟢 运行中
+
+## v1.3 新增功能
+
+### 🔍 学校搜索
+- 输入学校名称关键字，自动筛选出开设相关专业的高校
+- 显示学校基本信息（类型、省份、城市、办学性质）
+- 支持查看学校所有招生专业详情（双击学校行）
+- 支持"查看全部"学校列表
+
+### 📥 Excel导出
+- 一键将筛选结果导出为.xlsx文件
+- 支持自定义保存路径
+- 导出数据包含完整字段信息
+
+### 🖨️ 打印功能
+- 调用系统浏览器打印对话框
+- 生成专业打印预览页面（HTML格式）
+- 彩色分类显示（冲刺/稳妥/保底）
+- 打印样式优化（适合A4纸张）
 
 ## 项目结构
 
 ```
 excel-filter-project/
-├── main_launcher.py              # 主界面（本科/专科选择）
-├── main_simple2.py               # 本科筛选器
-├── main_zhuanke.py               # 专科筛选器
-├── data_loader.py                # 数据加载（原始）
-├── data_loader_optimized.py       # 数据加载（优化版）
-├── data_quality_check.py          # 数据质量检查
-├── test/                         # 测试目录
-│   ├── test_basic.py            # 基础测试
-│   ├── test_filter.py           # 筛选逻辑测试
-│   └── test_performance.py      # 性能测试
+├── main_v8.py                   # v1.3 综合筛选器（本科+专科）
+├── main_launcher.py             # 主界面（本科/专科选择）
+├── main_simple2.py              # 本科筛选器（v1.2）
+├── main_zhuanke.py              # 专科筛选器（v1.2）
+├── data_loader.py               # 数据加载模块
+├── data_loader_optimized.py     # 数据加载（优化版）
+├── data_quality_check.py        # 数据质量检查
+├── test/                        # 测试目录
 ├── data/                        # 数据文件
-│   ├── cache.pkl                # 缓存文件（自动生成）
-│   └── *.xlsx                   # 数据文件
-└── docs/                        # 文档
+├── docs/                        # 文档
+└── cloudbase_data/              # JSONL数据源
 ```
 
 ## 功能

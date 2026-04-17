@@ -1,0 +1,226 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://openclaw.github.io/schemas/verification-result.json",
+  "title": "Verification Result Schema",
+  "description": "验证结果数据结构定义，用于闭环验证机制",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["timestamp", "passed", "failed", "summary"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "验证执行时间（ISO 8601格式）"
+    },
+    "duration": {
+      "type": "number",
+      "description": "验证耗时（毫秒）"
+    },
+    "passed": {
+      "type": "array",
+      "description": "通过的验证项",
+      "items": {
+        "$ref": "#/definitions/VerificationItem"
+      }
+    },
+    "failed": {
+      "type": "array",
+      "description": "失败的验证项",
+      "items": {
+        "$ref": "#/definitions/VerificationItem"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "警告项（非致命问题）",
+      "items": {
+        "$ref": "#/definitions/Warning"
+      }
+    },
+    "suggestions": {
+      "type": "array",
+      "description": "改进建议",
+      "items": {
+ "$ref": "#/definitions/Suggestion"
+      }
+    },
+    "summary": {
+      "$ref": "#/definitions/Summary"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "元数据",
+      "properties": {
+        "skillName": {
+          "type": "string",
+          "description": "被验证的技能名称"
+        },
+        "skillPath": {
+          "type": "string",
+          "description": "技能路径"
+        },
+        "verificationType": {
+          "type": "string",
+          "enum": ["full", "setup", "mapping", "toolchain", "custom"],
+          "description": "验证类型"
+        },
+        "environment": {
+          "type": "string",
+          "description": "运行环境"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "VerificationItem": {
+      "type": "object",
+      "required": ["name", "status", "category"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "验证项唯一标识"
+        },
+        "name": {
+          "type": "string",
+          "description": "验证项名称"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["setup", "mapping", "toolchain", "file", "command", "api"],
+          "description": "验证类别"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "skipped"],
+          "description": "验证状态"
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "是否通过"
+        },
+        "message": {
+          "type": "string",
+          "description": "验证消息"
+        },
+        "expected": {
+          "type": ["string", "number", "boolean", "object", "array", "null"],
+          "description": "预期值"
+        },
+        "actual": {
+          "type": ["string", "number", "boolean", "object", "array", "null"],
+          "description": "实际值"
+        },
+        "error": {
+          "type": "string",
+          "description": "错误详情（如果失败）"
+        },
+        "recoverable": {
+          "type": "boolean",
+          "description": "是否可恢复"
+        },
+        "fixSuggestion": {
+          "type": "string",
+          "description": "修复建议"
+        },
+        "details": {
+          "type": "object",
+          "description": "额外详情"
+        }
+      }
+    },
+    "Warning": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "警告代码"
+        },
+        "message": {
+          "type": "string",
+          "description": "警告消息"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "description": "严重程度"
+        },
+        "relatedItem": {
+          "type": "string",
+          "description": "关联的验证项ID"
+        }
+      }
+    },
+    "Suggestion": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "建议代码"
+        },
+        "message": {
+          "type": "string",
+          "description": "建议消息"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "default": "medium",
+          "description": "优先级"
+        },
+        "category": {
+          "type": "string",
+          "description": "建议类别"
+        },
+        "estimatedEffort": {
+          "type": "string",
+          "description": "预估工作量"
+        },
+        "benefits": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "预期收益"
+        }
+      }
+    },
+    "Summary": {
+      "type": "object",
+      "required": ["total", "passedCount", "failedCount", "successRate"],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "总验证项数"
+        },
+        "passedCount": {
+          "type": "integer",
+          "description": "通过数"
+        },
+        "failedCount": {
+          "type": "integer",
+          "description": "失败数"
+        },
+        "warningCount": {
+          "type": "integer",
+          "description": "警告数"
+        },
+        "successRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "成功率（百分比）"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "partial", "failed", "critical"],
+          "description": "整体状态"
+        },
+        "readyForProduction": {
+          "type": "boolean",
+          "description": "是否可用于生产"
+        }
+      }
+    }
+  }
+}

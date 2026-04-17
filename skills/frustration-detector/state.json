@@ -1,0 +1,9 @@
+{
+  "negative_count": 0,
+  "consecutive_failures": 0,
+  "last_negative_time": 1775979702970,
+  "last_failure_time": null,
+  "reset_timer": 300000,
+  "level": 0,
+  "signal_history": []
+}

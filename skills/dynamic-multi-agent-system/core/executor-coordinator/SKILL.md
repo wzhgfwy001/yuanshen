@@ -5,7 +5,9 @@ parent: dynamic-multi-agent-system
 version: 1.0.0
 ---
 
-# 执行协调器 (Executor Coordinator)
+# executor-coordinator
+
+**【协调统御】Command — 执行协调器** - 
 
 ## 功能
 

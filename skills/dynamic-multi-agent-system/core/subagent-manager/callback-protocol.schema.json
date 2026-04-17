@@ -1,0 +1,270 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "callback-protocol.schema.json",
+  "title": "分阶段授权回调协议 / Progressive Authorization Callback Protocol",
+  "description": "用于混合动态多Agent系统中的渐进式任务分解回调机制。子Agent在执行过程中遇到模糊或障碍时，向主Agent发起回调请求。",
+  "version": "1.0.0",
+  "type": "object",
+  "definitions": {
+
+    "========================================",
+    "回调触发条件（Trigger Conditions）",
+    "========================================",
+
+    "callbackTriggerConditions": {
+      "description": "子Agent必须触发回调的条件枚举",
+      "type": "string",
+      "enum": [
+        "TASK_GOAL_AMBIGUOUS",
+        "PREREQUISITE_UNMET",
+        "RESOURCE_INSUFFICIENT",
+        "TECHNICAL_BLOCKER",
+        "USER_INTENT_UNCLEAR",
+        "DEPENDENCY_RESOLUTION_FAILED",
+        "QUALITY_THRESHOLD_VIOLATED",
+        "CONTEXT_OVERFLOW"
+      ],
+      "meta": {
+        "TASK_GOAL_AMBIGUOUS": "任务目标不明确，子Agent无法确定执行方向",
+        "PREREQUISITE_UNMET": "发现前置依赖未满足（如缺少数据、配置、权限）",
+        "RESOURCE_INSUFFICIENT": "需要额外资源（API配额、文件访问权、工具能力）",
+        "TECHNICAL_BLOCKER": "技术问题无法自行解决（错误反复出现、依赖冲突）",
+        "USER_INTENT_UNCLEAR": "用户原始意图有多种解释，需主Agent澄清",
+        "DEPENDENCY_RESOLUTION_FAILED": "子任务间的依赖关系无法自动解析",
+        "QUALITY_THRESHOLD_VIOLATED": "产出质量低于预设阈值，需主Agent重新定义标准",
+        "CONTEXT_OVERFLOW": "上下文超出限制，需主Agent压缩或拆分任务"
+      }
+    },
+
+    "========================================",
+    "回调请求格式（Callback Request）",
+    "========================================",
+
+    "callbackRequest": {
+      "description": "子Agent → 主Agent 的回调请求结构",
+      "type": "object",
+      "required": ["callbackId", "timestamp", "sourceAgent", "triggerCondition", "question", "currentProgress"],
+      "additionalProperties": false,
+      "properties": {
+        "callbackId": {
+          "description": "全局唯一回调ID，格式：cb-{timestamp}-{random4}",
+          "type": "string",
+          "pattern": "^cb-[0-9]{13}-[a-zA-Z0-9]{4}$"
+        },
+        "timestamp": {
+          "description": "回调发起时间，ISO 8601 格式",
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceAgent": {
+          "description": "发起回调的子Agent标识",
+          "type": "object",
+          "required": ["agentId", "agentRole", "taskId"],
+          "properties": {
+            "agentId": { "type": "string" },
+            "agentRole": { "type": "string" },
+            "taskId": { "type": "string" }
+          }
+        },
+        "triggerCondition": {
+          "description": "触发条件（见 callbackTriggerConditions）",
+          "$ref": "#/definitions/callbackTriggerConditions"
+        },
+        "question": {
+          "description": "子Agent向主Agent提出的具体问题",
+          "type": "string",
+          "minLength": 10
+        },
+        "options": {
+          "description": "子Agent预判的可选方案（可选，帮助主Agent快速决策）",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "description": { "type": "string" },
+              "risks": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "maxItems": 3
+        },
+        "currentProgress": {
+          "description": "回调时的当前执行进度",
+          "type": "object",
+          "properties": {
+            "completedSteps": { "type": "array", "items": { "type": "string" } },
+            "currentStep": { "type": "string" },
+            "blockerDetail": { "type": "string" },
+            "estimatedCompletionPercent": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "attemptCount": {
+          "description": "该问题已尝试解决的次数（防无限回调）",
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "urgency": {
+          "description": "回调紧急程度，影响主Agent处理优先级",
+          "type": "string",
+          "enum": ["low", "normal", "high", "critical"],
+          "default": "normal"
+        }
+      }
+    },
+
+    "========================================",
+    "主Agent响应格式（Master Response）",
+    "========================================",
+
+    "masterResponse": {
+      "description": "主Agent → 子Agent 的响应结构",
+      "type": "object",
+      "required": ["callbackId", "timestamp", "resolution", "directive"],
+      "additionalProperties": false,
+      "properties": {
+        "callbackId": {
+          "description": "关联的回调请求ID",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "响应时间，ISO 8601 格式",
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolution": {
+          "description": "主Agent对问题的解答或决策",
+          "type": "string"
+        },
+        "directive": {
+          "description": "给子Agent的下一步指令",
+          "type": "string",
+          "enum": [
+            "CONTINUE_WITH_ANSWER",
+            "REFINE_AND_CONTINUE",
+            "REPLAN_SUBTASK",
+            "ESCALATE_TO_USER",
+            "RETRY_WITH_HINTS",
+            "ABORT_AND_REPORT"
+          ],
+          "meta": {
+            "CONTINUE_WITH_ANSWER": "直接使用答案，继续执行",
+            "REFINE_AND_CONTINUE": "细化任务目标后继续执行",
+            "REPLAN_SUBTASK": "重新规划当前子任务",
+            "ESCALATE_TO_USER": "升级给用户，等待用户确认",
+            "RETRY_WITH_HINTS": "附带提示重试（主Agent认为子Agent能自行解决）",
+            "ABORT_AND_REPORT": "终止任务，汇报主Agent"
+          }
+        },
+        "hints": {
+          "description": "提示信息（directive为RETRY_WITH_HINTS时必填）",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "contextUpdates": {
+          "description": "主Agent更新后需要同步给子Agent的上下文",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "nextSteps": {
+          "description": "主Agent建议的后续步骤",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "estimatedRemainingTime": {
+          "description": "主Agent预估的剩余执行时间（秒）",
+          "type": "integer"
+        }
+      }
+    },
+
+    "========================================",
+    "回调协议状态机",
+    "========================================",
+
+    "callbackState": {
+      "description": "回调生命周期状态",
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "IN_PROGRESS",
+        "RESOLVED",
+        "ESCALATED",
+        "EXPIRED",
+        "MAX_RETRIES_EXCEEDED"
+      ]
+    },
+
+    "========================================",
+    "回调会话（完整回调上下文）",
+    "========================================",
+
+    "callbackSession": {
+      "description": "一次完整的回调会话记录",
+      "type": "object",
+      "required": ["sessionId", "request", "state"],
+      "properties": {
+        "sessionId": { "type": "string" },
+        "request": { "$ref": "#/definitions/callbackRequest" },
+        "response": { "$ref": "#/definitions/masterResponse" },
+        "state": { "$ref": "#/definitions/callbackState" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "resolvedAt": { "type": "string", "format": "date-time" },
+        "totalAttempts": { "type": "integer" }
+      }
+    }
+  },
+
+  "========================================",
+  "顶层结构",
+  "========================================",
+
+  "properties": {
+
+    "protocolVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+
+    "callbacks": {
+      "description": "当前活跃的回调会话记录",
+      "type": "array",
+      "items": { "$ref": "#/definitions/callbackSession" }
+    },
+
+    "globalSettings": {
+      "description": "全局回调策略配置",
+      "type": "object",
+      "properties": {
+        "maxCallbackAttemptsPerTask": {
+          "description": "单个任务最大回调次数（超过则强制升级）",
+          "type": "integer",
+          "default": 5
+        },
+        "callbackTimeoutMs": {
+          "description": "回调超时时间（毫秒），超时后自动升级",
+          "type": "integer",
+          "default": 60000
+        },
+        "autoRetryWithHints": {
+          "description": "是否自动使用hints重试（跳过主Agent响应）",
+          "type": "boolean",
+          "default": true
+        },
+        "maxAutoRetries": {
+          "description": "自动重试最大次数",
+          "type": "integer",
+          "default": 2
+        },
+        "rateLimit": {
+          "description": "回调限速：每N秒最多M个回调",
+          "type": "object",
+          "properties": {
+            "windowSeconds": { "type": "integer", "default": 60 },
+            "maxCallbacks": { "type": "integer", "default": 10 }
+          }
+        }
+      }
+    }
+  }
+}

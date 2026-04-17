@@ -1,5 +1,237 @@
 # MEMORY.md - 长期记忆
 
+## MiniMax Plus套餐配置
+
+**API Key:** `sk-cp-3n-fXwqj0y26NQku29UDhAEXGVMxkY2DxcX7qxyaBpJOg5WPazgON6D2yaOE0-Q5bTuvyYzSpD6E8CbG2vm7orX-LuMxJGm_WKtZ5EBo6ws3kMS6VPrg8-o`
+
+---
+
+## 阳神系统
+
+**名称：** 阳神（YangShen）
+
+**来源：** 混合动态多Agent协作系统的合并与品牌化
+
+**版本：** v2.0.0
+
+**定位：** 智能协作核心引擎，驱动元神(主Agent)完成复杂任务
+
+**最新进展：** 
+- 2026-04-12 从Claude Code源码泄露事件学习，借鉴其架构设计
+- 2026-04-12 新增4个技能+完整实现代码：frustration-detector.js、context-compactor.js、task-typologist.js、feature-flags.js
+- 2026-04-12 阳神系统升级至v2.0.0（情绪感知+上下文压缩+任务细化+特性开关）
+- 2026-04-11 配置Dreaming（每天凌晨3点自动记忆整理）
+- 2026-04-11 配置4个Cron Jobs（早间简报8:00、健康检查每时、记忆整理23:00、小程序检查18:00）
+- 2026-04-11 配置Standing Orders（5个持久化指令Program）
+
+**Agent命名规范：** 子Agent必须从《火影忍者》《死神》《海贼王》《银魂》中选择最契合的名字，见 `brain/decisions/2026-04-12-agent-naming.md`
+
+**最新测试：** 2026-04-10 深度测试完成，42项测试全部通过
+
+---
+
+## GitHub 配置
+
+**用户名：** wzhgfwy001
+
+**仓库：** https://github.com/wzhgfwy001/yuanshen
+
+**SSH Key：** `C:\Users\DELL\.ssh\id_ed25519_github`
+
+**SSH公钥：** `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB7WrFV5PJll5uqQ07C9/GINbofg08o7ZzvdP/OBHygf yangshen@github`
+
+**已上传内容：**
+- core/ - 阳神核心模块
+- agency-registry/ - 226个Agent定义
+- skills-evolution/ - Skills进化追踪
+- brain/ - 阴神记忆系统
+- state/ - 状态文件
+- examples/ - 使用示例
+
+**状态：** 2026-04-17 00:20 上传完成（138文件，24805行）
+
+---
+
+## 2026-04-16 自我进化体系 + 用户画像完成
+
+### 今晚成果（2026-04-16 22:00-02:00）
+
+| 时间 | 里程碑 |
+|------|--------|
+| 22:00-23:00 | LM Studio + OpenClaw 连接讨论 |
+| 23:00-00:00 | 简历优化 + Karpathy学习包 |
+| 00:00-01:00 | 三省六部 vs Anthropic 架构分析 |
+| 01:00-01:12 | 元神状态管理体系升级（100%） |
+| 01:12 | Skills进化 + 用户画像系统完成 |
+| 01:43 | 用户基础画像初始化完成 |
+
+### 新建系统（v1.0）
+
+| 系统 | 文件 | 状态 |
+|------|------|------|
+| 状态管理体系 | brain/progress.json (v4) | 100% |
+| Skills进化系统 | skills/skills-evolution/SKILL.md | 完成 |
+| 用户画像系统 | skills/user-profile/SKILL.md | 完成 |
+| 子Agent执行日志 | brain/subagent-log.md | 完成 |
+| 清理策略 | brain/cleanup-policy.md | 完成 |
+
+### Skills进化核心机制
+
+- **触发条件**：任务类型成功率 > 80% → 创建Skill草稿
+- **审查条件**：Skill使用成功率 < 60% → 触发改进审查
+- **数据存储**：brain/progress.json → task_tracking + skill_tracking
+
+### 用户基础画像（initial）
+
+| 字段 | 值 |
+|------|-----|
+| communication_style | 详细展开 |
+| preferred_language | 中文 |
+| active_hours | 有时候全天，有时候下午晚上 |
+| tech_familiarity | 初学者，但逻辑思维能力强 |
+| work_type | 房地产工程管理层，失业探索新出路 |
+| decision_style | 深思熟虑 + 多方案对比 |
+| feedback_style | 询问意见建议，评估后是否纠错 |
+| long_term_goals | 财富自由、技术深度、个人品牌 |
+
+### 用户核心需求（按优先级）
+
+| 优先级 | 方向 | 说明 |
+|--------|------|------|
+| 1️⃣ | 短视频IP | 启动快、成本低、快速验证市场 |
+| 2️⃣ | 小程序/App | 已有基础，近两个月能出成品 |
+| 3️⃣ | 小说动漫 | 长期目标，需要技术积累 |
+
+### 用户抖音信息
+
+- 抖音号：73703621074
+- 用户名：王截一
+- 待分析：截图/视频链接待发送
+
+### 三方协作分工
+
+| 角色 | 贡献 |
+|------|------|
+| 小白 | 外部视角、Anthropic/Google最佳实践、及时纠错 |
+| 元神 | 高效执行、自我诊断、主动优化 |
+| 小王同志 | 统筹协调、拍板确认 |
+
+### 待实施
+
+- [ ] 模型路由系统
+- [ ] 短视频风格分析+整改建议
+
+---
+
+## 2026-04-15 Karpathy 源码学习收获
+
+### 学习内容
+用户分享 Karpathy 源码包（micrograd/minGPT/nanochat），已解压分析到：
+`C:\Users\DELL\.openclaw\workspace\karpathy-source\karpathy-source-pack\`
+
+### 四大核心提升
+
+| 方面 | 提升内容 |
+|------|----------|
+| **LLM 内部机制** | KVCache（FA3风格）、Q/K/V Attention、prefill/decode 分离 |
+| **代码质量** | Karpathy 极简风格：专注、干净、无废话，强化 CLAUDE.md 四原则 |
+| **推理优化思维** | 一次计算反复复用、空间换时间、批量并行采样 |
+| **教育能力** | 能从源码层面解释 LLM/Transformer/GPT，不只是背概念 |
+
+### 关键设计模式（已理解）
+
+**KVCache（Flash Attention 3 风格）**
+- Tensors: (B, T, H, D) 而非传统的 (B, H, T, D)
+- cache_seqlens 追踪每个 batch 位置
+- prefill() 支持 batch=1 预填充后克隆给多个 sample
+- 核心思想：空间换时间，缓存复用
+
+**micrograd 自动微分**
+- Value 类封装标量，支持反向传播
+- Neuron: `act = sum(wi*xi) + b` → ReLU
+- MLP: 多层全连接网络
+
+**minGPT Transformer**
+- CausalSelfAttention + GELU 激活
+- GPT 模型族：GPT-1 / GPT-2 / tiny 自定义模型
+- 权重 decay 分离的 AdamW 优化器配置
+
+### 能力对比
+
+| 方面 | 学习前 | 学习后 |
+|------|--------|--------|
+| LLM 解释 | 概念层面 | **源码层面** |
+| 推理优化 | 知道 KVCache 名称 | **理解 FA3 实现细节** |
+| 代码审美 | 参考 CLAUDE.md | **亲眼看 Karpathy 实践** |
+| 任务设计 | 通用多 Agent | **带缓存/优化的多 Agent** |
+
+---
+
+## MiniMax API配置（重要）
+
+### 套餐信息
+- **套餐：** Plus（￥49/月）
+- **额度：** 1500次模型调用 / 5小时（滚动窗口）
+- **速度：** 正常约50TPS，低峰时段100TPS
+- **支持：** 约1-2个OpenClaw agent
+
+### 支持的模型
+| 模型 | 功能 | 配额 |
+|------|------|------|
+| MiniMax-M2.7 | 文本生成 | 1500次/5小时 |
+| MiniMax-M2.5 | 文本生成 | - |
+| image-01 | 图像生成 | 50次/日 |
+| speech-2.8-hd | TTS HD | 4000次/日 |
+| music-2.6 | 音乐生成 | 100次/日 |
+
+### 重要规则
+1. **额度重置：** 文本模型用5小时滚动窗口，非文本模型每日重置
+2. **限流规则：** 高峰期15:00-17:30会动态限流
+3. **API Key专用于Token Plan**，不能与开放平台Key混用
+4. **高峰支持：** Plus约支持1个Agent持续调用
+
+### 配置状态
+- ✅ MiniMax API Key已配置
+- ✅ 环境变量MINIMAX_API_KEY已设置
+- ✅ Gateway已配置MiniMax M2.7
+
+### 图像生成测试用过的Prompt
+```
+动漫风格：动漫风格，日系，精致细节，温暖色调
+日漫风格：日漫风格，精致细节，动漫美学
+```
+
+---
+
+## 已启用功能
+
+### OpenClaw功能
+- ✅ Active Memory（主动记忆）
+- ✅ Dreaming（凌晨3点自动记忆整理）
+- ✅ Cron Jobs（4个定时任务）
+- ✅ Standing Orders（5个持久化指令）
+- ✅ 飞书频道接入
+- ✅ 图像生成/分析
+
+### Cron Jobs定时任务
+| 任务 | 时间 | 说明 |
+|------|------|------|
+| 早间简报 | 每天08:00 | 生成日程+待办摘要 |
+| 健康检查 | 每小时 | 检查Gateway+模型状态 |
+| 小程序检查 | 每天18:00 | 检查小程序状态 |
+| 记忆整理 | 每天23:00 | 更新记忆系统 |
+
+### Standing Orders持久化指令
+| Program | 触发 | 说明 |
+|---------|------|------|
+| 每日早间简报 | 08:00 | 生成简报 |
+| 磁盘空间监控 | 每6小时 | <10GB告警 |
+| 记忆整理 | 23:00 | 检查brain/inbox |
+| 小程序监控 | 18:00 | 检查状态 |
+| 健康检查 | 每小时 | 检查系统 |
+
+---
+
 ## 混合动态多 Agent 系统开发
 
 **开始时间：** 2026-04-03
@@ -60,11 +292,6 @@
 - 每阶段揭示不同真相深度
 - 结局：肃清暗流/教廷归顺/樱花省归顺
 
-**第一部揭示禁区：**
-- ❌ 宝塔是地球文明起源
-- ❌ 吞噬者本体
-- ❌ 宇宙入侵完整真相
-
 **核心设定已确认：**
 - 九层宝塔名称（太虚宫/苍穹殿/天策府/星辰海/人间阁/轮回殿/因果簿/缉魂司/阎罗殿）
 - 灵魂能量体系（宇宙顶级能量，影响空间/时间/物质/因果）
@@ -96,6 +323,27 @@
 **小说大纲文件：**
 - `skills/dynamic-multi-agent-system/docs/STORY-OUTLINE-UPDATED.md`
 - `skills/dynamic-multi-agent-system/docs/VISUAL-DIAGRAMS.md`
+
+### 2026-04-09 数据导入与筛选修复
+
+**完成内容：**
+- ✅ 解决JSONL格式导入问题（扩展名.json，内容JSONL）
+- ✅ 修复云函数查询字段名不匹配（category → major_category）
+- ✅ 修复正则查询API错误（_.regex → db.RegExp）
+- ✅ 修复筛选页面选中状态不生效问题
+- ✅ 修复wx:if和wx:for混用编译错误
+- ✅ 优化概率显示四舍五入到个位数
+
+**数据状态：**
+- benke: 21,425条 ✅
+- zhuanke: 11,912条 ✅
+
+**技术配置：**
+- 云环境ID: wfc-9g0bpjwsb8d3d01c
+- AppID: wx21c2c6114d560057
+- 商户号: 1743894878
+
+---
 
 ### 2026-04-06 P0 运营计划启动 + Token 优化实施
 
@@ -313,8 +561,8 @@ start-dashboard.bat
 
 ### 配置确认
 
-- OpenClaw 版本：2026.4.1 ✅
-- 主模型：qwen3.5-plus ✅
+- OpenClaw 版本：2026.4.10 ✅
+- 主模型：minimax/MiniMax-M2.7 ✅
 - Gateway 模式：local（loopback 绑定）
 - 创建策略：全新创建（无现有文件合并）
 
