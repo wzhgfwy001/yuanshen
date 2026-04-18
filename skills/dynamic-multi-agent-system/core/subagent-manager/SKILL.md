@@ -486,6 +486,131 @@ else:
 4. 记录子Agent元数据
 ```
 
+---
+
+## 【气流顺引】Fusion Scheduler 融合调度集成
+
+### 功能定位
+
+在子Agent创建前，自动为其匹配并装备合适的技能/人格：
+1. **女娲人格** — 张雪峰、毛泽东等蒸馏人物
+2. **Agency模板** — 数据分析师、产品经理等专业模板
+3. **自定义Agent** — 当以上都没有匹配时
+
+### 装备优先级
+
+```
+1. 明确提到女娲名字 → 装备对应女娲人格
+      ↓ 没有
+2. Agency Agent模板（优先）
+      ↓ 没有
+3. 女娲人格（按触发词匹配）
+      ↓ 没有
+4. 自定义Agent（spawn新Agent）
+```
+
+### 集成模块
+
+**文件位置：** `./core/fusion-scheduler/fusion-integration.js`
+
+**使用方式：**
+```javascript
+const fusionIntegration = require('./core/fusion-scheduler/fusion-integration');
+
+// 检查是否可用
+if (fusionIntegration.isAvailable()) {
+  // 获取可用装备列表
+  const equipment = fusionIntegration.getAvailableEquipment();
+  console.log('女娲人格:', equipment.personas);
+  console.log('Agency模板:', equipment.templates);
+}
+
+// 为子任务生成装备计划
+const plan = fusionIntegration.planForTask(subTask);
+if (plan.equipped) {
+  console.log(`任务将装备: ${plan.type} - ${plan.name}`);
+}
+
+// 为prompt添加装备内容
+const enhancedPrompt = fusionIntegration.equipPrompt(basePrompt, plan);
+
+// 生成完整装备报告
+const report = fusionIntegration.generateEquipReport(subTasks);
+```
+
+### 装备计划结构
+
+```javascript
+{
+  subTask: { /* 原始子任务 */ },
+  equipped: true/false,           // 是否装备了技能
+  type: 'nuwa' | 'agency' | 'custom',  // 装备类型
+  name: '张雪峰' | '数据分析师' | null,  // 装备名称
+  skillContent: '...',            // SKILL.md内容
+  skillPath: 'brain/agents/...',  // 技能路径
+  matchScore: 0.95,              // 匹配分数
+  matchType: 'explicit' | 'trigger',  // 匹配类型
+  reasoning: ['明确提到人格: 张雪峰 (0.95)'],
+  fallback: false                // 是否是fallback
+}
+```
+
+### 装备后的Prompt格式
+
+**女娲人格注入：**
+```
+[基础prompt]
+
+--- 女娲人格注入 ---
+角色: 张雪峰
+[SKILL.md内容]
+--- 人格注入结束 ---
+```
+
+**Agency模板注入：**
+```
+[基础prompt]
+
+--- Agency角色装备 ---
+角色: 数据分析师
+[SKILL.md内容]
+--- 角色装备结束 ---
+```
+
+### 自动注册新人格
+
+女娲蒸馏完成后，自动注册到fusion-scheduler：
+```javascript
+fusionIntegration.registerPersona(
+  '新人物名',           // 名字
+  'brain/agents/新人物名/SKILL.md',  // 路径
+  ['触发词1', '触发词2'],  // 触发词
+  '人物描述'            // 描述
+);
+```
+
+### 融合调度注册表
+
+**文件位置：** `./core/fusion-scheduler/fusion-registry.json`
+
+**结构：**
+```json
+{
+  "version": "1.0.0",
+  "personas": {
+    "张雪峰": { "path": "brain/agents/张雪峰/SKILL.md", "triggers": [...] },
+    "毛泽东": { "path": "brain/agents/毛泽东/SKILL.md", "triggers": [...] }
+  },
+  "agencyTemplates": {
+    "data-analyst": { "path": "...", "triggers": [...] },
+    "product-manager": { "path": "...", "triggers": [...] }
+  },
+  "matchingRules": {
+    "priorityOrder": ["agencyTemplate", "persona", "fallback"]
+  }
+}
+```
+
 ### 执行阶段
 
 ```

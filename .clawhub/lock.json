@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skills": {
+    "lossless-claw": {
+      "version": "1.0.1",
+      "installedAt": 1776443825338
+    },
+    "text-to-ppt": {
+      "version": "1.0.0",
+      "installedAt": 1776519422233
+    }
+  }
+}

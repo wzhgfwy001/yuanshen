@@ -1,0 +1,51 @@
+{
+  "_comment": "子Agent统一注册表",
+  "_version": "1.0.0",
+  "_updated": "2026-04-18",
+  
+  "agents": {
+    "毛泽东": {
+      "source": "nuwa",
+      "path": "brain/agents/毛泽东",
+      "type": "persona",
+      "status": "active"
+    },
+    "张雪峰": {
+      "source": "nuwa",
+      "path": "brain/agents/张雪峰",
+      "type": "persona",
+      "status": "active"
+    },
+    "小说家融合人格": {
+      "source": "nuwa",
+      "path": "brain/agents/novelist-fusion",
+      "type": "persona",
+      "status": "active",
+      "description": "《吾名午夜》专属写作顾问，蒸馏9位小说家认知框架"
+    }
+  },
+  
+  "sources": {
+    "nuwa": {
+      "description": "女娲蒸馏的认知框架Agent",
+      "location": "brain/agents/[名字]/",
+      "format": "persona.md + SKILL.md + conversations/"
+    },
+    "agency": {
+      "description": "193个专业领域Agent模板",
+      "location": "skills/agency-agents/SKILL.md",
+      "format": "内嵌模板，运行时展开"
+    },
+    "yangshen": {
+      "description": "阳神系统创建的临时任务Agent",
+      "location": "动态创建",
+      "format": "运行时分配"
+    }
+  },
+  
+  "invocation_rules": {
+    "nuwa_agent_priority": true,
+    "agency_fallback": true,
+    "yangshen_dynamic": true
+  }
+}
