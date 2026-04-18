@@ -82,19 +82,37 @@ function getMappedCategory(originalCategory, agentName = null) {
     };
   }
 
-  // specialized 分类需要检查映射
-  if (originalCategory === 'specialized' && agentName) {
-    const remap = _categoryRemap.specialized;
-    if (remap && remap[agentName]) {
-      const mappedTo = remap[agentName];
-      console.log(`[mapping-loader] Mapped: ${agentName} → ${mappedTo}`);
-      return {
-        mappedCategory: mappedTo,
-        wasMapped: true,
-        source: 'category-mapping.json',
-        originalCategory: 'specialized',
-        agentName: agentName
-      };
+  // 支持所有category的映射（不限于specialized）
+  if (agentName) {
+    // 遍历所有category_remap中的分类
+    for (const [srcCategory, remapEntries] of Object.entries(_categoryRemap)) {
+      // 跳过内部元数据字段（以_开头的）
+      if (srcCategory.startsWith('_')) continue;
+      
+      // 如果原始分类匹配
+      if (originalCategory === srcCategory || srcCategory === '*') {
+        // 检查是否有该agent的映射
+        if (remapEntries && typeof remapEntries === 'object') {
+          // 支持两种格式：
+          // 1. 直接映射："agentName": "targetCategory"
+          // 2. 详细映射："agentName": { target: "targetCategory", ... }
+          const entry = remapEntries[agentName];
+          if (entry) {
+            const mappedTo = typeof entry === 'string' ? entry : entry.target;
+            if (mappedTo) {
+              console.log(`[mapping-loader] Mapped [${srcCategory}/${agentName}] → ${mappedTo}`);
+              return {
+                mappedCategory: mappedTo,
+                wasMapped: true,
+                source: 'category-mapping.json',
+                originalCategory: originalCategory,
+                mappedFrom: srcCategory,
+                agentName: agentName
+              };
+            }
+          }
+        }
+      }
     }
   }
 
