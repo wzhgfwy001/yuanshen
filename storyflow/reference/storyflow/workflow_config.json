@@ -1,0 +1,58 @@
+{
+  "workflow_id": "story_workflow",
+  "name": "小说创作工作流",
+  "nodes": [
+    {
+      "node_id": "world_node",
+      "name": "世界观生成",
+      "type": "world_building",
+      "config": {
+        "genre": "奇幻冒险",
+        "theme": "龙与魔法的世界"
+      }
+    },
+    {
+      "node_id": "character_node",
+      "name": "角色生成",
+      "type": "character",
+      "config": {
+        "character_type": "主角"
+      }
+    },
+    {
+      "node_id": "chapter_node",
+      "name": "章节生成",
+      "type": "chapter_generation",
+      "config": {
+        "chapter_number": 1,
+        "chapter_title": "龙之觉醒"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source_node": "world_node",
+      "source_output": "world_description",
+      "target_node": "character_node",
+      "target_input": "world_description"
+    },
+    {
+      "source_node": "world_node",
+      "source_output": "magic_system",
+      "target_node": "character_node",
+      "target_input": "magic_system"
+    },
+    {
+      "source_node": "world_node",
+      "source_output": "world_description",
+      "target_node": "chapter_node",
+      "target_input": "world_description"
+    },
+    {
+      "source_node": "character_node",
+      "source_output": "character_profile",
+      "target_node": "chapter_node",
+      "target_input": "character_profile"
+    }
+  ]
+}

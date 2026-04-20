@@ -1,0 +1,57 @@
+{
+  "workflow_id": "novel_creation",
+  "name": "小说创作工作流",
+  "provider": "minimax",
+  "model": "MiniMax-M2.7",
+  "nodes": [
+    {
+      "node_id": "world_building",
+      "type": "world_building",
+      "config": {
+        "genre": "奇幻",
+        "theme": "魔法与冒险"
+      }
+    },
+    {
+      "node_id": "character",
+      "type": "character",
+      "config": {
+        "character_type": "主角"
+      }
+    },
+    {
+      "node_id": "chapter_1",
+      "type": "chapter_generation",
+      "config": {
+        "chapter_number": 1,
+        "chapter_title": "觉醒"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source_node": "world_building",
+      "source_output": "world_description",
+      "target_node": "character",
+      "target_input": "world_description"
+    },
+    {
+      "source_node": "world_building",
+      "source_output": "magic_system",
+      "target_node": "character",
+      "target_input": "magic_system"
+    },
+    {
+      "source_node": "character",
+      "source_output": "character_profile",
+      "target_node": "chapter_1",
+      "target_input": "character_profile"
+    },
+    {
+      "source_node": "world_building",
+      "source_output": "world_description",
+      "target_node": "chapter_1",
+      "target_input": "world_description"
+    }
+  ]
+}

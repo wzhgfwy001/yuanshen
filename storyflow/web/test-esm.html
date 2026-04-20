@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ReactFlow ESM Test</title>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- Load React and ReactDOM as ES modules from CDN -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom": "https://esm.sh/react-dom@18.2.0",
+            "reactflow": "https://esm.sh/reactflow@11.11.3"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        import React from 'react';
+        import ReactDOM from 'react-dom';
+        import { ReactFlow } from 'reactflow';
+        
+        console.log('=== ES Module Test ===');
+        console.log('React:', typeof React);
+        console.log('ReactDOM:', typeof ReactDOM);
+        console.log('ReactFlow:', typeof ReactFlow);
+        console.log('ReactFlow exported:', ReactFlow);
+        
+        if (typeof ReactFlow !== 'undefined') {
+            document.getElementById('root').textContent = 'SUCCESS: ReactFlow loaded via ES Module!';
+        } else {
+            document.getElementById('root').textContent = 'FAIL: ReactFlow not loaded';
+        }
+    </script>
+</body>
+</html>

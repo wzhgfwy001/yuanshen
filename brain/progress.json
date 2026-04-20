@@ -1,13 +1,13 @@
 {
   "meta": {
     "created": "2026-04-16T00:23:00+08:00",
-    "last_updated": "2026-04-16T01:05:00+08:00",
-    "version": 4,
-    "note": "统一状态文件，v4新增Skills进化+用户画像追踪",
+    "last_updated": "2026-04-19T02:00:00+08:00",
+    "version": 5,
+    "note": "v5新增向量数据库双向同步状态 + 失忆问题修复机制（2026-04-19）",
     "migration_source": "SESSION-STATE.md (已并入)",
     "session_state_legacy": {
       "deprecated": true,
-      "migrated_to": "progress.json v4",
+      "migrated_to": "progress.json v5",
       "migrated_at": "2026-04-16T00:28:00+08:00"
     }
   },
@@ -30,6 +30,31 @@
     "default_multi_agent": "复杂任务一律启用多Agent协作",
     "parallel_processing": "多个独立任务同时分配给子Agent",
     "quality_check": "每个任务完成后必须有质量检查"
+  },
+  "vector_sync": {
+    "status": "已完整实现",
+    "two_way": true,
+    "write_function": {
+      "name": "writeAndVectorize()",
+      "location": "skills/auto-router/auto-router-enhanced.js:262",
+      "verified": true,
+      "verified_at": "2026-04-19T01:53:00+08:00"
+    },
+    "delete_function": {
+      "name": "deleteAndRemoveVector()",
+      "location": "skills/auto-router/auto-router-enhanced.js:221",
+      "verified": true,
+      "verified_at": "2026-04-19T01:53:00+08:00"
+    },
+    "delete_script": {
+      "path": "D:/vector_db/delete_from_vector.py",
+      "verified": true,
+      "verified_at": "2026-04-19T01:53:00+08:00"
+    }
+  },
+  "memory_rules": {
+    "compact_recovery": "compact后必须读取brain/progress.json + memory/YYYY-MM-DD.md + SESSION-STATE.md",
+    "task_complete_write": "重要任务完成后必须立即写memory/YYYY-MM-DD.md，禁止先报告后记录"
   },
   "skills_evolution": {
     "task_tracking": {
@@ -204,21 +229,36 @@
       "type": "EXECUTION",
       "confidence": 1,
       "detail": "添加package.json、补充README运行命令、标注模拟演示性质，推送commit 10ec967"
+    },
+    {
+      "step": "AGENTS.md添加Compact Recovery Protocol + 重要任务立即记录规则（2026-04-19）",
+      "timestamp": "2026-04-19T02:00:00+08:00",
+      "source": "元神",
+      "type": "EXECUTION",
+      "confidence": 1,
+      "detail": "为防止失忆问题，新增两个强制机制：1)compact后自动读取记忆 2)重要任务完成后立即记录"
     }
   ],
   "current_state": {
-    "summary": "2026-04-18 完成SOUL.md交互原则优化 + HEARTBEAT.md健康监控增强 + quick-demo修复",
+    "summary": "2026-04-19 修复失忆问题 + 新增记忆保护机制",
     "confidence": "high",
     "blockers": [],
     "next_action": "等待用户下一步指示",
     "today_completed": [
-      "SOUL.md交互原则优化：'先推断，再追问'原则 + 输出模板 + 检查清单 + 回复范例",
-      "HEARTBEAT.md健康监控增强：11项检查，新增健康监控+效率优化",
-      "quick-demo修复：package.json + README运行说明 + 模拟演示标注",
-      "GitHub推送：commit 10ec967"
+      "向量数据库双向同步验证通过：writeAndVectorize()、deleteAndRemoveVector()均已确认存在",
+      "AGENTS.md新增Compact Recovery Protocol和重要任务立即记录规则",
+      "brain/progress.json v5更新完成"
     ]
   },
-  "known_issues": [],
+  "known_issues": [
+    {
+      "issue": "失忆问题",
+      "description": "跨session时brain/progress.json未正确读取导致重复询问已实现功能",
+      "severity": "high",
+      "detected_at": "2026-04-19T01:53:00+08:00",
+      "fix_applied": "AGENTS.md添加Compact Recovery Protocol + memory_rules字段"
+    }
+  ],
   "reasoning_chain": [
     {
       "node": "问题识别：三省六部架构不适合元神",
@@ -248,6 +288,18 @@
       "node": "开始实施阶段1：Skills进化 + 用户画像并行",
       "timestamp": "2026-04-16T01:05:00+08:00",
       "source": "小王同志授权",
+      "confidence": 1
+    },
+    {
+      "node": "失忆问题识别：双向同步已实现但未记住",
+      "timestamp": "2026-04-19T01:53:00+08:00",
+      "source": "用户纠正",
+      "confidence": 1
+    },
+    {
+      "node": "修复措施：AGENTS.md添加Compact Recovery Protocol + memory_rules",
+      "timestamp": "2026-04-19T02:00:00+08:00",
+      "source": "元神",
       "confidence": 1
     }
   ]

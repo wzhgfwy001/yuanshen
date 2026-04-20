@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ReactFlow Test</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="/static/react.production.min.js"></script>
+    <script src="/static/react-dom.production.min.js"></script>
+    <script src="/static/react-flow.min.js"></script>
+    <script>
+        console.log('=== ReactFlow Loading Test ===');
+        console.log('React type:', typeof React);
+        console.log('ReactDOM type:', typeof ReactDOM);
+        console.log('ReactFlow type:', typeof ReactFlow);
+        if (typeof ReactFlow !== 'undefined') {
+            console.log('SUCCESS: ReactFlow is available!');
+            console.log('ReactFlow.Background:', typeof ReactFlow.Background);
+            console.log('ReactFlow.Controls:', typeof ReactFlow.Controls);
+        } else {
+            console.log('FAIL: ReactFlow is NOT available');
+        }
+    </script>
+</body>
+</html>

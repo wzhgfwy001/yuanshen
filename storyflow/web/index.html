@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryFlow - INKOS 5-Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --border: #475569;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #app { height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .workflow-type {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .workflow-type button {
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .workflow-type button.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+        
+        .workflow-type button:hover:not(.active) {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        .api-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+        }
+        
+        .api-status.set { color: var(--accent-green); }
+        .api-status.not-set { color: var(--accent-red); }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-secondary:hover { background: var(--border); }
+        
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* Main Content */
+        .main { flex: 1; display: flex; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .sidebar-tab:hover { color: var(--text-primary); }
+        .sidebar-tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+        
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
+        
+        /* Node Palette */
+        .node-category { margin-bottom: 16px; }
+        
+        .category-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .node-item {
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            cursor: grab;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .node-item:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+        
+        .node-item .node-icon { margin-right: 8px; }
+        
+        .node-item.agent { border-left: 3px solid var(--accent-purple); }
+        .node-item.truth { border-left: 3px solid var(--accent-green); }
+        .node-item.audit { border-left: 3px solid var(--accent-amber); }
+        .node-item.basic { border-left: 3px solid var(--accent-blue); }
+        
+        /* Canvas */
+        .canvas { flex: 1; position: relative; background: var(--bg-primary); }
+        
+        #reactflow { width: 100%; height: 100%; }
+        
+        /* Properties Panel */
+        .properties {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .properties-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+        
+        .properties-content { flex: 1; overflow-y: auto; padding: 16px; }
+        
+        .prop-group { margin-bottom: 16px; }
+        
+        .prop-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        
+        .prop-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        
+        .prop-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+        
+        textarea.prop-input { resize: vertical; min-height: 80px; }
+        
+        select.prop-input { cursor: pointer; }
+        
+        /* Loop Config */
+        .loop-config {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+        
+        .loop-config-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-purple);
+        }
+        
+        .loop-config-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .loop-config-row label { font-size: 12px; color: var(--text-secondary); }
+        
+        /* Output Panel */
+        .output-panel {
+            margin-top: 16px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 300px;
+            overflow: auto;
+        }
+        
+        .output-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-green);
+        }
+        
+        .output-content {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: var(--text-secondary);
+        }
+        
+        /* ReactFlow Custom Styles */
+        .react-flow__node { border-radius: 8px; }
+        
+        .node-header {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .node-body { padding: 10px 14px; font-size: 12px; color: var(--text-secondary); }
+        
+        /* Execution Status */
+        .exec-status {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .exec-status.running { border-color: var(--accent-blue); }
+        .exec-status.success { border-color: var(--accent-green); }
+        .exec-status.error { border-color: var(--accent-red); }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Templates Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+        
+        .template-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .template-card:hover { border-color: var(--accent-blue); }
+        
+        .template-card.selected { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
+        
+        .template-name { font-weight: 600; margin-bottom: 4px; }
+        .template-desc { font-size: 12px; color: var(--text-secondary); }
+        
+        .modal-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 20px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast.error { border-color: var(--accent-red); }
+        .toast.success { border-color: var(--accent-green); }
+        
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script src="/static/react.production.min.js"></script>
+    <script src="/static/react-dom.production.min.js"></script>
+    <script src="/static/react-flow.min.js"></script>
+    
+    <script>
+        const { useState, useEffect, useCallback, useRef } = React;
+        const { 
+            ReactFlow, Background, Controls, MiniMap, 
+            addEdge, useNodesState, useEdgesState,
+            Handle, Position
+        } = ReactFlow;
+        
+        // Custom Node Component
+        function CustomNode({ data, type }) {
+            const colors = {
+                agent: '#8b5cf6',
+                truth: '#10b981', 
+                audit: '#f59e0b',
+                basic: '#3b82f6'
+            };
+            const color = colors[data.category] || colors.basic;
+            
+            return (
+                <div style={{ 
+                    background: '#1e293b', 
+                    border: `2px solid ${color}`,
+                    borderRadius: 8,
+                    minWidth: 180,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}>
+                    <div style={{ 
+                        padding: '10px 14px', 
+                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        fontSize: 13, 
+                        fontWeight: 600,
+                        color: color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                    }}>
+                        <span>{data.icon || '📦'}</span>
+                        <span>{data.label}</span>
+                    </div>
+                    <div style={{ padding: '8px 14px', fontSize: 11, color: '#94a3b8' }}>
+                        {data.description || 'Double-click to configure'}
+                    </div>
+                    
+                    {/* Input Handle */}
+                    <Handle 
+                        type="target" 
+                        position={Position.Left} 
+                        style={{ background: color, width: 8, height: 8 }}
+                    />
+                    
+                    {/* Output Handle */}
+                    <Handle 
+                        type="source" 
+                        position={Position.Right} 
+                        style={{ background: color, width: 8, height: 8 }}
+                    />
+                </div>
+            );
+        }
+        
+        // Node Types
+        const nodeTypes = { custom: CustomNode };
+        
+        // Initial Nodes
+        const initialNodes = [
+            { id: '1', type: 'custom', position: { x: 100, y: 150 }, data: { label: 'World Building', icon: '🌍', category: 'basic', description: 'Generate world setting' } },
+            { id: '2', type: 'custom', position: { x: 400, y: 150 }, data: { label: 'Character', icon: '👤', category: 'basic', description: 'Create characters' } },
+            { id: '3', type: 'custom', position: { x: 700, y: 150 }, data: { label: 'Chapter', icon: '📖', category: 'basic', description: 'Write chapter' } },
+        ];
+        
+        const initialEdges = [
+            { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: '#3b82f6' } },
+            { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: '#3b82f6' } },
+        ];
+        
+        // Main App
+        function App() {
+            const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+            const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+            const [selectedNode, setSelectedNode] = useState(null);
+            const [workflowType, setWorkflowType] = useState('basic');
+            const [isRunning, setIsRunning] = useState(false);
+            const [execResult, setExecResult] = useState(null);
+            const [showTemplates, setShowTemplates] = useState(false);
+            const [apiKeySet, setApiKeySet] = useState(false);
+            const [loopConfig, setLoopConfig] = useState({
+                enabled: true,
+                maxIterations: 3,
+                exitCondition: 'critical_issues == 0'
+            });
+            
+            // Check API status
+            useEffect(() => {
+                fetch('/api/config').then(r => r.json()).then(data => {
+                    setApiKeySet(data.config.api_key_set);
+                });
+            }, []);
+            
+            // Handle edge connection
+            const onConnect = useCallback((params) => {
+                setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#3b82f6' } }, eds));
+            }, [setEdges]);
+            
+            // Handle node click
+            const onNodeClick = useCallback((event, node) => {
+                setSelectedNode(node);
+            }, []);
+            
+            // Handle pane click
+            const onPaneClick = useCallback(() => {
+                setSelectedNode(null);
+            }, []);
+            
+            // Load Template
+            const loadTemplate = (template) => {
+                const newNodes = template.nodes.map(n => ({
+                    id: n.id,
+                    type: 'custom',
+                    position: { x: n.x, y: n.y },
+                    data: { 
+                        label: n.type.charAt(0).toUpperCase() + n.type.slice(1).replace('_', ' '),
+                        icon: getNodeIcon(n.type),
+                        category: getNodeCategory(n.type),
+                        type: n.type,
+                        inputs: {}
+                    }
+                }));
+                
+                const newEdges = template.connections.map((c, i) => ({
+                    id: `e${i}`,
+                    source: c.from_node,
+                    target: c.to_node,
+                    sourceHandle: c.from_port,
+                    targetHandle: c.to_port,
+                    animated: true,
+                    style: { stroke: '#8b5cf6' }
+                }));
+                
+                setNodes(newNodes);
+                setEdges(newEdges);
+                setShowTemplates(false);
+                
+                if (template.loop_config) {
+                    setLoopConfig({
+                        enabled: template.loop_config.enabled,
+                        maxIterations: template.loop_config.max_iterations,
+                        exitCondition: template.loop_config.exit_condition
+                    });
+                }
+                
+                setWorkflowType(template.name === 'INKOS 5-Agent' ? 'inkos' : 'basic');
+                showToast('Template loaded: ' + template.name, 'success');
+            };
+            
+            // Execute Workflow
+            const executeWorkflow = async () => {
+                if (!apiKeySet) {
+                    showToast('Please set API key first', 'error');
+                    return;
+                }
+                
+                setIsRunning(true);
+                setExecResult(null);
+                
+                try {
+                    const config = {
+                        workflow_type: workflowType,
+                        loop_config: loopConfig,
+                        nodes: nodes.map(n => ({
+                            id: n.id,
+                            type: n.data.type || 'unknown',
+                            x: n.position.x,
+                            y: n.position.y,
+                            inputs: n.data.inputs || {}
+                        })),
+                        connections: edges.map(e => ({
+                            from_node: e.source,
+                            from_port: e.sourceHandle,
+                            to_node: e.target,
+                            to_port: e.targetHandle
+                        }))
+                    };
+                    
+                    const response = await fetch('/api/workflow/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ config })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        setExecResult(data);
+                        showToast('Execution completed!', 'success');
+                    } else {
+                        showToast('Error: ' + data.error, 'error');
+                        setExecResult({ error: data.error });
+                    }
+                } catch (err) {
+                    showToast('Request failed: ' + err.message, 'error');
+                } finally {
+                    setIsRunning(false);
+                }
+            };
+            
+            // Update Node Input
+            const updateNodeInput = (key, value) => {
+                if (!selectedNode) return;
+                
+                setNodes(nds => nds.map(n => {
+                    if (n.id === selectedNode.id) {
+                        return {
+                            ...n,
+                            data: {
+                                ...n.data,
+                                inputs: { ...n.data.inputs, [key]: value }
+                            }
+                        };
+                    }
+                    return n;
+                }));
+            };
+            
+            // Delete Node
+            const deleteNode = () => {
+                if (!selectedNode) return;
+                setNodes(nds => nds.filter(n => n.id !== selectedNode.id));
+                setEdges(eds => eds.filter(e => e.source !== selectedNode.id && e.target !== selectedNode.id));
+                setSelectedNode(null);
+            };
+            
+            return (
+                <div id="app">
+                    {/* Header */}
+                    <header className="header">
+                        <div className="header-left">
+                            <div className="logo">StoryFlow</div>
+                            <div className="workflow-type">
+                                <button 
+                                    className={workflowType === 'basic' ? 'active' : ''}
+                                    onClick={() => setWorkflowType('basic')}
+                                >
+                                    Basic
+                                </button>
+                                <button 
+                                    className={workflowType === 'inkos' ? 'active' : ''}
+                                    onClick={() => setWorkflowType('inkos')}
+                                >
+                                    INKOS 5-Agent
+                                </button>
+                            </div>
+                        </div>
+                        <div className="header-right">
+                            <span className={`api-status ${apiKeySet ? 'set' : 'not-set'}`}>
+                                {apiKeySet ? 'API Key Set' : 'No API Key'}
+                            </span>
+                            <button className="btn btn-secondary" onClick={() => setShowTemplates(true)}>
+                                Templates
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => { setNodes(initialNodes); setEdges(initialEdges); setExecResult(null); }}>
+                                Clear
+                            </button>
+                            <button className="btn btn-primary" onClick={executeWorkflow} disabled={isRunning}>
+                                {isRunning ? 'Running...' : 'Execute'}
+                            </button>
+                        </div>
+                    </header>
+                    
+                    {/* Main Content */}
+                    <main className="main">
+                        {/* Sidebar */}
+                        <aside className="sidebar">
+                            <div className="sidebar-tabs">
+                                <div className="sidebar-tab active">Nodes</div>
+                            </div>
+                            <div className="sidebar-content">
+                                <div className="node-category">
+                                    <div className="category-title">INKOS Agents</div>
+                                    <div className="node-item agent" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'agent', icon: '🎯', label: 'Radar', category: 'agent' }))}>
+                                        <span className="node-icon">🎯</span>Radar
+                                    </div>
+                                    <div className="node-item agent" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'architect', icon: '🏛️', label: 'Architect', category: 'agent' }))}>
+                                        <span className="node-icon">🏛️</span>Architect
+                                    </div>
+                                    <div className="node-item agent" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'writer', icon: '✍️', label: 'Writer', category: 'agent' }))}>
+                                        <span className="node-icon">✍️</span>Writer
+                                    </div>
+                                    <div className="node-item audit" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'audit_33d', icon: '🔍', label: 'Audit 33D', category: 'audit' }))}>
+                                        <span className="node-icon">🔍</span>Audit 33D
+                                    </div>
+                                    <div className="node-item audit" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'revise', icon: '🔧', label: 'Reviser', category: 'audit' }))}>
+                                        <span className="node-icon">🔧</span>Reviser
+                                    </div>
+                                </div>
+                                
+                                <div className="node-category">
+                                    <div className="category-title">Truth Files</div>
+                                    <div className="node-item truth" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'current_state', icon: '📍', label: 'Current State', category: 'truth' }))}>
+                                        <span className="node-icon">📍</span>Current State
+                                    </div>
+                                    <div className="node-item truth" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'character_matrix', icon: '👥', label: 'Character Matrix', category: 'truth' }))}>
+                                        <span className="node-icon">👥</span>Character Matrix
+                                    </div>
+                                    <div className="node-item truth" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'pending_hooks', icon: '🎣', label: 'Pending Hooks', category: 'truth' }))}>
+                                        <span className="node-icon">🎣</span>Pending Hooks
+                                    </div>
+                                </div>
+                                
+                                <div className="node-category">
+                                    <div className="category-title">Basic Nodes</div>
+                                    <div className="node-item basic" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'world_building', icon: '🌍', label: 'World Building', category: 'basic' }))}>
+                                        <span className="node-icon">🌍</span>World Building
+                                    </div>
+                                    <div className="node-item basic" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'character', icon: '👤', label: 'Character', category: 'basic' }))}>
+                                        <span className="node-icon">👤</span>Character
+                                    </div>
+                                    <div className="node-item basic" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', JSON.stringify({ type: 'chapter_generation', icon: '📖', label: 'Chapter', category: 'basic' }))}>
+                                        <span className="node-icon">📖</span>Chapter
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                        
+                        {/* Canvas */}
+                        <div className="canvas">
+                            <ReactFlow
+                                nodes={nodes}
+                                edges={edges}
+                                onNodesChange={onNodesChange}
+                                onEdgesChange={onEdgesChange}
+                                onConnect={onConnect}
+                                onNodeClick={onNodeClick}
+                                onPaneClick={onPaneClick}
+                                nodeTypes={nodeTypes}
+                                onDragOver={(event) => event.preventDefault()}
+                                onDrop={(event) => {
+                                    event.preventDefault();
+                                    const data = JSON.parse(event.dataTransfer.getData('application/reactflow'));
+                                    const position = { x: event.clientX - 280, y: event.clientY - 50 };
+                                    
+                                    const newNode = {
+                                        id: `node_${Date.now()}`,
+                                        type: 'custom',
+                                        position,
+                                        data: { 
+                                            label: data.label, 
+                                            icon: data.icon,
+                                            category: data.category,
+                                            type: data.type,
+                                            inputs: {}
+                                        }
+                                    };
+                                    setNodes(nds => [...nds, newNode]);
+                                }}
+                                fitView
+                            >
+                                <Background color="#334155" gap={20} />
+                                <Controls />
+                                <MiniMap nodeColor={(n) => {
+                                    const colors = { agent: '#8b5cf6', truth: '#10b981', audit: '#f59e0b', basic: '#3b82f6' };
+                                    return colors[n.data.category] || '#3b82f6';
+                                }} />
+                            </ReactFlow>
+                            
+                            {/* Execution Status */}
+                            {isRunning && (
+                                <div className="exec-status running">
+                                    <div className="spinner"></div>
+                                    <span>Executing workflow...</span>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Properties Panel */}
+                        <aside className="properties">
+                            <div className="properties-header">
+                                {selectedNode ? 'Node Properties' : 'Properties'}
+                            </div>
+                            <div className="properties-content">
+                                {selectedNode ? (
+                                    <>
+                                        <div className="prop-group">
+                                            <div className="prop-label">Node Type</div>
+                                            <input 
+                                                className="prop-input" 
+                                                value={selectedNode.data.label} 
+                                                disabled 
+                                            />
+                                        </div>
+                                        
+                                        {selectedNode.data.type === 'radar' && (
+                                            <>
+                                                <div className="prop-group">
+                                                    <div className="prop-label">Genre (题材)</div>
+                                                    <input 
+                                                        className="prop-input" 
+                                                        placeholder="e.g., 玄幻, 都市"
+                                                        onChange={(e) => updateNodeInput('genre', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="prop-group">
+                                                    <div className="prop-label">Platform (平台)</div>
+                                                    <input 
+                                                        className="prop-input" 
+                                                        placeholder="e.g., 起点, 晋江"
+                                                        onChange={(e) => updateNodeInput('platform', e.target.value)}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.data.type === 'architect' && (
+                                            <>
+                                                <div className="prop-group">
+                                                    <div className="prop-label">Chapter Number</div>
+                                                    <input 
+                                                        className="prop-input" 
+                                                        type="number"
+                                                        defaultValue={1}
+                                                        onChange={(e) => updateNodeInput('chapter_number', parseInt(e.target.value))}
+                                                    />
+                                                </div>
+                                                <div className="prop-group">
+                                                    <div className="prop-label">Target Words</div>
+                                                    <input 
+                                                        className="prop-input" 
+                                                        type="number"
+                                                        defaultValue={3000}
+                                                        onChange={(e) => updateNodeInput('target_words', parseInt(e.target.value))}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.data.type === 'writer' && (
+                                            <>
+                                                <div className="prop-group">
+                                                    <div className="prop-label">Writing Style</div>
+                                                    <select className="prop-input" onChange={(e) => updateNodeInput('style', e.target.value)}>
+                                                        <option value="immersive">沉浸式</option>
+                                                        <option value="fast-paced">快节奏</option>
+                                                        <option value="lyrical">抒情诗</option>
+                                                    </select>
+                                                </div>
+                                                <div className="prop-group">
+                                                    <div className="prop-label">Pacing</div>
+                                                    <select className="prop-input" onChange={(e) => updateNodeInput('pacing', e.target.value)}>
+                                                        <option value="balanced">平衡</option>
+                                                        <option value="fast">快节奏</option>
+                                                        <option value="slow">慢节奏</option>
+                                                    </select>
+                                                </div>
+                                            </>
+                                        )}
+                                        
+                                        {selectedNode.data.type === 'audit_33d' && (
+                                            <div className="prop-group">
+                                                <div className="prop-label">Strict Mode</div>
+                                                <select className="prop-input" onChange={(e) => updateNodeInput('strict_mode', e.target.value === 'true')}>
+                                                    <option value="true">Enabled</option>
+                                                    <option value="false">Disabled</option>
+                                                </select>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Loop Config for INKOS */}
+                                        {workflowType === 'inkos' && (
+                                            <div className="loop-config">
+                                                <div className="loop-config-title">Loop Configuration</div>
+                                                <div className="loop-config-row">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="loopEnabled"
+                                                        checked={loopConfig.enabled}
+                                                        onChange={(e) => setLoopConfig({...loopConfig, enabled: e.target.checked})}
+                                                    />
+                                                    <label htmlFor="loopEnabled">Enable Revision Loop</label>
+                                                </div>
+                                                <div className="loop-config-row">
+                                                    <label>Max Iterations:</label>
+                                                    <input 
+                                                        type="number" 
+                                                        className="prop-input" 
+                                                        style={{width: 60}}
+                                                        value={loopConfig.maxIterations}
+                                                        onChange={(e) => setLoopConfig({...loopConfig, maxIterations: parseInt(e.target.value)})}
+                                                    />
+                                                </div>
+                                                <div className="loop-config-row">
+                                                    <label style={{fontSize: 11}}>Exit: critical_issues == 0</label>
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        <button className="btn btn-secondary" style={{marginTop: 16, width: '100%', color: '#ef4444'}} onClick={deleteNode}>
+                                            Delete Node
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div style={{color: '#94a3b8', textAlign: 'center', marginTop: 40}}>
+                                        Click a node to edit its properties
+                                    </div>
+                                )}
+                                
+                                {/* Execution Output */}
+                                {execResult && (
+                                    <div className="output-panel">
+                                        <div className="output-title">Execution Result</div>
+                                        <div className="output-content">
+                                            {execResult.error 
+                                                ? `Error: ${execResult.error}` 
+                                                : JSON.stringify(execResult.results, null, 2)
+                                            }
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </aside>
+                    </main>
+                    
+                    {/* Templates Modal */}
+                    {showTemplates && (
+                        <div className="modal-overlay" onClick={() => setShowTemplates(false)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <span>Workflow Templates</span>
+                                    <button onClick={() => setShowTemplates(false)}>X</button>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="template-card selected" onClick={() => loadTemplate({
+                                        name: 'INKOS 5-Agent',
+                                        nodes: [
+                                            { id: 'radar', type: 'radar', x: 100, y: 100 },
+                                            { id: 'architect', type: 'architect', x: 350, y: 100 },
+                                            { id: 'writer', type: 'writer', x: 600, y: 100 },
+                                            { id: 'auditor', type: 'audit_33d', x: 850, y: 100 },
+                                            { id: 'reviser', type: 'revise', x: 1100, y: 100 },
+                                        ],
+                                        connections: [
+                                            { from_node: 'radar', from_port: 'story_direction', to_node: 'architect', to_port: 'market_context' },
+                                            { from_node: 'architect', from_port: 'chapter_outline', to_node: 'writer', to_port: 'chapter_outline' },
+                                            { from_node: 'architect', from_port: 'truth_context', to_node: 'writer', to_port: 'truth_context' },
+                                            { from_node: 'writer', from_port: 'chapter_draft', to_node: 'auditor', to_port: 'chapter_draft' },
+                                            { from_node: 'writer', from_port: 'state_update', to_node: 'auditor', to_port: 'truth_files' },
+                                            { from_node: 'auditor', from_port: 'audit_report', to_node: 'reviser', to_port: 'audit_result' },
+                                            { from_node: 'writer', from_port: 'chapter_draft', to_node: 'reviser', to_port: 'draft' },
+                                        ],
+                                        loop_config: { enabled: true, loop_nodes: ['reviser', 'auditor'], max_iterations: 3, exit_condition: 'critical_issues == 0' }
+                                    })}>
+                                        <div className="template-name">INKOS 5-Agent</div>
+                                        <div className="template-desc">Complete AI novel creation pipeline with market analysis, outline design, chapter writing, 33-dimension audit, and iterative revision.</div>
+                                    </div>
+                                    
+                                    <div className="template-card" onClick={() => loadTemplate({
+                                        name: 'Basic Novel',
+                                        nodes: [
+                                            { id: 'world', type: 'world_building', x: 100, y: 150 },
+                                            { id: 'character', type: 'character', x: 400, y: 150 },
+                                            { id: 'chapter', type: 'chapter_generation', x: 700, y: 150 },
+                                        ],
+                                        connections: [
+                                            { from_node: 'world', from_port: 'world_description', to_node: 'character', to_port: 'world_description' },
+                                            { from_node: 'character', from_port: 'character_profile', to_node: 'chapter', to_port: 'character_profile' },
+                                            { from_node: 'world', from_port: 'world_description', to_node: 'chapter', to_port: 'world_description' },
+                                        ]
+                                    })}>
+                                        <div className="template-name">Basic Novel Generation</div>
+                                        <div className="template-desc">Simple novel creation flow: world building - character creation - chapter writing.</div>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="btn btn-secondary" onClick={() => setShowTemplates(false)}>Cancel</button>
+                                    <button className="btn btn-primary" onClick={() => setShowTemplates(false)}>Select Template</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        // Helper Functions
+        function getNodeIcon(type) {
+            const icons = {
+                radar: '🎯', architect: '🏛️', writer: '✍️',
+                audit_33d: '🔍', revise: '🔧',
+                current_state: '📍', character_matrix: '👥', pending_hooks: '🎣',
+                world_building: '🌍', character: '👤', chapter_generation: '📖'
+            };
+            return icons[type] || '📦';
+        }
+        
+        function getNodeCategory(type) {
+            if (['radar', 'architect', 'writer'].includes(type)) return 'agent';
+            if (['audit_33d', 'revise'].includes(type)) return 'audit';
+            if (['current_state', 'character_matrix', 'pending_hooks'].includes(type)) return 'truth';
+            return 'basic';
+        }
+        
+        let toastTimeout;
+        function showToast(message, type = 'info') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>

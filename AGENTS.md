@@ -60,6 +60,26 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - When you make a mistake → document it in `learnings/errors.json`
 - **Text > Brain** 📝
 
+### 🗃️ 向量数据库一致性维护（强制执行）
+
+**背景：** 向量数据库与文件系统需要保持同步，否则会出现"失忆"或"幽灵数据"
+
+**规则：**
+1. **删除文件前**：必须先调用 `deleteAndRemoveVector()` 清理对应向量
+2. **重命名文件前**：先删旧向量，再建新向量（分开两步）
+3. **定期检查**：运行 `python D:/vector_db/check_consistency.py` 检查一致性
+4. **发现问题**：立即运行 `python D:/vector_db/cleanup_orphans.py` 清理孤儿向量
+
+**孤儿向量产生原因：**
+- 文件已删除但向量未清理（未调用 `deleteAndRemoveVector()`）
+- 状态迁移（如 `SESSION-STATE.md` → `brain/progress.json`）时旧向量残留
+
+**触发时机：**
+- 删除任何 brain/memory/skills 目录下的文件前
+- 进行状态迁移或文件重构前
+- 每次 heartbeat 时（自动检查）
+- 用户询问"向量数据库一致吗"时立即检查
+
 ### 🛡️ WAL Protocol - Write Before Responding
 
 **When user says:**
@@ -77,6 +97,48 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 2. START fresh logging
 3. EVERY exchange after 60% → log to `working-buffer.md`
 4. After compaction → READ `working-buffer.md` FIRST to recover
+
+---
+
+### 🔄 Compact Recovery Protocol（强制执行）
+
+**触发条件：** 收到"Pre-compaction memory flush"消息后，在恢复响应前必须执行
+
+**执行步骤：**
+1. 完成 memory flush 写入后
+2. 重新读取 `brain/progress.json`（获取最新状态）
+3. 重新读取 `memory/YYYY-MM-DD.md`（今日记忆）
+4. 重新读取 `SESSION-STATE.md`（如有WAL条目）
+5. 然后才响应用户
+
+**目的：** 防止"失忆"——compact后丢失关键状态
+
+---
+
+### 📝 重要任务立即记录规则（强制执行）
+
+**触发条件：** 完成任何重要任务后，在报告"完成"前
+
+**执行步骤：**
+1. 任务完成 → 立即写 memory/YYYY-MM-DD.md
+2. 重要决策 → 立即写 brain/decisions/
+3. 状态变更 → 立即更新 brain/progress.json
+4. 然后才报告用户"已完成"
+
+**禁止行为：** ❌ 任务完成后不记录就报告"完成"
+**理由：** "Mental notes don't survive session restarts. Files do."
+
+---
+
+### 🛡️ WAL Protocol - Write Before Responding
+
+**When user says:**
+- "It's X, not Y" / "Actually..." / "No, I meant..." → Write to `SESSION-STATE.md` FIRST
+- Decisions → Write to `SESSION-STATE.md` FIRST
+- Preferences → Write to `SESSION-STATE.md` FIRST
+- Proper nouns (names, places, products) → Write to `SESSION-STATE.md` FIRST
+
+**Rule: STOP → WRITE → THEN respond**
 
 ## 🔍 Verify Before Reporting (VBR)
 
