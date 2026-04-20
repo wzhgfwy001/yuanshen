@@ -1,0 +1,128 @@
+[
+  {
+    "id": "c5dbab2399fa5406",
+    "title": "未命名模式",
+    "type": "pattern",
+    "content": "待提炼\n\n## 相关模式\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "3753f46691698002",
+    "title": "数据分析模式",
+    "type": "pattern",
+    "content": "---\nid: pattern-data_analysis\ncreated_at: 2026-04-20T19:27:57.372317\nagent: 艾斯\ntype: data_analysis\ntags: [data_analysis]\ntrigger_count: 0\nsuccess_rate: 1.0\n---\n\n# 数据分析模式\n\n## 适用场景\n收集、清洗和分析数据\n\n## 触发条件\n- 需要data_analysis的场景\n- Agent为艾斯的任务\n\n## 执行步骤\n1. 定义分析目标\n2. 收集数据\n3. 清洗和验证数据\n4. 探索性分析\n5. 生成分析报告\n\n## 成功案例\n待补充实际案例\n\n## 关键要点\n- 每步要有明确目标\n- 注意依赖关系\n- 及时验证结果\n\n## 相关模式\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "data_analysis"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "2f5ea23a9bc35f50",
+    "title": "代码实现最佳实践模式",
+    "type": "pattern",
+    "content": "---\nid: pattern-implementation\ncreated_at: 2026-04-20T19:27:57.372026\nagent: 白哉\ntype: implementation\ntags: [implementation]\ntrigger_count: 0\nsuccess_rate: 1.0\n---\n\n# 代码实现最佳实践模式\n\n## 适用场景\n编写高质量、可维护的代码\n\n## 触发条件\n- 需要implementation的场景\n- Agent为白哉的任务\n\n## 执行步骤\n1. 分析需求和技术约束\n2. 设计代码结构\n3. 编写清晰的注释\n4. 实现核心逻辑\n5. 添加错误处理\n6. 编写测试用例\n\n## 成功案例\n待补充实际案例\n\n## 关键要点\n- 每步要有明确目标\n- 注意依赖关系\n- 及时验证结果\n\n## 相关模式\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "implementation"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "eb631fb2c7a1d85b",
+    "title": "内容创作模式",
+    "type": "pattern",
+    "content": "---\nid: pattern-writing\ncreated_at: 2026-04-20T19:27:57.372793\nagent: 山寺三郎\ntype: writing\ntags: [writing]\ntrigger_count: 0\nsuccess_rate: 1.0\n---\n\n# 内容创作模式\n\n## 适用场景\n创作高质量的内容\n\n## 触发条件\n- 需要writing的场景\n- Agent为山寺三郎的任务\n\n## 执行步骤\n1. 明确受众和目的\n2. 收集素材和灵感\n3. 构建内容框架\n4. 撰写内容\n5. 审核和修改\n\n## 成功案例\n待补充实际案例\n\n## 关键要点\n- 每步要有明确目标\n- 注意依赖关系\n- 及时验证结果\n\n## 相关模式\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "writing"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "a51ce85b7d7b7fa6",
+    "title": "复杂任务分解模式",
+    "type": "pattern",
+    "content": "---\nid: pattern-task_decomposition\ncreated_at: 2026-04-20T19:27:57.371737\nagent: 鹿丸\ntype: task_decomposition\ntags: [task_decomposition]\ntrigger_count: 0\nsuccess_rate: 1.0\n---\n\n# 复杂任务分解模式\n\n## 适用场景\n将复杂任务分解为可执行的子任务\n\n## 触发条件\n- 需要task_decomposition的场景\n- Agent为鹿丸的任务\n\n## 执行步骤\n1. 分析任务目标和约束\n2. 识别关键里程碑\n3. 分解为可管理的子任务\n4. 评估子任务依赖关系\n5. 分配子任务给合适的Agent\n\n## 成功案例\n待补充实际案例\n\n## 关键要点\n- 每步要有明确目标\n- 注意依赖关系\n- 及时验证结果\n\n## 相关模式\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "task_decomposition"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "21b4c438a24fb4fc",
+    "title": "未命名教训",
+    "type": "lesson",
+    "content": "无\n\n## 相关教训\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "a5084a31b448e607",
+    "title": "数据源不可靠教训",
+    "type": "lesson",
+    "content": "---\nid: lesson-data_source\ncreated_at: 2026-04-20T19:27:57.373685\nagent: 艾斯\ntype: data_source\nseverity: high\ntags: [data_source]\noccurrence_count: 1\nresolved: false\n---\n\n# 数据源不可靠教训\n\n## 问题描述\n数据源不稳定导致分析失败\n\n## 根本原因\n没有验证数据源的可靠性\n\n## 影响范围\n待评估\n\n## 解决方案\n评估数据源质量和稳定性\n\n## 预防措施\n- 测试数据源可用性\n- 设计数据备份方案\n- 提供备用数据源\n\n## 关键警示\n⚠️ **⚠️ 不要完全依赖单一数据源**\n⚠️ **⚠️ 数据质量决定分析质量**\n\n## 相关教训\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "data_source"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "d8fd1ecf1aaa3ae3",
+    "title": "数据验证缺失教训",
+    "type": "lesson",
+    "content": "---\nid: lesson-data_validation\ncreated_at: 2026-04-20T19:27:57.373240\nagent: 白哉\ntype: data_validation\nseverity: medium\ntags: [data_validation]\noccurrence_count: 1\nresolved: false\n---\n\n# 数据验证缺失教训\n\n## 问题描述\n处理数据时未验证格式导致错误\n\n## 根本原因\n假设数据格式正确\n\n## 影响范围\n待评估\n\n## 解决方案\n添加数据验证逻辑\n\n## 预防措施\n- 验证数据格式\n- 处理边界情况\n- 提供默认值\n\n## 关键警示\n⚠️ **⚠️ 不要假设数据格式正确**\n⚠️ **⚠️ 输入验证是必要的**\n\n## 相关教训\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "data_validation"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "a7d6755a3a092dbd",
+    "title": "API调用超时教训",
+    "type": "lesson",
+    "content": "---\nid: lesson-api_timeout\ncreated_at: 2026-04-20T19:27:57.373010\nagent: 白哉\ntype: api_timeout\nseverity: high\ntags: [api_timeout]\noccurrence_count: 1\nresolved: false\n---\n\n# API调用超时教训\n\n## 问题描述\n外部API调用未设置超时导致长时间阻塞\n\n## 根本原因\n没有为API调用设置超时参数\n\n## 影响范围\n待评估\n\n## 解决方案\n设置合理的超时时间（10-30秒）\n\n## 预防措施\n- 所有外部API调用必须设置超时\n- 实现重试机制\n- 提供降级方案\n\n## 关键警示\n⚠️ **⚠️ 不要假设API总是可用**\n⚠️ **⚠️ 超时设置要合理，不宜过长**\n\n## 相关教训\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "api_timeout"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "5e66a3dd04cf51f9",
+    "title": "需求不明确教训",
+    "type": "lesson",
+    "content": "---\nid: lesson-task_clarity\ncreated_at: 2026-04-20T19:27:57.373459\nagent: 鹿丸\ntype: task_clarity\nseverity: medium\ntags: [task_clarity]\noccurrence_count: 1\nresolved: false\n---\n\n# 需求不明确教训\n\n## 问题描述\n任务需求不明确导致返工\n\n## 根本原因\n没有充分确认用户需求\n\n## 影响范围\n待评估\n\n## 解决方案\n任务开始前明确验收标准\n\n## 预防措施\n- 需求不明确时立即提问\n- 提供多个方案供用户选择\n- 明确交付标准\n\n## 关键警示\n⚠️ **⚠️ 不要猜测用户意图**\n⚠️ **⚠️ 主动沟通避免返工**\n\n## 相关教训\n待补充\n\n## 改进建议\n待补充\n",
+    "tags": [
+      "task_clarity"
+    ],
+    "created_at": "",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  }
+]

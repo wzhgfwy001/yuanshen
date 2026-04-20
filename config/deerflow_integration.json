@@ -1,0 +1,18 @@
+{
+  "deerflow": {
+    "enabled": false,
+    "api_base_url": "http://localhost:8080",
+    "timeout": 300,
+    "max_retries": 3
+  },
+  "research_tasks": {
+    "auto_delegate": false,
+    "complexity_threshold": 3,
+    "time_threshold_minutes": 15
+  },
+  "output_formats": {
+    "report": true,
+    "podcast": false,
+    "presentation": false
+  }
+}

@@ -62,7 +62,9 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 
 ### 🗃️ 向量数据库一致性维护（强制执行）
 
+
 **背景：** 向量数据库与文件系统需要保持同步，否则会出现"失忆"或"幽灵数据"
+
 
 **规则：**
 1. **删除文件前**：必须先调用 `deleteAndRemoveVector()` 清理对应向量
@@ -79,6 +81,46 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - 进行状态迁移或文件重构前
 - 每次 heartbeat 时（自动检查）
 - 用户询问"向量数据库一致吗"时立即检查
+
+### 🧠 阳神经验学习系统（融合升级）
+
+**来源：** 借鉴Hermes Agent自进化闭环 + claude-mem跨会话记忆 + DeerFlow深度研究 + Karpathy行为准则
+
+**核心文件：**
+```
+scripts/yangshen/
+├── __init__.py              # 统一接口 YangshenLearning
+├── learn_from_experience.py # 经验学习引擎
+├── yangshen_integration.py  # 系统集成层
+├── knowledge_graph.py       # 知识图谱
+├── deerflow_bridge.py       # DeerFlow桥接器
+└── historical_learner.py    # 历史学习器
+```
+
+**Brain新增目录：**
+```
+brain/
+├── patterns/              # 成功模式（7个）
+├── lessons/               # 失败教训（6个）
+├── common_knowledge/       # 通用知识
+├── user_preferences/       # 用户偏好
+└── knowledge_graph/        # 知识图谱数据
+    ├── nodes.json
+    ├── relations.json
+    └── graph.dot
+```
+
+**使用方式：**
+```python
+from scripts.yangshen import create_learning_system
+
+system = create_learning_system()
+stats = system.get_statistics()
+patterns = system.get_patterns()
+lessons = system.get_lessons()
+```
+
+**行为准则：** `YANGSHEN-GUIDELINES.md` - 基于Karpathy四大原则
 
 ### 🛡️ WAL Protocol - Write Before Responding
 
