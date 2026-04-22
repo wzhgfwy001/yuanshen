@@ -1,330 +1,338 @@
 # StoryFlow 项目完成报告
 
+**版本**: v1.2.0  
+**更新日期**: 2026-04-20  
+**项目状态**: ✅ 已完成并持续迭代
+
+---
+
 ## 📋 项目概述
 
-**项目名称**: StoryFlow - 轻量级节点工作流引擎
-**完成日期**: 2026-04-19
-**开发模式**: Python 3.10+
-**LLM 后端**: 通义千问 API (modelstudio/qwen3.5-plus)
+| 项目 | 说明 |
+|------|------|
+| **项目名称** | StoryFlow - 智能小说创作工作流引擎 |
+| **核心能力** | 多Agent协作 · 33维度审计 · AI痕迹检测 · 真相文件驱动 |
+| **开发语言** | Python 3.10+ |
+| **LLM支持** | MiniMax-M2.7 / 通义千问 / OpenAI |
+| **更新** | 2026-04-20: inkos → storyflow 全面重命名 |
+
+---
 
 ## ✅ 交付成果
 
-### 1. 核心引擎 (engine.py) - 237 行
-- ✅ Node 类：节点基类，支持输入/输出定义和执行
-- ✅ NodeInput/NodeOutput：输入输出端口定义
-- ✅ NodeResult：执行结果封装
-- ✅ LLMNode：LLM 节点基类，内置通义千问 API 调用
-- ✅ Workflow：工作流管理，支持拓扑排序和数据传播
-- ✅ Engine：执行引擎，支持异步执行和日志记录
+### 1. 核心引擎 (engine.py) - 627行
+- ✅ Node 基类：输入/输出/execute
+- ✅ LLMNode：内置LLM调用
+- ✅ ProviderFactory：多提供商支持
+- ✅ Workflow：工作流管理+拓扑排序
+- ✅ Engine：异步执行引擎
+- ✅ LoopEngine：循环迭代引擎
+- ✅ Checkpoint：断点续传
 
-**关键功能**:
-- 节点类定义（输入/输出/处理函数）
-- 节点连接和数据传递
-- 工作流执行引擎
-- 拓扑排序和循环依赖检测
-- 详细的执行日志
+### 2. 基础节点 (nodes.py) - 20318字节
+- ✅ WorldBuildingNode：世界观生成
+- ✅ CharacterNode：角色生成
+- ✅ ChapterGenerationNode：章节生成
+- ✅ SceneNode：场景生成
+- ✅ DialogueNode：对话生成
+- ✅ OutlineNode：大纲生成
+- ✅ ReviseNode：修订节点
+- ✅ PlotNode：情节规划
 
-### 2. 示例节点类 (nodes.py) - 186 行
-- ✅ WorldBuildingNode：世界观生成节点
-- ✅ CharacterNode：角色生成节点
-- ✅ ChapterGenerationNode：章节生成节点
-- ✅ SimpleNode：简单节点示例
+### 3. 高级节点 (storyflow_nodes.py) - 52168字节
+- ✅ AI痕迹检测：AITraceDetector
+- ✅ AI痕迹去除：AITraceRemover
+- ✅ 33维度审计：AuditNode
+- ✅ 真相文件：CurrentStateNode, CharacterMatrixNode等
+- ✅ 5-Agent协作：ArchitectNode, WriterNode, RadarNode等
 
-**工作流示例**:
-```
-世界观生成 → 角色生成 → 章节生成
-     ↓             ↓            ↓
-世界描述      角色档案      章节内容
-魔法体系      角色动机      字数统计
-```
+### 4. Web界面 (web/)
+- ✅ React Flow 可视化
+- ✅ 实时执行监控
+- ✅ FastAPI后端
 
-### 3. 工作流配置文件 (workflow_config.json) - 43 行
-- ✅ JSON 格式配置
-- ✅ 3 个节点定义
-- ✅ 4 条连接关系
-- ✅ 配置驱动的节点初始化
+### 5. 文档
+- ✅ README.md - 完整项目文档
+- ✅ PROJECT_SUMMARY.md - 本文档
+- ✅ QUICKSTART.md - 快速开始
+- ✅ DELIVERY.md - 交付清单
+- ✅ WEB-UI.md - Web界面说明
+- ✅ PROMPT_DESIGN.md - 提示词设计
 
-### 4. README 文档 (README.md) - 5.3KB
-- ✅ 项目介绍和特性
-- ✅ 安装和快速开始
-- ✅ 核心概念说明
-- ✅ 自定义节点教程
-- ✅ 工作流配置说明
-- ✅ 调试技巧
-- ✅ 示例节点详解
-
-### 5. 额外交付物
-
-#### 主入口文件 (main.py) - 145 行
-- ✅ 从 JSON 加载工作流配置
-- ✅ 节点工厂模式
-- ✅ 执行演示和结果展示
-- ✅ 详细的执行过程输出
-
-#### 单元测试 (test_basic.py) - 175 行
-- ✅ 基本工作流执行测试
-- ✅ 拓扑排序正确性测试
-- ✅ 循环依赖检测测试
-- ✅ 输入验证测试
-- ✅ **所有测试通过**
-
-#### 快速开始指南 (QUICKSTART.md) - 6.9KB
-- ✅ 项目概览和代码统计
-- ✅ 三步上手指南
-- ✅ 详细的使用示例
-- ✅ 工作流配置格式
-- ✅ 常见问题解答
-
-#### 交付清单 (DELIVERY.md) - 9.1KB
-- ✅ 完整的交付物清单
-- ✅ 代码统计
-- ✅ 架构设计说明
-- ✅ 测试结果
-- ✅ 技术亮点
-
-## 📊 代码统计
-
-| 组件 | 文件 | 行数 | 大小 |
-|------|------|------|------|
-| 核心引擎 | engine.py | 237 | 7.3KB |
-| 示例节点 | nodes.py | 186 | 6.6KB |
-| 主程序 | main.py | 145 | 4.4KB |
-| 单元测试 | test_basic.py | 175 | 4.8KB |
-| 配置文件 | workflow_config.json | 43 | 1.4KB |
-| **总计** | **核心代码** | **743** | **~24KB** |
-
-## 🎯 技术要求达成情况
-
-| 要求 | 状态 | 说明 |
-|------|------|------|
-| Python 3.10+ | ✅ | 使用现代 Python 特性 |
-| 核心类：Node, Workflow, Engine | ✅ | 完整实现 |
-| 通义千问 API 作为 LLM 后端 | ✅ | LLMNode 类内置支持 |
-| JSON 格式工作流配置 | ✅ | workflow_config.json |
-| 节点类定义（输入/输出/处理函数） | ✅ | Node 类完整实现 |
-| 节点连接和数据传递 | ✅ | Workflow.propagate_to_node() |
-| 工作流执行引擎 | ✅ | Engine.execute() |
-| 示例：世界观→角色→章节生成 | ✅ | 完整实现并测试 |
-
-## 🧪 测试结果
-
-### 单元测试 (test_basic.py)
-
-```
-============================================================
-🧪 StoryFlow 单元测试
-============================================================
-
-🧪 测试 1: 基本工作流
-✅ 执行成功: True
-   节点1结果: {'result': 10}
-   节点2结果: {'result': 20}
-   节点3结果: {'sum': 30}
-   ✓ 测试通过
-
-🧪 测试 2: 拓扑排序
-✅ 执行顺序: ['node1', 'node2', 'node3']
-   ✓ 拓扑排序正确
-
-🧪 测试 3: 循环依赖检测
-✅ 正确检测到循环依赖: 工作流存在循环依赖
-   ✓ 循环依赖检测正确
-
-🧪 测试 4: 输入验证
-✅ 正确检测到缺失输入: 节点 测试节点1 (node1) 输入不完整
-   ✓ 输入验证正确
-
-============================================================
-✅ 所有测试通过！
-============================================================
-```
-
-**测试覆盖率**:
-- ✅ 基本工作流执行：通过
-- ✅ 拓扑排序正确性：通过
-- ✅ 循环依赖检测：通过
-- ✅ 输入验证：通过
-- ✅ 数据传播：通过
-- **测试通过率**: 100%
+---
 
 ## 🏗️ 架构设计
 
 ### 核心架构
 
 ```
-用户层
-   ↓
-配置层 (JSON)
-   ↓
-工作流层 (Workflow)
-   ↓
-执行层 (Engine)
-   ↓
-节点层 (Node/LLMNode)
-   ↓
-服务层 (通义千问 API)
+用户层（题材/平台/章节数）
+         ↓
+配置层（workflow_config.json）
+         ↓
+工作流层（Workflow + 拓扑排序）
+         ↓
+执行层（Engine/LoopEngine + 多Agent）
+         ↓
+节点层（基础节点 + 高级节点）
+         ↓
+服务层（MiniMax / 通义千问 / OpenAI）
 ```
 
-### 数据流
+### 5-Agent协作架构
 
 ```
-输入数据 → 节点验证 → 节点执行 → 输出数据 → 数据传播 → 下一个节点
-                                      ↓
-                                   执行日志
+┌─────────────────────────────────────┐
+│       storyflow 5-Agent 工作流       │
+├─────────────────────────────────────┤
+│  🧠 Architect - 世界观构建           │
+│  📡 Radar - 质量监控                │
+│  ✍️ Writer - 内容创作               │
+│  🔍 Auditor - 33维度审计             │
+│  🔧 Reviser - 修订优化              │
+└─────────────────────────────────────┘
 ```
-
-### 关键算法
-
-1. **拓扑排序** (Kahn 算法)
-   - 计算入度
-   - 队列处理
-   - 循环依赖检测
-
-2. **数据传播**
-   - 基于连接关系
-   - 按需传播
-   - 类型验证
-
-3. **执行调度**
-   - 按拓扑顺序执行
-   - 异步执行支持
-   - 错误处理
-
-## 🚀 使用方式
-
-### 快速开始（3 步）
-
-1. **安装依赖**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **配置 API Key**
-   ```python
-   # 编辑 main.py
-   API_KEY = "your-api-key-here"
-   MODEL = "modelstudio/qwen3.5-plus"
-   ```
-
-3. **运行示例**
-   ```bash
-   # 运行完整工作流（需要 API Key）
-   python main.py
-
-   # 运行单元测试（不需要 API Key）
-   python test_basic.py
-   ```
-
-### 自定义节点示例
-
-```python
-from engine import Node, NodeResult
-
-class MyNode(Node):
-    def __init__(self, node_id: str):
-        super().__init__(node_id, "我的节点")
-        self.add_input("data", "str", True)
-        self.add_output("result", "str")
-
-    def execute(self) -> NodeResult:
-        data = self.input_values.get("data", "")
-        result = data.upper()
-        return NodeResult(success=True, data={"result": result})
-```
-
-## 📚 文档清单
-
-1. ✅ `README.md` (5.3KB) - 完整项目文档
-2. ✅ `QUICKSTART.md` (6.9KB) - 快速开始指南
-3. ✅ `DELIVERY.md` (9.1KB) - 交付清单
-4. ✅ 代码注释 - 所有关键函数都有详细注释
-
-## 💡 技术亮点
-
-1. **设计模式**
-   - 工厂模式：节点创建
-   - 模板方法：execute() 抽象
-   - 策略模式：不同节点类型
-
-2. **核心算法**
-   - 拓扑排序：Kahn 算法
-   - 依赖解析：入度计算
-   - 数据传播：按需传递
-
-3. **异步编程**
-   - asyncio 支持
-   - 异步 HTTP 请求
-   - 并发执行潜力
-
-4. **错误处理**
-   - 输入验证
-   - 异常捕获
-   - 详细日志
-
-5. **可扩展性**
-   - 节点化设计
-   - 插件式架构
-   - 配置驱动
-
-## 🎓 学习资源
-
-### 入门
-1. 阅读 `QUICKSTART.md`
-2. 运行 `test_basic.py`
-3. 查看 `main.py` 示例
-
-### 进阶
-1. 阅读 `README.md` 了解核心概念
-2. 创建自定义节点
-3. 修改工作流配置
-
-### 深入
-1. 研究 `engine.py` 核心实现
-2. 理解拓扑排序算法
-3. 扩展 LLMNode 功能
-
-## ✨ 项目特色
-
-1. **轻量级**: 核心引擎仅 237 行
-2. **易用性**: JSON 配置驱动
-3. **可扩展**: 节点化设计
-4. **健壮性**: 完善的错误处理
-5. **文档齐全**: 详细的文档和示例
-6. **测试覆盖**: 100% 测试通过率
-
-## 🔄 未来扩展方向
-
-1. **更多节点类型**
-   - 场景生成节点
-   - 对话生成节点
-   - 情节规划节点
-
-2. **高级功能**
-   - 条件分支
-   - 循环处理
-   - 数据聚合
-
-3. **可视化界面**
-   - Web UI
-   - 工作流拖拽编辑
-   - 实时执行监控
-
-4. **性能优化**
-   - 并行执行
-   - 结果缓存
-   - 增量更新
-
-## 📞 支持与反馈
-
-如有问题或建议：
-1. 查看文档（README.md, QUICKSTART.md）
-2. 运行测试（test_basic.py）
-3. 查看示例（main.py, workflow_config.json）
 
 ---
 
-**项目状态**: ✅ 完成
-**版本**: 0.1.0
-**最后更新**: 2026-04-19
+## 📊 33维度审计体系
 
-🎉 **StoryFlow - 让创意流动起来！**
+| 类别 | 维度数 | 说明 |
+|------|--------|------|
+| 基础质量 | 5 | 语法/拼写/标点/句子/段落 |
+| 内容质量 | 10 | 世界观/角色/情节/时间线/场景等 |
+| AI痕迹检测 | 8 | 模板化/机械连接词/刻板表达等 |
+| 风格质量 | 5 | 文风/语气/视角/节奏/独特性 |
+| 合规性 | 5 | 平台规则/敏感词/原创度等 |
+| **总计** | **33** | 全方位质量把控 |
+
+---
+
+## 🔄 工作流执行流程
+
+```
+1. 用户输入 → 题材/平台/章节数/目标字数
+   ↓
+2. ArchitectNode → 生成世界观和大纲
+   ↓
+3. WriterNode → 首次写作（需要N个字）
+   ↓
+4. AuditorNode → 33维度审计
+   ↓
+5. RadarNode → 质量判断
+   ├─ 通过 → 6
+   └─ 不通过 → 返回3（迭代，最多5次）
+   ↓
+6. ReviserNode → AI痕迹去除 + 风格修订
+   ↓
+7. 输出 → 达标章节 + 审计报告
+```
+
+---
+
+## 🧪 测试结果
+
+### 基础测试 (test_basic.py)
+```
+✅ 基本工作流: 通过
+✅ 拓扑排序: 通过
+✅ 循环依赖检测: 通过
+✅ 输入验证: 通过
+✅ 数据传播: 通过
+✅ 断点续传: 通过
+
+通过率: 100%
+```
+
+### 高级节点测试 (test_storyflow.py)
+```
+✅ AI痕迹检测: 通过
+   - 检测11类AI痕迹
+   - critical/major/minor分级
+   
+✅ AI痕迹去除: 通过
+   - low/medium/high三种强度
+   - 保留原文风格
+
+✅ 真相文件节点: 通过
+   - CurrentStateNode
+   - CharacterMatrixNode
+   - PendingHooksNode
+
+✅ 33维度审计: 完成
+   - 多维度评分
+   - 问题分类
+   - 修改建议
+
+✅ 5-Agent工作流: 完成
+   - 多轮迭代
+   - 质量控制
+```
+
+---
+
+## 📁 文件统计
+
+| 组件 | 文件 | 大小 | 说明 |
+|------|------|------|------|
+| 核心引擎 | engine.py | 25.6KB | 627行 |
+| 基础节点 | nodes.py | 20.3KB | 20318字节 |
+| 高级节点 | storyflow_nodes.py | 52.1KB | 增强节点 |
+| 主程序 | main.py | 9KB | 入口 |
+| 配置文件 | workflow_config.json | 3KB | JSON配置 |
+| 测试 | test_*.py | ~20KB | 多测试文件 |
+| Web | web/*.js, index.html | ~200KB | UI |
+| **总计** | **50+文件** | **~350KB** | 完整项目 |
+
+---
+
+## 🚀 使用方式
+
+### 命令行
+
+```bash
+# 基础测试（无需API）
+python test_basic.py
+
+# 完整工作流（需要API）
+python test_storyflow.py
+
+# Web界面
+python web_server.py
+# 或
+python web_server_fastapi.py
+```
+
+### Python API
+
+```python
+import asyncio
+from engine import Workflow, Engine, ProviderFactory
+from storyflow_nodes import storyflowWorkflow
+
+async def main():
+    # 创建工作流
+    workflow = storyflowWorkflow()
+    
+    # 执行
+    result = await workflow.execute(
+        genre="玄幻",
+        platform="起点", 
+        chapter_number=1,
+        target_words=3000
+    )
+    
+    print(f"成功: {result['success']}")
+    print(f"迭代次数: {result['iteration_count']}")
+
+asyncio.run(main())
+```
+
+### Web界面
+
+```
+http://localhost:5000
+```
+
+---
+
+## ⚙️ 配置说明
+
+### 环境变量
+
+| 变量 | 说明 | 优先级 |
+|------|------|--------|
+| `STORYFLOW_API_KEY` | 主API Key | 最高 |
+| `MINIMAX_API_KEY` | MiniMax | 其次 |
+| `DASHSCOPE_API_KEY` | 通义千问 | 最后 |
+
+### 工作流配置
+
+```json
+{
+  "workflow_id": "novel_creation",
+  "name": "小说创作工作流",
+  "provider": "minimax",
+  "model": "MiniMax-M2.7",
+  "nodes": [...],
+  "connections": [...]
+}
+```
+
+---
+
+## 💡 技术亮点
+
+1. **多模型支持**
+   - MiniMax-M2.7
+   - 通义千问
+   - OpenAI兼容
+
+2. **智能迭代**
+   - LoopEngine支持循环执行
+   - 最多5次迭代
+   - 质量阈值控制
+
+3. **AI痕迹检测**
+   - 11类AI痕迹识别
+   - critical/major/minor分级
+   - 自动去除
+
+4. **33维度审计**
+   - 全方位质量把控
+   - 量化评分
+   - 改进建议
+
+5. **真相文件**
+   - 角色状态跟踪
+   - 伏笔管理
+   - 情节一致性
+
+---
+
+## 📚 学习路径
+
+### 入门（1天）
+1. 阅读 README.md 了解项目
+2. 运行 test_basic.py 理解核心
+3. 查看 workflow_config.json 配置
+
+### 进阶（3天）
+1. 阅读 engine.py 核心实现
+2. 创建自定义节点
+3. 修改工作流配置
+
+### 精通（7天）
+1. 研究 storyflow_nodes.py 高级实现
+2. 理解5-Agent协作机制
+3. 扩展审计维度
+
+---
+
+## 🔮 未来规划
+
+| 优先级 | 功能 | 状态 |
+|--------|------|------|
+| P0 | 增加更多节点类型 | 待开发 |
+| P1 | 支持更多LLM提供商 | 待开发 |
+| P1 | 优化迭代算法 | 待开发 |
+| P2 | Web拖拽编辑 | 待开发 |
+| P2 | 分布式执行 | 待开发 |
+| P3 | 实时协作 | 规划中 |
+
+---
+
+## 📞 支持
+
+如有问题：
+1. 查看 README.md 常见问题
+2. 运行 test_basic.py 验证环境
+3. 查看 docs/ 目录文档
+
+---
+
+**StoryFlow** - 让创意流动，让小说创作更智能！ 🚀
+
+**版本**: v1.2.0  
+**最后更新**: 2026-04-20  
+**项目状态**: ✅ 活跃开发中

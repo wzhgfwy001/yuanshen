@@ -1,0 +1,92 @@
+{
+  "data_analysis": {
+    "keywords": [
+      "分析",
+      "数据",
+      "统计",
+      "报表",
+      "数据清洗",
+      "data analysis",
+      "analyze"
+    ],
+    "agent": "艾斯",
+    "confidence_boost": 0.2
+  },
+  "implementation": {
+    "keywords": [
+      "实现",
+      "代码",
+      "写代码",
+      "开发",
+      "implementation",
+      "code",
+      "develop"
+    ],
+    "agent": "白哉",
+    "confidence_boost": 0.2
+  },
+  "writing": {
+    "keywords": [
+      "写作",
+      "创作",
+      "写文章",
+      "写小说",
+      "writing",
+      "create content",
+      "write"
+    ],
+    "agent": "山寺三郎",
+    "confidence_boost": 0.2
+  },
+  "task_decomposition": {
+    "keywords": [
+      "分解",
+      "规划",
+      "拆解",
+      "多步骤",
+      "复杂任务",
+      "decompose",
+      "plan",
+      "break down"
+    ],
+    "agent": "鹿丸",
+    "confidence_boost": 0.2
+  },
+  "academic_research": {
+    "keywords": [
+      "研究",
+      "论文",
+      "学术",
+      "调研",
+      "research",
+      "paper",
+      "study"
+    ],
+    "agent": "静音",
+    "confidence_boost": 0.2
+  },
+  "error_handling": {
+    "keywords": [
+      "错误",
+      "异常",
+      "调试",
+      "debug",
+      "error",
+      "fix bug"
+    ],
+    "agent": "白哉",
+    "confidence_boost": 0.2
+  },
+  "decision_making": {
+    "keywords": [
+      "决策",
+      "选择方案",
+      "权衡",
+      "decision",
+      "choose",
+      "evaluate"
+    ],
+    "agent": "鹿丸",
+    "confidence_boost": 0.2
+  }
+}

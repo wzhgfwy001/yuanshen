@@ -104,6 +104,12 @@
       "target_input": "world_description"
     },
     {
+      "source_node": "outline",
+      "source_output": "outline",
+      "target_node": "chapter_1",
+      "target_input": "outline"
+    },
+    {
       "source_node": "character",
       "source_output": "character_profile",
       "target_node": "chapter_1",

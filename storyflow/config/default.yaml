@@ -1,0 +1,19 @@
+# StoryFlow Default Configuration
+
+provider: minimax
+model: "MiniMax-M2.7"
+
+# Cache settings
+cache:
+  enabled: true
+  ttl: 3600
+
+# Checkpoint settings
+checkpoint:
+  enabled: true
+  dir: ".storyflow_checkpoints"
+
+# Loop settings
+loop:
+  max_iterations: 3
+  exit_on_critical: true

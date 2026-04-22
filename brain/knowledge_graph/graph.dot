@@ -1,14 +1,21 @@
 digraph KnowledgeGraph {
   rankdir=LR;
   node [shape=box];
-  "c5dbab2399fa5406" [label="未命名模式", fillcolor="lightblue", style="filled"];
   "3753f46691698002" [label="数据分析模式", fillcolor="lightblue", style="filled"];
   "2f5ea23a9bc35f50" [label="代码实现最佳实践模式", fillcolor="lightblue", style="filled"];
   "eb631fb2c7a1d85b" [label="内容创作模式", fillcolor="lightblue", style="filled"];
   "a51ce85b7d7b7fa6" [label="复杂任务分解模式", fillcolor="lightblue", style="filled"];
-  "21b4c438a24fb4fc" [label="未命名教训", fillcolor="lightcoral", style="filled"];
   "a5084a31b448e607" [label="数据源不可靠教训", fillcolor="lightcoral", style="filled"];
   "d8fd1ecf1aaa3ae3" [label="数据验证缺失教训", fillcolor="lightcoral", style="filled"];
   "a7d6755a3a092dbd" [label="API调用超时教训", fillcolor="lightcoral", style="filled"];
   "5e66a3dd04cf51f9" [label="需求不明确教训", fillcolor="lightcoral", style="filled"];
+  "lesson-err-006" [label="教训-err-006-假执行-文件创建不等于生效", fillcolor="lightcoral", style="filled"];
+  "ck-coding-standards" [label="代码编写规范", fillcolor="lightyellow", style="filled"];
+  "ck-error-handling" [label="错误处理规范", fillcolor="lightyellow", style="filled"];
+  "ck-code-review" [label="代码审查清单", fillcolor="lightyellow", style="filled"];
+  "ck-writing-style" [label="写作风格规范", fillcolor="lightyellow", style="filled"];
+  "ck-task-routing" [label="任务路由决策", fillcolor="lightyellow", style="filled"];
+  "up-communication" [label="用户沟通偏好", fillcolor="lightgreen", style="filled"];
+  "up-output-format" [label="输出格式偏好", fillcolor="lightgreen", style="filled"];
+  "up-tech-preferences" [label="技术实现偏好", fillcolor="lightgreen", style="filled"];
 }

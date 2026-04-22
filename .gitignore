@@ -1,0 +1,42 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+
+# Distribution / packaging
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.env
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+.storyflow_cache/
+.storyflow_checkpoints/
+.storyflow/
+node_modules/
+*.db
+
+# Logs
+*.log
+dreaming.log
+
+# Heartbeat state (local only)
+heartbeat-state.json

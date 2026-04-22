@@ -1,22 +1,18 @@
-﻿{
-    "queue":  {
-                  "waiting":  null,
-                  "suspended":  null,
-                  "running":  null,
-                  "completed":  [
-
-                                ],
-                  "failed":  [
-
-                             ]
-              },
-    "scheduler":  {
-                      "interval":  5,
-                      "running":  false,
-                      "lastRun":  null
-                  },
-    "limits":  {
-                   "maxRunningTasks":  3,
-                   "maxTotalAgents":  12
-               }
+{
+  "queue": {
+    "waiting": null,
+    "suspended": null,
+    "running": null,
+    "completed": [],
+    "failed": []
+  },
+  "scheduler": {
+    "interval": 5,
+    "running": false,
+    "lastRun": null
+  },
+  "limits": {
+    "maxRunningTasks": 3,
+    "maxTotalAgents": 12
+  }
 }

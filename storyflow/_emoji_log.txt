@@ -1,0 +1,6 @@
+Replaced 1 of U+F09F93
+Replaced 1 of U+E29C85
+Replaced 1 of U+E29D8C
+Replaced 4 of U+E29AA0
+Replaced 1 of U+F09F94
+Done!

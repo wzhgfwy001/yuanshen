@@ -1,16 +1,5 @@
 [
   {
-    "id": "c5dbab2399fa5406",
-    "title": "未命名模式",
-    "type": "pattern",
-    "content": "待提炼\n\n## 相关模式\n待补充\n\n## 改进建议\n待补充\n",
-    "tags": [],
-    "created_at": "",
-    "references": [],
-    "related_to": [],
-    "confidence": 1.0
-  },
-  {
     "id": "3753f46691698002",
     "title": "数据分析模式",
     "type": "pattern",
@@ -57,17 +46,6 @@
     "tags": [
       "task_decomposition"
     ],
-    "created_at": "",
-    "references": [],
-    "related_to": [],
-    "confidence": 1.0
-  },
-  {
-    "id": "21b4c438a24fb4fc",
-    "title": "未命名教训",
-    "type": "lesson",
-    "content": "无\n\n## 相关教训\n待补充\n\n## 改进建议\n待补充\n",
-    "tags": [],
     "created_at": "",
     "references": [],
     "related_to": [],
@@ -122,6 +100,159 @@
     ],
     "created_at": "",
     "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "lesson-err-006",
+    "title": "教训-err-006-假执行-文件创建不等于生效",
+    "type": "lesson",
+    "content": "---\nid: lesson-err-006\ncreated_at: 2026-04-16T18:58:00\nagent: system\ntype: 假执行-文件创建不等于生效\nseverity: high\ntags: [假执行-文件创建不等于生效]\noccurence_count: 1\nresolved: false\n---\n\n# 假执行-文件创建不等于生效\n\n## 问题描述\n创建了大量schema文件但没有实际集成到主流程\n\n## 根本原因\n创建文件后没有验证文件是否被系统加载和使用，只汇报'完成'是自欺欺人\n\n## 解决方案\n创建文件后必须验证：1)文件路径正确 2)主流程确实读取了文件 3)实际效果可观测\n\n## 关键警示\n⚠️ **避免重蹈覆辙**\n",
+    "tags": [
+      "假执行-文件创建不等于生效"
+    ],
+    "created_at": "2026-04-16T18:58:00",
+    "references": [
+      "err-006"
+    ],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "ck-coding-standards",
+    "title": "代码编写规范",
+    "type": "knowledge",
+    "content": "# 代码编写规范\n\n## 核心理念\n- **简单优先**：最小代码解决问题，不做 speculative 开发\n- **精准修改**：只改必要的，不\"改进\"相邻代码\n- **可验证**：每一行改动都能追溯到用户需求\n\n## Python 规范\n- 使用 `r\"raw string\"` 处理正则表达式\n- 文件保存为 UTF-8 编码\n- 函数添加 docstring 说明参数和返回值\n- 异常处理要具体，不 bare except\n\n## JavaScript 规范\n- 使用 camelCase 命名变量\n- 使用 PascalCase 命名类和组件\n- 函数参数提供默认值\n- 异步操作添加错误处理\n\n## PowerShell 规范\n- 使用 `$true`/`$false` 而非 `True`/`False`\n- 使用 `Get-Content -Encoding UTF8`\n- 管道操作注意性能\n\n## 触发条件\n- 任何代码编写任务\n- 任何代码审查任务\n",
+    "tags": [
+      "coding",
+      "standards",
+      "best-practices"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [],
+    "related_to": [
+      "ck-error-handling",
+      "ck-code-review"
+    ],
+    "confidence": 1.0
+  },
+  {
+    "id": "ck-error-handling",
+    "title": "错误处理规范",
+    "type": "knowledge",
+    "content": "# 错误处理规范\n\n## 原则\n1. **具体捕获**：except 只捕获已知异常类型\n2. **记录日志**：记录错误时包含上下文\n3. **优雅降级**：出错时提供备用方案\n4. **用户友好**：错误信息对用户可理解\n\n## Python 错误处理\n```python\ntry:\n    result = risky_operation()\nexcept SpecificError as e:\n    logger.error(f\"操作失败: {e}\")\n    return fallback_result()\nexcept Exception as e:\n    logger.exception(\"未知错误\")\n    raise\n```\n\n## 外部 API 调用\n- 必须设置 timeout（10-30秒）\n- 实现重试机制（最多3次）\n- 提供降级方案\n\n## 触发条件\n- 任何涉及外部调用的任务\n- 任何需要错误恢复的任务\n",
+    "tags": [
+      "error-handling",
+      "resilience",
+      "api"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [],
+    "related_to": [
+      "ck-coding-standards"
+    ],
+    "confidence": 1.0
+  },
+  {
+    "id": "ck-code-review",
+    "title": "代码审查清单",
+    "type": "knowledge",
+    "content": "# 代码审查清单\n\n## 安全性检查\n- [ ] 无注入/溢出风险\n- [ ] 敏感信息不硬编码\n- [ ] 输入验证完整\n\n## 性能检查\n- [ ] 无 N+1 查询\n- [ ] 无无限循环\n- [ ] 资源正确释放\n\n## 可读性检查\n- [ ] 命名清晰\n- [ ] 注释充分\n- [ ] 函数短小（<50行）\n\n## 错误处理检查\n- [ ] 异常捕获完善\n- [ ] 边界条件处理\n- [ ] 有降级方案\n\n## 触发条件\n- 代码审查任务\n- 代码质量检查任务\n",
+    "tags": [
+      "code-review",
+      "quality",
+      "checklist"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [],
+    "related_to": [
+      "ck-coding-standards"
+    ],
+    "confidence": 1.0
+  },
+  {
+    "id": "ck-writing-style",
+    "title": "写作风格规范",
+    "type": "knowledge",
+    "content": "# 写作风格规范\n\n## 去 AI 味要点\n1. 避免过度完美的表述\n2. 使用自然过渡，不强行关联\n3. 适当使用口语化表达\n4. 句式多样化，避免重复\n5. 细节具体化，不要泛泛而谈\n\n## 技术文档写作\n- 先说结论，再说原因\n- 使用代码示例说明\n- 表格优于冗长文字\n- 标题清晰，层次分明\n\n## 创意写作\n- 场景描写具体（时间、地点、感官）\n- 人物动作代替陈述\n- 对话自然，不书面化\n- 情感通过行为表达\n\n## 触发条件\n- 任何写作任务\n- 任何内容创作任务\n",
+    "tags": [
+      "writing",
+      "style",
+      "content-creation"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "ck-task-routing",
+    "title": "任务路由决策",
+    "type": "knowledge",
+    "content": "# 任务路由决策\n\n## 任务类型判断流程\n\n### 1. 分析任务类型\n```\n简单任务（<5分钟）→ 直接执行\n标准任务（有固定流程）→ 查 Skill 后执行\n创新任务（需要创作）→ 多 Agent 协作\n复杂任务（多阶段）→ 任务分解 + 多 Agent\n混合任务 → 主 Agent 协调\n```\n\n### 2. Agent 选择逻辑\n| 任务类型 | 推荐 Agent | 说明 |\n|---------|-----------|------|\n| 代码实现 | 白哉 | 注重质量和规范 |\n| 数据分析 | 艾斯 | 注重数据和逻辑 |\n| 内容创作 | 山寺三郎 | 注重创意和表达 |\n| 任务分解 | 鹿丸 | 注重结构和规划 |\n| 学术分析 | 静音 | 注重深度和研究 |\n\n### 3. 触发时机\n- 任何新任务开始时\n- 任务类型不明确时\n- 需要多 Agent 协作时\n",
+    "tags": [
+      "task-routing",
+      "agent-selection",
+      "decision"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [],
+    "related_to": [],
+    "confidence": 1.0
+  },
+  {
+    "id": "up-communication",
+    "title": "用户沟通偏好",
+    "type": "preference",
+    "content": "# 用户沟通偏好\n\n## 沟通风格\n- **详细展开**：喜欢详细解释和分析\n- **中文优先**：主要使用中文交流\n- **主动汇报**：任务进行中主动汇报进度\n\n## 决策方式\n- **深思熟虑 + 多方案对比**：不冲动决定，需要多个选项\n- **喜欢询问意见**：先问用户意见，评估后才执行\n- **反馈式**：会根据建议调整方向\n\n## 交互习惯\n- 简洁指令：\"处理\"、\"继续\"等\n- 不喜欢过多确认\n- 习惯用\"都处理\"表示全选\n\n## 触发条件\n- 任何需要与用户确认的任务\n- 方案选择类任务\n",
+    "tags": [
+      "communication",
+      "decision-style",
+      "feedback"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [
+      "USER.md",
+      "brain/progress.json"
+    ],
+    "related_to": [
+      "up-output-format"
+    ],
+    "confidence": 1.0
+  },
+  {
+    "id": "up-output-format",
+    "title": "输出格式偏好",
+    "type": "preference",
+    "content": "# 输出格式偏好\n\n## 任务输出\n- **根据任务类型决定**：不需要每次都格式化\n- **代码任务**：代码块 + 简洁说明\n- **分析任务**：表格 + 关键发现\n- **写作任务**：直接输出内容\n\n## 报告格式\n- 使用 Markdown 格式\n- 代码示例要可运行\n- 表格优于列表（对于数据）\n\n## 工作流程偏好\n- 不喜欢过度设计\n- 先完成再优化\n- 小步迭代，快速验证\n\n## 触发条件\n- 需要输出格式化结果时\n- 方案展示类任务\n",
+    "tags": [
+      "output",
+      "format",
+      "presentation"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [
+      "brain/progress.json"
+    ],
+    "related_to": [
+      "up-communication"
+    ],
+    "confidence": 1.0
+  },
+  {
+    "id": "up-tech-preferences",
+    "title": "技术实现偏好",
+    "type": "preference",
+    "content": "# 技术实现偏好\n\n## 编程语言\n- **Python**：主要使用，文件操作和数据处理\n- **PowerShell**：Windows 系统管理\n- **JavaScript**：前端和 OpenClaw 插件\n\n## 系统偏好\n- 高端 UI 设计\n- 简洁高效\n- 持续优化迭代\n- 避免内存占用过大\n\n## 已掌握技术\n- 高考志愿系统开发（桌面应用）\n- 混合多 Agent 系统开发\n- OpenClaw Skills 开发\n- GitHub 协作\n\n## 触发条件\n- 技术选型任务\n- 架构设计任务\n",
+    "tags": [
+      "technology",
+      "stack",
+      "preferences"
+    ],
+    "created_at": "2026-04-22T06:07:05+08:00",
+    "references": [
+      "USER.md"
+    ],
     "related_to": [],
     "confidence": 1.0
   }

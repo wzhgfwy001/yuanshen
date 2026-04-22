@@ -60,11 +60,20 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - When you make a mistake → document it in `learnings/errors.json`
 - **Text > Brain** 📝
 
-### 🗃️ 向量数据库一致性维护（强制执行）
+### 🗃️ 向量数据库一致性维护（已弃用 2026-04-22）
 
+> ⚠️ **此章节已弃用** — 2026-04-22 因内存压力卸载 LM Studio + ChromaDB，向量数据库功能已完全移除。
+> 
+> **影响：**
+> - `deleteAndRemoveVector()` → 失效
+> - `writeAndVectorize()` → 失效
+> - `D:/vector_db/` → 已删除
+> - `memory_search` → 降级为纯文本搜索
+
+<details>
+<summary>点击展开：原规则（仅供参考，已失效）</summary>
 
 **背景：** 向量数据库与文件系统需要保持同步，否则会出现"失忆"或"幽灵数据"
-
 
 **规则：**
 1. **删除文件前**：必须先调用 `deleteAndRemoveVector()` 清理对应向量
@@ -72,16 +81,15 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 3. **定期检查**：运行 `python D:/vector_db/check_consistency.py` 检查一致性
 4. **发现问题**：立即运行 `python D:/vector_db/cleanup_orphans.py` 清理孤儿向量
 
-**孤儿向量产生原因：**
-- 文件已删除但向量未清理（未调用 `deleteAndRemoveVector()`）
-- 状态迁移（如 `SESSION-STATE.md` → `brain/progress.json`）时旧向量残留
-
 **触发时机：**
 - 删除任何 brain/memory/skills 目录下的文件前
 - 进行状态迁移或文件重构前
 - 每次 heartbeat 时（自动检查）
 - 用户询问"向量数据库一致吗"时立即检查
 
+</details>
+
+---
 ### 🧠 阳神经验学习系统（融合升级）
 
 **来源：** 借鉴Hermes Agent自进化闭环 + claude-mem跨会话记忆 + DeerFlow深度研究 + Karpathy行为准则

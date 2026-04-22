@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "source": "ck-coding-standards",
+    "target": "ck-error-handling",
+    "type": "related"
+  },
+  {
+    "source": "ck-coding-standards",
+    "target": "ck-code-review",
+    "type": "related"
+  },
+  {
+    "source": "ck-error-handling",
+    "target": "ck-coding-standards",
+    "type": "related"
+  },
+  {
+    "source": "ck-code-review",
+    "target": "ck-coding-standards",
+    "type": "related"
+  },
+  {
+    "source": "up-communication",
+    "target": "up-output-format",
+    "type": "related"
+  },
+  {
+    "source": "up-output-format",
+    "target": "up-communication",
+    "type": "related"
+  }
+]

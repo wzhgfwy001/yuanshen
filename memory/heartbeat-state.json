@@ -1,8 +1,29 @@
-{
-  "lastChecks": {
-    "email": null,
-    "calendar": null,
-    "weather": null,
-    "model_status": "2026-04-08T14:35:45Z"
-  }
+﻿{
+    "lastChecks": {
+        "wal": "2026-04-22T06:25:00Z",
+        "workingBuffer": "2026-04-22T06:25:00Z",
+        "memory": "2026-04-22T06:25:00Z",
+        "system": "2026-04-22T06:43:00Z",
+        "inbox": "2026-04-22T06:43:00Z",
+        "errors": "2026-04-22T06:43:00Z",
+        "performance": "2026-04-22T06:25:00Z",
+        "tracking": "2026-04-22T06:25:00Z",
+        "health": "2026-04-22T06:25:00Z"
+    },
+    "skipped": {
+        "wal": 0,
+        "workingBuffer": 0,
+        "memory": 0,
+        "inbox": 0,
+        "errors": 0,
+        "performance": 0,
+        "tracking": 0
+    },
+    "notes": {
+        "vector_db_uninstalled": "2026-04-22 05:31 - LM Studio + ChromaDB 卸载完成",
+        "heartbeat_cleaned": "2026-04-22 05:40 - 重置心跳状态",
+        "inbox_items": "54 lines, 4 pending items (1 high + 3 med priority)",
+        "kg_nodes": "17 nodes in knowledge graph",
+        "errors_ongoing": "1 (err-006)"
+    }
 }
