@@ -578,3 +578,22 @@ The goal: Be helpful without being annoying. Check in a few times a day, do usef
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
+
+---
+
+## Skill Development Three-in-One Principle (Mandatory)
+
+When creating new Skills or GitHub optimizations, must include all three parts:
+
+| Part | Requirement | Description |
+|------|-------------|-------------|
+| 1. Actual Code | 5KB+ real executable code | No empty files or comments only |
+| 2. Functionality | Complete usable module | Full methods and logic |
+| 3. Trigger Mechanism | SKILL.md + conditions | Defines when/how to activate |
+
+Trigger must include:
+- name, description, parent, trigger (YAML frontmatter)
+- Usage examples
+- Integration method for main system
+
+Reminder: User explicitly said 'do not make me remind you every time' (2026-04-22)
