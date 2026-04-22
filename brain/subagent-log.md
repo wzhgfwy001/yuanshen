@@ -1,7 +1,11 @@
 # 子Agent执行日志 - 设计规范
 
 **创建时间：** 2026-04-16T00:37:00+08:00
-**状态：** 低优先级任务 - 设计中
+**状态：** ⚠️ 设计阶段 - 尚未实现
+
+> ⚠️ 注意：此文件为设计规范文档，实际日志记录机制尚未实现。
+> 子Agent结果目前通过 sessions_history 和 sessions_send 工具获取，
+> 由主Agent手动记录到 brain/progress.json 的 completed_steps。
 
 ---
 
@@ -90,3 +94,12 @@
 - [ ] subagent-manager 模块适配
 - [ ] 阳神审查逻辑增强
 - [ ] 执行日志格式标准化
+
+> ⚠️ 这些待实现项暂不需要处理。当前通过以下方式替代：
+> - **结果获取**：sessions_history / sessions_send 工具
+> - **状态记录**：主Agent手动写入 progress.json completed_steps
+> - **错误追踪**：learnings/errors.json
+
+---
+
+*最后更新：2026-04-22*

@@ -40,6 +40,45 @@
 - [ ] 《吾名午夜》第6章创作
 - [ ] GitHub 元神项目添加Demo
 - [ ] 跟进Issue #67648
+- [x] StoryFlow 开发调试（✅ 54个问题，9个P0已修复，2026-04-21完成）
+
+## 🟡 升级提醒
+
+**下次升级 OpenClaw 时，使用内置命令：**
+```
+openclaw update --yes
+```
+
+**不要用：** `npm install -g openclaw@latest`（会 EPERM 错误）
+
+**正确流程：** `openclaw update` 内置命令自动处理 Gateway 停启
+
+## 🟢 已完成优化（2026-04-22）
+
+- [x] err-006 已标记resolved（tracker集成已修复，SKILL.md已添加第9步）
+- [x] subagent-log.md 已更新状态说明（设计阶段未实现，已澄清）
+- [x] inbox清理（标记StoryFlow已完成）
+- [x] tasks/active.md刷新
+
+## 🟡 待优化项（可延后）
+
+- [ ] user-profile auto-extractor集成
+  - auto-extractor.js已实现但从未运行
+  - 需要消息历史才能提取，但OpenClaw消息存储较复杂
+  - 建议：作为独立工具手动运行，不强行集成heartbeat
+
+## 📋 2026-04-22 全面检查结论
+
+| 模块 | 状态 |
+|------|------|
+| Brain系统 | ✅ 正常 |
+| Skills系统 | ✅ 正常 |
+| 阳神系统 | ✅ tracker修复完成 |
+| OpenClaw配置 | ✅ 正常 |
+| 心跳系统 | ✅ 正常 |
+| learnings | ✅ err-006已解决 |
+| 追踪系统 | ✅ tracker开始生效 |
+| subagent-log | ⚠️ 设计阶段未实现（已澄清）|
 
 ## 📝 阳神核心价值
 
@@ -50,4 +89,17 @@
 
 ---
 
-*Last updated: 2026-04-22 06:25*
+## 🔔 升级提醒（2026-04-22）
+
+**下次升级 OpenClaw 时，使用内置命令：**
+```
+openclaw update --yes
+```
+
+**不要用：** `npm install -g openclaw@latest`（会 EPERM 错误）
+
+**正确流程：** `openclaw update` 内置命令自动处理 Gateway 停启
+
+---
+
+*Last updated: 2026-04-22 20:25*

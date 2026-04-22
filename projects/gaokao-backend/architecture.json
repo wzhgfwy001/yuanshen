@@ -1,0 +1,268 @@
+{
+  "项目名称": "高考志愿填报系统 - 后端架构方案",
+  "版本": "v1.0",
+  "最后更新": "2026-04-20",
+
+  "一、技术选型": {
+    "核心框架": {
+      "后端框架": "Django 4.2 + Django REST Framework",
+      "Python版本": "3.10+",
+      "数据库": "MySQL 8.0",
+      "缓存层": "Redis 7.0",
+      "消息队列": "Celery + RabbitMQ/Redis",
+      "Web服务器": "Nginx + Gunicorn"
+    },
+    "第三方服务": {
+      "对象存储": "阿里云OSS / 腾讯云COS",
+      "短信服务": "阿里云短信 / 腾讯云短信",
+      "地图服务": "高德地图API",
+      "日志服务": "ELK Stack / Loki"
+    },
+    "DevOps": {
+      "容器化": "Docker + Docker Compose",
+      "CI/CD": "GitHub Actions / Jenkins",
+      "监控": "Prometheus + Grafana",
+      "文档": "Swagger / Redoc"
+    }
+  },
+
+  "二、数据库设计": {
+    "ER图描述": {
+      "核心实体": [
+        {
+          "实体": "User（用户）",
+          "字段": ["id(PK)", "username", "password_hash", "phone", "email", "role(考生/家长/管理员)", "created_at", "updated_at"],
+          "关系": "1:N → Score(成绩)", "1:N → Favorite(收藏)", "1:N → Report(报告)"
+        },
+        {
+          "实体": "Province（省份）",
+          "字段": ["id(PK)", "name", "code", "is_active"],
+          "关系": "1:N → ScoreLine(批次线)"
+        },
+        {
+          "实体": "ScoreLine（批次线）",
+          "字段": ["id(PK)", "province_id(FK)", "year", "batch(本科一批/二批/专科)", "category(文科/理科/物理/历史)", "min_score", "enrollment_count"],
+          "关系": "N:1 → Province"
+        },
+        {
+          "实体": "Score（成绩）",
+          "字段": ["id(PK)", "user_id(FK)", "year", "province_id(FK)", "total_score", "rank", "category", "subject_scores(JSON)"],
+          "关系": "N:1 → User, N:1 → Province"
+        },
+        {
+          "实体": "University（大学）",
+          "字段": ["id(PK)", "name", "code", "province", "level(985/211/一本/二本)", "type(综合/理工/师范...)", "rank_national", "rank_subject", "features(JSON)", "location", "tuition_range"],
+          "关系": "1:N → Major（专业）"
+        },
+        {
+          "实体": "Major（专业）",
+          "字段": ["id(PK)", "university_id(FK)", "name", "code", "category", "degree(学士/硕士/博士)", "study_length", "avg_salary", "employment_rate"],
+          "关系": "N:1 → University, N:1 → ScoreLine(参考)"
+        },
+        {
+          "实体": "AdmissionRecord（录取记录）",
+          "字段": ["id(PK)", "university_id(FK)", "major_id(FK)", "province_id(FK)", "year", "batch", "category", "min_score", "min_rank", "enrollment_count", "apply_count"],
+          "关系": "N:1 → University, N:1 → Major, N:1 → Province"
+        },
+        {
+          "实体": "Favorite（收藏）",
+          "字段": ["id(PK)", "user_id(FK)", "university_id(FK)", "major_id(FK)", "created_at"],
+          "关系": "N:1 → User, N:1 → University/Major"
+        },
+        {
+          "实体": "Report（志愿报告）",
+          "字段": ["id(PK)", "user_id(FK)", "title", "content(JSON志愿方案)", "score_snapshot", "status(draft/published)", "created_at"],
+          "关系": "N:1 → User"
+        },
+        {
+          "实体": "ScoreChange（分数波动）",
+          "字段": ["id(PK)", "university_id(FK)", "major_id(FK)", "year", "score_change", "reason"],
+          "关系": "N:1 → University/Major"
+        }
+      ],
+      "索引策略": {
+        "高频查询索引": [
+          "University: (province, level, type)",
+          "AdmissionRecord: (province, year, batch, category, min_score)",
+          "Score: (user_id, year)",
+          "ScoreLine: (province_id, year, batch, category)"
+        ]
+      }
+    }
+  },
+
+  "三、API设计": {
+    "RESTful规范": {
+      "版本控制": "/api/v1/",
+      "认证方式": "JWT Token",
+      "限流策略": "100次/分钟（匿名）/ 1000次/分钟（付费用户）"
+    },
+    "核心接口": {
+      "认证模块": {
+        "POST /api/v1/auth/register": {"描述": "用户注册", "参数": ["username", "password", "phone", "role"]},
+        "POST /api/v1/auth/login": {"描述": "登录", "参数": ["username", "password"], "返回": "access_token, refresh_token"},
+        "POST /api/v1/auth/refresh": {"描述": "刷新Token", "参数": ["refresh_token"]},
+        "POST /api/v1/auth/sms/send": {"描述": "发送验证码", "参数": ["phone", "type(login/register)"]},
+        "POST /api/v1/auth/sms/verify": {"描述": "验证验证码", "参数": ["phone", "code"]}
+      },
+      "用户模块": {
+        "GET /api/v1/users/me": {"描述": "获取个人信息"},
+        "PUT /api/v1/users/me": {"描述": "更新个人信息", "参数": ["email", "avatar"]},
+        "PUT /api/v1/users/me/password": {"描述": "修改密码"}
+      },
+      "成绩模块": {
+        "POST /api/v1/scores": {"描述": "录入成绩", "参数": ["year", "province", "total_score", "category", "subject_scores"]},
+        "GET /api/v1/scores/me": {"描述": "获取我的成绩"},
+        "GET /api/v1/scores/provincial-lines": {"描述": "获取各省批次线", "参数": ["province", "year", "batch"]},
+        "GET /api/v1/scores/rank-estimate": {"描述": "根据分数估算位次", "参数": ["score", "province", "category"]}
+      },
+      "大学专业模块": {
+        "GET /api/v1/universities": {"描述": "大学列表", "参数": ["province", "level", "type", "page", "page_size"], "筛选": "支持多条件组合"},
+        "GET /api/v1/universities/{id}": {"描述": "大学详情"},
+        "GET /api/v1/universities/{id}/majors": {"描述": "大学的专业列表"},
+        "GET /api/v1/majors": {"描述": "专业列表", "参数": ["category", "degree", "keyword"]},
+        "GET /api/v1/majors/{id}": {"描述": "专业详情"},
+        "GET /api/v1/majors/{id}/employment": {"描述": "专业就业数据"}
+      },
+      "录取数据模块": {
+        "GET /api/v1/admissions/history": {"描述": "历史录取数据", "参数": ["province", "year", "batch", "category", "score_min", "score_max"]},
+        "GET /api/v1/admissions/probability": {"描述": "录取概率分析", "参数": ["score", "province", "category", "target_universities"]},
+        "GET /api/v1/admissions/trend": {"描述": "录取趋势分析", "参数": ["university_id", "major_id", "years"]},
+        "GET /api/v1/admissions/similar-profiles": {"描述": "同位次考生去向", "参数": ["score", "rank", "province"]}
+      },
+      "智能推荐模块": {
+        "POST /api/v1/recommend/smart": {"描述": "智能推荐志愿", "参数": ["score", "province", "category", "preferences(JSON)"], "返回": "冲刺/稳妥/保底方案"},
+        "POST /api/v1/recommend/batch": {"描述": "批量推荐", "参数": ["score_list"]},
+        "GET /api/v1/recommend/compare": {"描述": "方案对比", "参数": ["report_ids"]}
+      },
+      "收藏模块": {
+        "GET /api/v1/favorites": {"描述": "我的收藏"},
+        "POST /api/v1/favorites": {"描述": "添加收藏", "参数": ["university_id", "major_id"]},
+        "DELETE /api/v1/favorites/{id}": {"描述": "删除收藏"}
+      },
+      "报告模块": {
+        "POST /api/v1/reports": {"描述": "生成志愿报告", "参数": ["title", "志愿方案JSON"]},
+        "GET /api/v1/reports": {"描述": "我的报告列表"},
+        "GET /api/v1/reports/{id}": {"描述": "报告详情"},
+        "PUT /api/v1/reports/{id}": {"描述": "修改报告"},
+        "DELETE /api/v1/reports/{id}": {"描述": "删除报告"}
+      },
+      "数据分析模块": {
+        "GET /api/v1/analytics/heatmap": {"描述": "专业热度热力图"},
+        "GET /api/v1/analytics/trends": {"描述": "专业趋势分析"},
+        "GET /api/v1/analytics/region-distribution": {"描述": "地域分布分析"}
+      },
+      "管理员模块": {
+        "POST /api/v1/admin/universities": {"描述": "添加大学"},
+        "PUT /api/v1/admin/universities/{id}": {"描述": "更新大学信息"},
+        "POST /api/v1/admin/admissions": {"描述": "导入录取数据"},
+        "GET /api/v1/admin/statistics": {"描述": "系统统计"}
+      }
+    },
+    "响应格式": {
+      "成功": {
+        "code": 200,
+        "message": "success",
+        "data": {}
+      },
+      "错误": {
+        "code": 400,
+        "message": "错误描述",
+        "errors": []
+      }
+    }
+  },
+
+  "四、安全策略": {
+    "认证与授权": {
+      "JWT配置": {
+        "access_token有效期": "30分钟",
+        "refresh_token有效期": "7天",
+        "算法": "HS256",
+        "存储": "HttpOnly Cookie / LocalStorage"
+      },
+      "权限控制": {
+        "基于角色": "RBAC模型（考生/家长/管理员）",
+        "数据隔离": "用户只能访问自己的数据",
+        "接口级别": "@permission_classes"细粒度控制"
+      }
+    },
+    "数据安全": {
+      "密码加密": "PBKDF2 + SHA256，iterations=100000",
+      "敏感数据": "手机号/身份证脱敏存储",
+      "传输加密": "HTTPS强制（TLS 1.3）",
+      "数据库加密": "敏感字段AES加密"
+    },
+    "接口安全": {
+      "CSRF防护": "Django CSRF Token",
+      "XSS防护": "输入过滤 + 输出转义",
+      "SQL注入": "ORM参数化查询",
+      "接口限流": "Redis +滑动窗口算法",
+      "敏感操作": "二次验证（短信/人脸）"
+    },
+    "业务安全": {
+      "志愿填报": {
+        "提交锁定": "截止日期后禁止修改",
+        "确认机制": "需二次确认方可生效",
+        "修改日志": "完整操作审计"
+      },
+      "数据一致性": {
+        "乐观锁": "version字段防并发",
+        "事务保障": "关键操作@Transactional"
+      }
+    },
+    "日志与审计": {
+      "访问日志": "记录IP、UA、操作、耗时",
+      "敏感日志": "加密存储、分离备份",
+      "审计追踪": "管理员操作全记录",
+      "异常告警": "异常操作实时告警"
+    },
+    "容灾备份": {
+      "数据备份": "每日全量 + 实时增量",
+      "跨地域": "主从复制 + 异地容灾",
+      "熔断降级": "关键服务不可用时降级提示"
+    }
+  },
+
+  "五、系统架构图（文字描述）": {
+    "分层结构": [
+      "【客户端层】Web前端 / 移动App / 微信小程序",
+      "    ↓ HTTPS",
+      "【接入层】Nginx（反向代理 + 负载均衡 + SSL终端）",
+      "    ↓",
+      "【应用层】Django + Gunicorn（多Worker）",
+      "    ↓",
+      "【服务层】业务服务 + Celery异步任务",
+      "    ↓",
+      "【数据层】MySQL（主库） + Redis（缓存/队列）",
+      "    ↓",
+      "【存储层】OSS（文件）+ ELK（日志）"
+    ],
+    "部署拓扑": {
+      "测试环境": "单机Docker Compose",
+      "预发布环境": "2台应用 + 1台数据库",
+      "生产环境": "K8s集群（多副本 + HPA + PodDisruptionBudget）"
+    }
+  },
+
+  "六、项目目录结构": {
+    "gaokao_backend/": {
+      "config/": "配置（settings, urls, wsgi, asgi）",
+      "apps/": {
+        "users/": "用户模块",
+        "universities/": "大学专业模块",
+        "admissions/": "录取数据模块",
+        "recommend/": "智能推荐模块",
+        "reports/": "报告模块",
+        "analytics/": "数据分析模块",
+        "admin_panel/": "管理后台"
+      },
+      "services/": "业务逻辑层",
+      "models/": "数据模型层",
+      "serializers/": "DRF序列化器",
+      "middleware/": "中间件",
+      "utils/": "工具函数",
+      "tests/": "单元测试"
+    }
+  }
+}

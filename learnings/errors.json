@@ -82,7 +82,8 @@
     },
     "root_cause": "创建文件后没有验证文件是否被系统加载和使用，只汇报'完成'是自欺欺人",
     "resolution": "创建文件后必须验证：1)文件路径正确 2)主流程确实读取了文件 3)实际效果可观测",
-    "status": "ongoing"
+    "fix_applied_2026-04-22": "已在SKILL.md执行流程中添加第9步Tracker记录，要求主Agent在任务完成时调用tracker.increment()。已测试验证totalTasks从0增至1。",
+    "status": "resolved"
   },
   {
     "id": "err-007",

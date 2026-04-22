@@ -744,4 +744,70 @@ openclaw status
 
 ---
 
-*最后更新: 2026-04-18 02:00*
+*最后更新: 2026-04-22 12:50*
+
+---
+
+## 2026-04-22 系统全面优化
+
+### 早间向量数据库卸载（05:31）
+
+| 操作 | 结果 |
+|------|------|
+| 卸载 LM Studio + ChromaDB | 内存从2.7GB可用增加到9.4GB可用 |
+| 移除 D:/vector_db/ 目录 | memory_search 降级为纯文本搜索 |
+| 更新 AGENTS.md | 添加向量数据库卸载说明 |
+
+### 晚间全面模块检查与优化（20:30-20:50）
+
+**检查范围：**
+- Brain系统（阴神）：progress.json、decisions、knowledge_graph、patterns、lessons
+- Skills系统：dynamic-multi-agent-system、skills-evolution、user-profile、agency-agents
+- OpenClaw配置：openclaw.json、feishu插件
+- 心跳系统：HEARTBEAT.md、heartbeat-state.json、learnings
+- 追踪系统：tracker、skills-evolution、user-profile
+
+**检查结果：**
+| 模块 | 状态 |
+|------|------|
+| ✅ Brain系统 | 14个模块正常 |
+| 🟡 需优化 | 3个（tracker、user-profile、skills-evolution tracking） |
+| 🔴 问题 | 2个（subagent-log设计未实现） |
+
+**修复内容：**
+
+| 问题 | 修复方案 | 状态 |
+|------|----------|------|
+| err-006 tracker假执行 | SKILL.md添加第9步Tracker记录 | ✅ 已解决 |
+| subagent-log状态不清 | 更新为"设计阶段-尚未实现" | ✅ 已澄清 |
+| user-profile auto-extractor未运行 | 备注为未来按需手动运行 | ⚠️ 延后 |
+| err-006 ongoing | 更新errors.json状态为resolved | ✅ 已解决 |
+
+**tracker验证结果：**
+```
+测试调用 tracker.increment()
+totalTasks: 0 → 1 → 2 ✅
+lastUpdated: 2026-04-22T12:46:46.104Z
+```
+
+**关键决策（2026-04-22）：**
+- SKILL.md执行流程添加第9步：Tracker记录
+- tracker.increment()在每个子任务完成时必须调用
+- subagent-log.md当前通过sessions_history+progress.json替代
+
+### inbox.md 更新
+
+- 添加"已完成优化"分区
+- 添加"待优化项"说明
+- 标记StoryFlow开发调试为已完成
+
+### 进度保存
+
+**保存时间：** 2026-04-22 20:50
+**保存内容：**
+- progress.json v7 更新（新增key_decision + completed_steps）
+- MEMORY.md 添加2026-04-22活动记录
+- inbox.md 清理完成
+- errors.json err-006 resolved
+
+---
