@@ -1,9 +1,22 @@
 {
-  "negative_count": 0,
+  "negative_count": 1,
   "consecutive_failures": 0,
-  "last_negative_time": 1775979702970,
+  "last_negative_time": 1776851501208,
   "last_failure_time": null,
   "reset_timer": 300000,
-  "level": 0,
-  "signal_history": []
+  "level": 1,
+  "signal_history": [
+    {
+      "time": 1776851501208,
+      "message": "太慢了！",
+      "score": 1,
+      "signals": [
+        {
+          "type": "negative",
+          "pattern": "太慢|等好久|卡|慢死了",
+          "score": 1
+        }
+      ]
+    }
+  ]
 }

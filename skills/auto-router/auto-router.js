@@ -8,28 +8,13 @@
 const path = require('path');
 const hub = require(path.join(__dirname, '../skill-hub/skill-hub.js'));
 
-// 向量搜索模块（可选）
-let vectorSearch = null;
-try {
-    vectorSearch = require('./vector-search.js');
-} catch(e) {
-    // 向量搜索不可用时静默跳过
-}
-
-/**
- * 分析用户消息，返回推荐的技能
- */
 /**
  * 分析用户消息，返回推荐的技能
  * @param {string} userMessage - 用户消息
- * @param {object} options - { vector: true } 启用向量搜索
  */
-function route(userMessage, options = {}) {
-  const vector = options.vector && vectorSearch;
-  
+function route(userMessage) {
   const msg = userMessage.toLowerCase();
   const recommendations = [];
-  const vectorResults = { skills: [], errors: [], agents: [] };
   
   // 情绪检测（始终检测，不影响其他技能匹配）
   const frustration = hub.detectFrustration ? hub.detectFrustration(userMessage) : { level: 'none' };
@@ -85,62 +70,25 @@ function route(userMessage, options = {}) {
     recommendations.push({ skill: 'classifier', reason: '任务分类', method: 'classifyTask', priority: 'normal' });
   }
   
-  // 向量搜索（新增）
-  if (vector && vectorSearch) {
-    const { execSync } = require('child_process');
-    const SCRIPTS_DIR = 'D:/vector_db';
-    
-    try {
-      // Skills推荐
-      const skillsOut = execSync(`python "${SCRIPTS_DIR}/skill_recommend.py" "${userMessage}" 3`, 
-        { encoding: 'utf-8', timeout: 15000, windowsHide: true });
-      const skillsJson = JSON.parse((skillsOut.match(/```json\s*([\s\S]*?)\s*```/) || ['',''])[1]);
-      if (skillsJson && skillsJson.length > 0) {
-        vectorResults.skills = skillsJson;
-      }
-    } catch(e) {}
-    
-    try {
-      // Error预防
-      const errorsOut = execSync(`python "${SCRIPTS_DIR}/error_search.py" "${userMessage}" 3`, 
-        { encoding: 'utf-8', timeout: 15000, windowsHide: true });
-      const errorsJson = JSON.parse((errorsOut.match(/```json\s*([\s\S]*?)\s*```/) || ['',''])[1]);
-      if (errorsJson && errorsJson.length > 0) {
-        vectorResults.errors = errorsJson;
-      }
-    } catch(e) {}
-    
-    try {
-      // Agent推荐
-      const agentsOut = execSync(`python "${SCRIPTS_DIR}/agent_recommend.py" "${userMessage}" 3`, 
-        { encoding: 'utf-8', timeout: 15000, windowsHide: true });
-      const agentsJson = JSON.parse((agentsOut.match(/```json\s*([\s\S]*?)\s*```/) || ['',''])[1]);
-      if (agentsJson && agentsJson.length > 0) {
-        vectorResults.agents = agentsJson;
-      }
-    } catch(e) {}
-  }
-  
-  return { recommendations, vector: vectorResults };
+  return { recommendations };
 }
 
 /**
  * 自动执行推荐的技能
  */
 function autoExecute(userMessage, options = {}) {
-  const { vector = true, ...opts } = options;
-  const result = route(userMessage, { vector });
+  const result = route(userMessage);
   const recommendations = result.recommendations;
   
   if (recommendations.length === 0) {
-    return { routed: false, message: '未识别到特定技能请求', vector: result.vector };
+    return { routed: false, message: '未识别到特定技能请求' };
   }
   
   // 优先执行情绪检测（高优先级）
   const frustrationRec = recommendations.find(r => r.priority === 'high');
   if (frustrationRec) {
     const res = hub[frustrationRec.method] ? hub[frustrationRec.method](userMessage) : {};
-    return { routed: true, skill: 'frustration', result: res, recommendations, vector: result.vector };
+    return { routed: true, skill: 'frustration', result: res, recommendations };
   }
   
   // 执行第一个匹配的技能
@@ -149,14 +97,14 @@ function autoExecute(userMessage, options = {}) {
   
   if (typeof skill === 'function') {
     try {
-      const res = skill(userMessage, opts);
-      return { routed: true, skill: primary.skill, result: res, recommendations, vector: result.vector };
+      const res = skill(userMessage, options);
+      return { routed: true, skill: primary.skill, result: res, recommendations };
     } catch (e) {
-      return { routed: false, error: e.message, recommendations, vector: result.vector };
+      return { routed: false, error: e.message, recommendations };
     }
   }
   
-  return { routed: false, message: '技能方法不可调用', recommendations, vector: result.vector };
+  return { routed: false, message: '技能方法不可调用', recommendations };
 }
 
 /**

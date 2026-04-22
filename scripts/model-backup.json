@@ -1,0 +1,13 @@
+﻿{
+    "originalModel":  "minimax/MiniMax-M2.7",
+    "fallbacks":  [
+                      "deepseek/deepseek-chat",
+                      "modelstudio/qwen3.5-plus"
+                  ],
+    "lastSwitchAt":  null,
+    "switchHistory":  [
+
+                      ],
+    "lastHealthCheck":  "2026-04-11T03:36:15.7232642+08:00",
+    "consecutiveFailures":  0
+}

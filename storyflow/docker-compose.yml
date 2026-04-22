@@ -1,0 +1,11 @@
+services:
+  storyflow:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - STORYFLOW_API_KEY=${STORYFLOW_API_KEY}
+      - FLASK_ENV=development
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped

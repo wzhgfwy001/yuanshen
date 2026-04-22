@@ -1,25 +1,126 @@
 /**
- * Fusion Scheduler 集成模块
- * 
- * 将融合调度器接入subagent-manager的核心集成点
- * 
- * 使用方式:
- * const fusionIntegration = require('./fusion-integration');
- * 
- * // 为子任务生成装备计划
- * const plan = fusionIntegration.planForTask(subTask);
- * 
- * // 生成装备后的prompt
- * const enhancedPrompt = fusionIntegration.equipPrompt(taskPrompt, plan);
- * 
- * // 获取完整的装备报告
- * const report = fusionIntegration.generateEquipReport(subTasks);
+ * Fusion Scheduler 集成模块 v2.0
+ * 基于DeerFlow架构优化：
+ * 1. 结构化状态
+ * 2. 事件系统
+ * 3. 异步化
  */
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 
-// 尝试加载fusion-scheduler
+// ==================== DeerFlow借鉴: 结构化状态 ====================
+
+class EquipmentPlan {
+  constructor(subTask, equipped, type, name, reasoning) {
+    this.subTask = subTask;
+    this.equipped = equipped;
+    this.type = type || 'custom';
+    this.name = name;
+    this.reasoning = reasoning || [];
+    this.timestamp = new Date().toISOString();
+  }
+
+  toJSON() {
+    return {
+      taskId: this.subTask?.id || this.subTask?.taskId,
+      equipped: this.equipped,
+      type: this.type,
+      name: this.name,
+      reasoning: this.reasoning,
+      timestamp: this.timestamp
+    };
+  }
+}
+
+class EquipReport {
+  constructor(success, summary, plans, error = null) {
+    this.success = success;
+    this.summary = summary;
+    this.plans = plans;
+    this.error = error;
+    this.timestamp = new Date().toISOString();
+  }
+
+  toJSON() {
+    return {
+      success: this.success,
+      summary: this.summary,
+      plans: this.plans.map(p => p.toJSON ? p.toJSON() : p),
+      error: this.error,
+      timestamp: this.timestamp
+    };
+  }
+}
+
+class AvailabilityInfo {
+  constructor(available, personas, templates) {
+    this.available = available;
+    this.personas = personas || [];
+    this.templates = templates || [];
+    this.totalPersonas = personas?.length || 0;
+    this.totalTemplates = templates?.length || 0;
+    this.timestamp = new Date().toISOString();
+  }
+
+  toJSON() {
+    return {
+      available: this.available,
+      personas: this.personas,
+      templates: this.templates,
+      totalPersonas: this.totalPersonas,
+      totalTemplates: this.totalTemplates,
+      timestamp: this.timestamp
+    };
+  }
+}
+
+// ==================== DeerFlow借鉴: 事件系统 ====================
+
+class IntegrationEmitter {
+  constructor() {
+    this.events = {};
+  }
+
+  on(event, listener) {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(listener);
+    return this;
+  }
+
+  off(event, listener) {
+    if (!this.events[event]) return this;
+    this.events[event] = this.events[event].filter(l => l !== listener);
+    return this;
+  }
+
+  emit(event, data) {
+    if (!this.events[event]) return;
+    this.events[event].forEach(listener => {
+      try {
+        listener(data);
+      } catch (e) {
+        console.error(`[IntegrationEmitter] ${event} error:`, e.message);
+      }
+    });
+  }
+}
+
+const emitter = new IntegrationEmitter();
+
+const EVENTS = {
+  EQUIPMENT_PLANNED: 'equipment_planned',
+  PERSONA_REGISTERED: 'persona_registered',
+  TEMPLATE_REGISTERED: 'template_registered',
+  INTEGRATION_ERROR: 'integration_error'
+};
+
+emitter.on(EVENTS.PERSONA_REGISTERED, (name) => console.log(`[FusionIntegration] ✅ 注册人格: ${name}`));
+emitter.on(EVENTS.TEMPLATE_REGISTERED, (name) => console.log(`[FusionIntegration] ✅ 注册模板: ${name}`));
+
+// ==================== 尝试加载fusion-scheduler ====================
+
 let fusionScheduler = null;
 try {
   fusionScheduler = require('./fusion-scheduler');
@@ -27,40 +128,52 @@ try {
   console.warn('[FusionIntegration] 警告: 无法加载fusion-scheduler:', e.message);
 }
 
-/**
- * 检查fusion-scheduler是否可用
- */
 function isAvailable() {
   return fusionScheduler !== null;
 }
 
-/**
- * 为单个子任务生成装备计划
- * @param {object} subTask - 子任务对象
- * @returns {object} 装备计划
- */
+// ==================== 核心功能 ====================
+
+function createFallbackPlan(subTask, reason) {
+  return new EquipmentPlan(
+    subTask,
+    false,
+    'custom',
+    null,
+    [`Fallback: ${reason}`]
+  );
+}
+
 function planForTask(subTask) {
   if (!isAvailable()) {
-    return createFallbackPlan(subTask, 'fusion-scheduler-unavailable');
+    const plan = createFallbackPlan(subTask, 'fusion-scheduler-unavailable');
+    emitter.emit(EVENTS.EQUIPMENT_PLANNED, plan);
+    return plan;
   }
   
   try {
     const result = fusionScheduler.planEquip([subTask]);
     if (result.success && result.plans && result.plans.length > 0) {
-      return result.plans[0];
+      const plan = new EquipmentPlan(
+        result.plans[0].subTask,
+        result.plans[0].equipped,
+        result.plans[0].type,
+        result.plans[0].name,
+        result.plans[0].reasoning
+      );
+      emitter.emit(EVENTS.EQUIPMENT_PLANNED, plan);
+      return plan;
     }
-    return createFallbackPlan(subTask, 'no-match');
+    const plan = createFallbackPlan(subTask, 'no-match');
+    emitter.emit(EVENTS.EQUIPMENT_PLANNED, plan);
+    return plan;
   } catch (e) {
     console.error('[FusionIntegration] planForTask错误:', e.message);
+    emitter.emit(EVENTS.INTEGRATION_ERROR, { function: 'planForTask', error: e.message });
     return createFallbackPlan(subTask, 'error');
   }
 }
 
-/**
- * 为多个子任务生成装备计划
- * @param {array} subTasks - 子任务数组
- * @returns {object} 装备报告
- */
 function planForTasks(subTasks) {
   if (!isAvailable()) {
     return {
@@ -72,9 +185,17 @@ function planForTasks(subTasks) {
   
   try {
     const result = fusionScheduler.planEquip(subTasks);
+    if (result.success) {
+      const plans = result.plans.map(p => new EquipmentPlan(
+        p.subTask, p.equipped, p.type, p.name, p.reasoning
+      ));
+      emitter.emit(EVENTS.EQUIPMENT_PLANNED, { count: plans.length });
+      return { success: true, plans };
+    }
     return result;
   } catch (e) {
     console.error('[FusionIntegration] planForTasks错误:', e.message);
+    emitter.emit(EVENTS.INTEGRATION_ERROR, { function: 'planForTasks', error: e.message });
     return {
       success: false,
       error: e.message,
@@ -83,12 +204,6 @@ function planForTasks(subTasks) {
   }
 }
 
-/**
- * 为prompt添加装备内容
- * @param {string} basePrompt - 基础prompt
- * @param {object} plan - 装备计划
- * @returns {string} 增强后的prompt
- */
 function equipPrompt(basePrompt, plan) {
   if (!plan || !plan.equipped || !plan.skillContent) {
     return basePrompt;
@@ -115,45 +230,35 @@ ${plan.skillContent}
   return basePrompt;
 }
 
-/**
- * 生成完整的装备报告（用于日志）
- * @param {array} subTasks - 子任务数组
- * @returns {object} 装备报告
- */
 function generateEquipReport(subTasks) {
   const result = planForTasks(subTasks);
   
   if (!result.success) {
-    return {
-      fusionSchedulerAvailable: isAvailable(),
-      error: result.error,
-      summary: {
-        total: subTasks.length,
-        equipped: 0,
-        byType: {}
-      },
-      plans: result.plans
-    };
+    return new EquipReport(
+      false,
+      { total: subTasks.length, equipped: 0, byType: {} },
+      result.plans,
+      result.error
+    );
   }
   
-  // 统计
+  const plans = result.plans;
   const summary = {
     total: subTasks.length,
-    equipped: result.plans.filter(p => p.equipped).length,
+    equipped: plans.filter(p => p.equipped).length,
     byType: {
-      nuwa: result.plans.filter(p => p.type === 'nuwa').length,
-      agency: result.plans.filter(p => p.type === 'agency').length,
-      custom: result.plans.filter(p => p.type === 'custom' || p.fallback).length
+      nuwa: plans.filter(p => p.type === 'nuwa').length,
+      agency: plans.filter(p => p.type === 'agency').length,
+      custom: plans.filter(p => p.type === 'custom' || p.fallback).length
     }
   };
   
-  return {
-    fusionSchedulerAvailable: isAvailable(),
-    success: true,
+  return new EquipReport(
+    true,
     summary,
-    plans: result.plans.map(plan => ({
-      taskId: plan.subTask.id || plan.subTask.taskId,
-      taskDescription: plan.subTask.description || plan.subTask.text,
+    plans.map(plan => ({
+      taskId: plan.subTask?.id || plan.subTask?.taskId,
+      taskDescription: plan.subTask?.description || plan.subTask?.text,
       equipped: plan.equipped,
       type: plan.type,
       name: plan.name,
@@ -161,87 +266,64 @@ function generateEquipReport(subTasks) {
       reasoning: plan.reasoning,
       hasSkillContent: !!plan.skillContent
     }))
-  };
+  );
 }
 
-/**
- * 获取可用的人格和模板列表（用于调试/展示）
- */
 function getAvailableEquipment() {
   if (!isAvailable()) {
-    return { available: false };
+    return new AvailabilityInfo(false, [], []);
   }
   
   try {
     const registry = fusionScheduler.loadRegistry();
     if (!registry) {
-      return { available: false, error: 'registry-load-failed' };
+      return new AvailabilityInfo(false, [], []);
     }
     
     const personas = Object.keys(registry.personas || {});
     const templates = Object.keys(registry.agencyTemplates || {});
     
-    return {
-      available: true,
-      personas,
-      templates,
-      totalPersonas: personas.length,
-      totalTemplates: templates.length
-    };
+    return new AvailabilityInfo(true, personas, templates);
   } catch (e) {
-    return { available: false, error: e.message };
+    return new AvailabilityInfo(false, [], []);
   }
 }
 
-/**
- * 创建fallback计划
- */
-function createFallbackPlan(subTask, reason) {
-  return {
-    subTask,
-    equipped: false,
-    type: 'custom',
-    name: null,
-    skillContent: null,
-    skillPath: null,
-    fallback: true,
-    matchScore: null,
-    matchType: null,
-    reasoning: [`Fallback: ${reason}`]
-  };
-}
-
-/**
- * 注册新人格（女娲蒸馏后调用）
- */
-function registerPersona(name, skillPath, triggers, description) {
+async function registerPersonaAsync(name, skillPath, triggers, description) {
   if (!isAvailable()) {
     return { success: false, error: 'fusion-scheduler-unavailable' };
   }
   
   try {
     const result = fusionScheduler.registerPersona(name, skillPath, triggers, description);
+    if (result) {
+      emitter.emit(EVENTS.PERSONA_REGISTERED, name);
+    }
     return { success: !!result };
   } catch (e) {
+    emitter.emit(EVENTS.INTEGRATION_ERROR, { function: 'registerPersona', error: e.message });
     return { success: false, error: e.message };
   }
 }
 
-/**
- * 注册新模板
- */
-function registerTemplate(name, skillPath, triggers, category) {
+async function registerTemplateAsync(name, skillPath, triggers, category) {
   if (!isAvailable()) {
     return { success: false, error: 'fusion-scheduler-unavailable' };
   }
   
   try {
     const result = fusionScheduler.registerTemplate(name, skillPath, triggers, category);
+    if (result) {
+      emitter.emit(EVENTS.TEMPLATE_REGISTERED, name);
+    }
     return { success: !!result };
   } catch (e) {
+    emitter.emit(EVENTS.INTEGRATION_ERROR, { function: 'registerTemplate', error: e.message });
     return { success: false, error: e.message };
   }
 }
+
+// ==================== 导出 ====================
 
 module.exports = {
   isAvailable,
@@ -250,6 +332,11 @@ module.exports = {
   equipPrompt,
   generateEquipReport,
   getAvailableEquipment,
-  registerPersona,
-  registerTemplate
+  registerPersona: registerPersonaAsync,
+  registerTemplate: registerTemplateAsync,
+  EquipmentPlan,
+  EquipReport,
+  AvailabilityInfo,
+  emitter,
+  EVENTS
 };

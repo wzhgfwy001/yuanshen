@@ -1,57 +1,122 @@
 /**
- * 自动验证Hook - Auto Verification Hook
- * 
- * 任务完成后自动触发验证，确保配置生效
- * 将验证结果写入 state/verification-log.json
- * 
- * @version 1.0.0
+ * 自动验证Hook - Auto Verification Hook v2.0
+ * 基于DeerFlow架构优化：
+ * 1. 事件系统
+ * 2. 结构化结果
  */
 
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
+
+// ============================================================
+// DeerFlow借鉴: 结构化状态
+// ============================================================
+
+class VerificationResult {
+  constructor(hookId, hookType, success, duration, data = {}) {
+    this.hookId = hookId;
+    this.hookType = hookType;
+    this.success = success;
+    this.duration = duration;
+    this.timestamp = new Date().toISOString();
+    this.data = data;
+  }
+
+  toJSON() {
+    return {
+      hookId: this.hookId,
+      hookType: this.hookType,
+      success: this.success,
+      duration: this.duration,
+      timestamp: this.timestamp,
+      ...this.data
+    };
+  }
+}
+
+class HookConfig {
+  constructor(config = {}) {
+    this.autoVerifyOnTaskComplete = config.autoVerifyOnTaskComplete ?? true;
+    this.verifyOnStartup = config.verifyOnStartup ?? true;
+    this.blockOnFailure = config.blockOnFailure ?? false;
+    this.maxLogEntries = config.maxLogEntries ?? 100;
+    this.verifyTimeout = config.verifyTimeout ?? 30000;
+    this.skipCategories = config.skipCategories || [];
+  }
+}
+
+// ============================================================
+// DeerFlow借鉴: 事件系统
+// ============================================================
+
+class HookEmitter {
+  constructor() {
+    this.events = {};
+  }
+
+  on(event, listener) {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(listener);
+    return this;
+  }
+
+  off(event, listener) {
+    if (!this.events[event]) return this;
+    this.events[event] = this.events[event].filter(l => l !== listener);
+    return this;
+  }
+
+  emit(event, data) {
+    if (!this.events[event]) return;
+    this.events[event].forEach(listener => {
+      try {
+        listener(data);
+      } catch (e) {
+        console.error(`[HookEmitter] ${event} error:`, e.message);
+      }
+    });
+  }
+}
+
+const emitter = new HookEmitter();
+
+const EVENTS = {
+  VERIFICATION_COMPLETE: 'verification_complete',
+  VERIFICATION_FAILED: 'verification_failed',
+  TASK_COMPLETE_HOOK: 'task_complete_hook',
+  STARTUP_HOOK: 'startup_hook',
+  MANUAL_HOOK: 'manual_hook'
+};
+
+emitter.on(EVENTS.VERIFICATION_COMPLETE, (result) => {
+  const status = result.success ? '✅' : '❌';
+  console.log(`[AutoVerify] ${status} 验证完成 - ${result.hookType}, 耗时: ${result.duration}ms`);
+});
+
+emitter.on(EVENTS.TASK_COMPLETE_HOOK, (taskInfo) => {
+  console.log(`[AutoVerify] 🚀 任务完成触发验证: ${taskInfo.name || taskInfo.taskId}`);
+});
+
+emitter.on(EVENTS.STARTUP_HOOK, () => {
+  console.log(`[AutoVerify] 🚀 启动时验证`);
+});
 
 // ============================================================
 // 路径配置
 // ============================================================
+
 const WORKSPACE_ROOT = 'C:\\Users\\DELL\\.openclaw\\workspace';
 const SKILLS_ROOT = path.join(WORKSPACE_ROOT, 'skills');
 const DYNAMIC_AGENT_ROOT = path.join(SKILLS_ROOT, 'dynamic-multi-agent-system');
 const STATE_ROOT = path.join(DYNAMIC_AGENT_ROOT, 'state');
 const VERIFICATION_LOG = path.join(STATE_ROOT, 'verification-log.json');
-
-// 验证器路径
 const VERIFICATION_MODULE_PATH = path.join(__dirname, '闭环验证器.js');
-
-// ============================================================
-// Hook配置
-// ============================================================
-const HOOK_CONFIG = {
-    // 是否在任务完成后自动验证
-    autoVerifyOnTaskComplete: true,
-    
-    // 是否在启动时验证
-    verifyOnStartup: true,
-    
-    // 验证失败时是否阻止继续
-    blockOnFailure: false,
-    
-    // 最大日志保留条数
-    maxLogEntries: 100,
-    
-    // 验证超时（毫秒）
-    verifyTimeout: 30000,
-    
-    // 需要跳过的验证类别
-    skipCategories: []
-};
 
 // ============================================================
 // 工具函数
 // ============================================================
 
-/**
- * 确保目录存在
- */
 async function ensureDir(dirPath) {
     try {
         await fs.promises.access(dirPath);
@@ -62,9 +127,6 @@ async function ensureDir(dirPath) {
     }
 }
 
-/**
- * 读取JSON文件
- */
 async function readJson(filePath) {
     try {
         const content = await fs.promises.readFile(filePath, 'utf8');
@@ -74,24 +136,15 @@ async function readJson(filePath) {
     }
 }
 
-/**
- * 写入JSON文件
- */
 async function writeJson(filePath, data) {
     await ensureDir(path.dirname(filePath));
     await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
-/**
- * 获取时间戳
- */
 function timestamp() {
     return new Date().toISOString();
 }
 
-/**
- * 生成唯一ID
- */
 function generateId() {
     return `hook_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -105,9 +158,6 @@ class VerificationLogManager {
         this.logPath = logPath;
     }
 
-    /**
-     * 读取日志
-     */
     async read() {
         const exists = await fs.promises.access(this.logPath).then(() => true).catch(() => false);
         if (!exists) return [];
@@ -121,9 +171,6 @@ class VerificationLogManager {
         }
     }
 
-    /**
-     * 添加日志
-     */
     async add(entry) {
         await ensureDir(path.dirname(this.logPath));
         
@@ -137,35 +184,25 @@ class VerificationLogManager {
         
         logs.push(logEntry);
         
-        // 保留最近记录
-        if (logs.length > HOOK_CONFIG.maxLogEntries) {
-            logs.splice(0, logs.length - HOOK_CONFIG.maxLogEntries);
+        if (logs.length > 100) {
+            logs.splice(0, logs.length - 100);
         }
         
         await writeJson(this.logPath, logs);
         return logEntry;
     }
 
-    /**
-     * 获取最近N条日志
-     */
     async getRecent(count = 10) {
         const logs = await this.read();
         return logs.slice(-count);
     }
 
-    /**
-     * 获取指定技能的最新验证结果
-     */
     async getLatestForSkill(skillName) {
         const logs = await this.read();
         const filtered = logs.filter(l => l.metadata?.skillName === skillName);
         return filtered.length > 0 ? filtered[filtered.length - 1] : null;
     }
 
-    /**
-     * 清空日志
-     */
     async clear() {
         await writeJson(this.logPath, []);
     }
@@ -177,25 +214,20 @@ class VerificationLogManager {
 
 class AutoVerifyHook {
     constructor(config = {}) {
-        this.config = { ...HOOK_CONFIG, ...config };
+        this.config = new HookConfig(config);
         this.logManager = new VerificationLogManager();
         this.verifier = null;
     }
 
-    /**
-     * 加载验证器
-     */
     async loadVerifier() {
         if (!this.verifier) {
             try {
-                // 动态加载验证器
                 const verificationPath = VERIFICATION_MODULE_PATH;
                 const pathExists = await fs.promises.access(verificationPath).then(() => true).catch(() => false);
                 
                 if (pathExists) {
                     this.verifier = require(verificationPath);
                 } else {
-                    // 内联基础验证器
                     this.verifier = this.createInlineVerifier();
                 }
             } catch (error) {
@@ -206,9 +238,6 @@ class AutoVerifyHook {
         return this.verifier;
     }
 
-    /**
-     * 创建内联验证器（当闭环验证器不可用时）
-     */
     createInlineVerifier() {
         return {
             runFullVerification: async (skillName, options) => {
@@ -238,32 +267,21 @@ class AutoVerifyHook {
         };
     }
 
-    /**
-     * 任务完成钩子
-     */
     async onTaskComplete(taskInfo) {
         const hookId = generateId();
-        
-        console.log(`[AutoVerify] 🚀 任务完成触发验证 (${hookId})`);
-        console.log(`[AutoVerify] 任务: ${taskInfo.name || taskInfo.taskId || 'unknown'}`);
-        
         const startTime = Date.now();
-        const result = {
+
+        emitter.emit(EVENTS.TASK_COMPLETE_HOOK, taskInfo);
+        
+        const result = new VerificationResult(
             hookId,
-            hookType: 'task_complete',
-            taskInfo: {
-                name: taskInfo.name,
-                taskId: taskInfo.taskId,
-                skillName: taskInfo.skillName,
-                success: taskInfo.success
-            },
-            verification: null,
-            duration: 0,
-            error: null
-        };
+            'task_complete',
+            false,
+            0,
+            { taskInfo }
+        );
 
         try {
-            // 执行验证
             const verifier = await this.loadVerifier();
             const skillName = taskInfo.skillName || 'dynamic-multi-agent-system';
             
@@ -274,10 +292,10 @@ class AutoVerifyHook {
                 )
             ]);
             
-            result.verification = verifyResult;
+            result.success = verifyResult.summary?.failedCount === 0;
             result.duration = Date.now() - startTime;
+            result.data.verification = verifyResult;
             
-            // 记录到日志
             await this.logManager.add({
                 hookId,
                 hookType: 'task_complete',
@@ -285,27 +303,21 @@ class AutoVerifyHook {
                 skillName: taskInfo.skillName,
                 verification: verifyResult,
                 duration: result.duration,
-                success: verifyResult.summary?.failedCount === 0
+                success: result.success
             });
 
-            // 输出结果
             if (verifyResult.summary) {
                 const { passedCount, failedCount, successRate } = verifyResult.summary;
                 console.log(`[AutoVerify] ✓ 验证完成 - 通过: ${passedCount}, 失败: ${failedCount}, 成功率: ${successRate}%`);
-                
-                if (failedCount > 0) {
-                    console.log(`[AutoVerify] ⚠ 存在失败项`);
-                    if (this.config.blockOnFailure) {
-                        console.log(`[AutoVerify] ⛔ 配置为阻止失败，但当前不会实际阻止`);
-                    }
-                }
             }
 
+            emitter.emit(EVENTS.VERIFICATION_COMPLETE, result);
             return result;
 
         } catch (error) {
-            result.error = error.message;
+            result.success = false;
             result.duration = Date.now() - startTime;
+            result.data.error = error.message;
             
             await this.logManager.add({
                 hookId,
@@ -319,29 +331,28 @@ class AutoVerifyHook {
             });
             
             console.error(`[AutoVerify] ✗ 验证失败: ${error.message}`);
+            emitter.emit(EVENTS.VERIFICATION_FAILED, result);
             return result;
         }
     }
 
-    /**
-     * 启动时验证
-     */
     async onStartup(skillName = 'dynamic-multi-agent-system') {
         const hookId = generateId();
+        const startTime = Date.now();
+
+        emitter.emit(EVENTS.STARTUP_HOOK);
         
-        console.log(`[AutoVerify] 🚀 启动时验证 (${hookId})`);
-        
-        const result = {
+        const result = new VerificationResult(
             hookId,
-            hookType: 'startup',
-            timestamp: timestamp(),
-            verification: null,
-            duration: 0,
-            error: null
-        };
+            'startup',
+            false,
+            0,
+            { skillName }
+        );
 
         try {
             const verifier = await this.loadVerifier();
+            
             const verifyResult = await Promise.race([
                 verifier.runFullVerification(skillName, { verbose: false }),
                 new Promise((_, reject) => 
@@ -349,8 +360,9 @@ class AutoVerifyHook {
                 )
             ]);
             
-            result.verification = verifyResult;
-            result.duration = Date.now() - result.duration;
+            result.success = verifyResult.summary?.failedCount === 0;
+            result.duration = Date.now() - startTime;
+            result.data.verification = verifyResult;
             
             await this.logManager.add({
                 hookId,
@@ -358,41 +370,41 @@ class AutoVerifyHook {
                 skillName,
                 verification: verifyResult,
                 duration: result.duration,
-                success: verifyResult.summary?.failedCount === 0
+                success: result.success
             });
 
             console.log(`[AutoVerify] ✓ 启动验证完成`);
+            emitter.emit(EVENTS.VERIFICATION_COMPLETE, result);
             return result;
 
         } catch (error) {
-            result.error = error.message;
+            result.success = false;
+            result.duration = Date.now() - startTime;
+            result.data.error = error.message;
+            
             console.error(`[AutoVerify] ✗ 启动验证失败: ${error.message}`);
+            emitter.emit(EVENTS.VERIFICATION_FAILED, result);
             return result;
         }
     }
 
-    /**
-     * 手动触发验证
-     */
     async trigger(skillName, options = {}) {
         const hookId = generateId();
-        
+        const startTime = Date.now();
+
         console.log(`[AutoVerify] 🚀 手动触发验证 (${hookId})`);
         console.log(`[AutoVerify] 目标技能: ${skillName}`);
         
-        const result = {
+        const result = new VerificationResult(
             hookId,
-            hookType: 'manual',
-            timestamp: timestamp(),
-            skillName,
-            verification: null,
-            duration: 0,
-            error: null
-        };
+            'manual',
+            false,
+            0,
+            { skillName }
+        );
 
         try {
             const verifier = await this.loadVerifier();
-            const startTime = Date.now();
             
             const verifyResult = await Promise.race([
                 verifier.runFullVerification(skillName, { verbose: options.verbose || false }),
@@ -401,8 +413,9 @@ class AutoVerifyHook {
                 )
             ]);
             
-            result.verification = verifyResult;
+            result.success = verifyResult.summary?.failedCount === 0;
             result.duration = Date.now() - startTime;
+            result.data.verification = verifyResult;
             
             await this.logManager.add({
                 hookId,
@@ -410,64 +423,58 @@ class AutoVerifyHook {
                 skillName,
                 verification: verifyResult,
                 duration: result.duration,
-                success: verifyResult.summary?.failedCount === 0
+                success: result.success
             });
 
             console.log(`[AutoVerify] ✓ 验证完成`);
+            emitter.emit(EVENTS.VERIFICATION_COMPLETE, result);
             return result;
 
         } catch (error) {
-            result.error = error.message;
+            result.success = false;
+            result.duration = Date.now() - startTime;
+            result.data.error = error.message;
+            
             console.error(`[AutoVerify] ✗ 验证失败: ${error.message}`);
+            emitter.emit(EVENTS.VERIFICATION_FAILED, result);
             return result;
         }
     }
 
-    /**
-     * 获取验证历史
-     */
     async getHistory(count = 10) {
         return await this.logManager.getRecent(count);
     }
 
-    /**
-     * 获取指定技能的最新验证
-     */
     async getLatest(skillName) {
         return await this.logManager.getLatestForSkill(skillName);
     }
 }
 
 // ============================================================
-// 创建默认Hook实例
-// ============================================================
-const defaultHook = new AutoVerifyHook();
-
-// ============================================================
 // 导出
 // ============================================================
+
+const defaultHook = new AutoVerifyHook();
 
 module.exports = {
     AutoVerifyHook,
     VerificationLogManager,
-    HOOK_CONFIG,
+    VerificationResult,
+    HookConfig,
+    emitter,
+    EVENTS,
     
-    // 快捷方法
     onTaskComplete: (taskInfo) => defaultHook.onTaskComplete(taskInfo),
     onStartup: (skillName) => defaultHook.onStartup(skillName),
     trigger: (skillName, options) => defaultHook.trigger(skillName, options),
     getHistory: (count) => defaultHook.getHistory(count),
     getLatest: (skillName) => defaultHook.getLatest(skillName),
     
-    // 构造函数
     createHook: (config) => new AutoVerifyHook(config),
     createLogManager: (logPath) => new VerificationLogManager(logPath)
 };
 
-// ============================================================
 // CLI入口
-// ============================================================
-
 if (require.main === module) {
     const args = process.argv.slice(2);
     const command = args[0] || 'help';
@@ -481,7 +488,7 @@ if (require.main === module) {
             hook.trigger(skillName, { verbose: true })
                 .then(result => {
                     console.log('\n验证结果:');
-                    console.log(JSON.stringify(result.verification, null, 2));
+                    console.log(JSON.stringify(result.data.verification, null, 2));
                 });
             break;
             
@@ -528,7 +535,6 @@ if (require.main === module) {
 示例:
   node auto-verify-hook.js verify dynamic-multi-agent-system
   node auto-verify-hook.js history 20
-  node auto-verify-hook.js latest
 `);
     }
 }

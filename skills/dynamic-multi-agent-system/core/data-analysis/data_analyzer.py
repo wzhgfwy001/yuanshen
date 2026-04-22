@@ -1,17 +1,20 @@
-// 【探测宝石】Find Gems - 数据分析
+# 【探测宝石】Find Gems - 数据分析 v2.0
+# 基于DeerFlow架构优化：结构化状态、分析管道、结果缓存
 
 # -*- coding: utf-8 -*-
 """
-Data Analyzer - 数据分析核心模块
+Data Analyzer - 数据分析核心模块 v2.0
 支持多格式文件分析、统计、可视化
-版本: 1.0.0
+基于DeerFlow优化：dataclass、结构化结果、管道钩子、缓存
 """
 
 import os
-import pandas as pd
+import json
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
+from dataclasses import dataclass, field, asdict
+from functools import wraps
 
 # 可选依赖
 try:
@@ -35,15 +38,193 @@ except ImportError:
     HAS_MATPLOTLIB = False
 
 
+# ==================== DeerFlow借鉴: 结构化状态 ====================
+
+@dataclass
+class AnalysisMetadata:
+    """分析元数据"""
+    version: str = "2.0"
+    analyzed_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    analyzer: str = "DataAnalyzer"
+    duration_ms: float = 0
+    cache_hit: bool = False
+
+
+@dataclass
+class FileAnalysisResult:
+    """文件分析结果"""
+    success: bool
+    name: str = ""
+    path: str = ""
+    file_type: str = ""
+    metadata: AnalysisMetadata = field(default_factory=AnalysisMetadata)
+    
+    # Excel/CSV specific
+    rows: int = 0
+    columns: int = 0
+    column_names: List[str] = field(default_factory=list)
+    numeric_columns: List[str] = field(default_factory=list)
+    missing_values: Dict[str, int] = field(default_factory=dict)
+    
+    # Text specific
+    lines: int = 0
+    words: int = 0
+    characters: int = 0
+    text_preview: str = ""
+    
+    # PDF specific
+    pages: int = 0
+    
+    # Word specific
+    paragraphs: int = 0
+    tables_count: int = 0
+    
+    # Error
+    error: str = ""
+    
+    def to_dict(self) -> Dict[str, Any]:
+        result = asdict(self)
+        return result
+
+
+# ==================== DeerFlow借鉴: 分析管道 ====================
+
+class AnalysisMiddleware:
+    """分析中间件基类"""
+    def before_analyze(self, file_path: str, context: Dict) -> Dict:
+        return context
+    
+    def after_analyze(self, result: FileAnalysisResult, context: Dict) -> FileAnalysisResult:
+        return result
+
+
+class AnalysisPipeline:
+    """分析管道"""
+    def __init__(self):
+        self.middlewares: List[AnalysisMiddleware] = []
+    
+    def use(self, mw: AnalysisMiddleware) -> 'AnalysisPipeline':
+        self.middlewares.append(mw)
+        return self
+    
+    def execute(self, file_path: str, analyze_fn, *args, **kwargs) -> FileAnalysisResult:
+        context = {'file_path': file_path}
+        
+        # BEFORE钩子
+        for mw in self.middlewares:
+            try:
+                context = mw.before_analyze(file_path, context) or context
+            except Exception as e:
+                print(f"[Pipeline] before_analyze error: {e}")
+        
+        # 执行分析
+        start_time = datetime.now()
+        try:
+            result = analyze_fn(file_path, *args, **kwargs)
+        except Exception as e:
+            result = FileAnalysisResult(success=False, error=str(e))
+        
+        # 计算耗时
+        duration = (datetime.now() - start_time).total_seconds() * 1000
+        if isinstance(result, FileAnalysisResult):
+            result.metadata.duration_ms = duration
+        
+        # AFTER钩子
+        for mw in self.middlewares:
+            try:
+                result = mw.after_analyze(result, context) or result
+            except Exception as e:
+                print(f"[Pipeline] after_analyze error: {e}")
+        
+        return result
+
+
+# 具体中间件
+class MetadataEnrichmentMiddleware(AnalysisMiddleware):
+    """元数据丰富化中间件"""
+    def after_analyze(self, result: FileAnalysisResult, context: Dict) -> FileAnalysisResult:
+        result.metadata.analyzed_at = datetime.now().isoformat()
+        result.metadata.version = "2.0"
+        result.metadata.analyzer = "DataAnalyzer-v2"
+        return result
+
+
+class LoggingMiddleware(AnalysisMiddleware):
+    """日志中间件"""
+    def before_analyze(self, file_path: str, context: Dict) -> Dict:
+        print(f"[DataAnalyzer] 分析文件: {file_path}")
+        return context
+    
+    def after_analyze(self, result: FileAnalysisResult, context: Dict) -> FileAnalysisResult:
+        status = "✅" if result.success else "❌"
+        print(f"[DataAnalyzer] {status} {result.name}")
+        return result
+
+
+# ==================== DeerFlow借鉴: 结果缓存 ====================
+
+class AnalysisCache:
+    """分析结果缓存"""
+    def __init__(self, ttl_seconds: int = 300):
+        self._cache: Dict[str, Dict] = {}
+        self._timestamps: Dict[str, float] = {}
+        self.ttl = ttl_seconds
+    
+    def _make_key(self, file_path: str, mtime: float) -> str:
+        return f"{file_path}:{mtime}"
+    
+    def get(self, file_path: str) -> Optional[FileAnalysisResult]:
+        try:
+            mtime = os.path.getmtime(file_path)
+            key = self._make_key(file_path, mtime)
+            
+            if key in self._cache:
+                import time
+                if time.time() - self._timestamps[key] < self.ttl:
+                    result = FileAnalysisResult(**self._cache[key])
+                    result.metadata.cache_hit = True
+                    return result
+                else:
+                    # 过期删除
+                    del self._cache[key]
+                    del self._timestamps[key]
+        except:
+            pass
+        return None
+    
+    def set(self, file_path: str, result: FileAnalysisResult):
+        try:
+            mtime = os.path.getmtime(file_path)
+            key = self._make_key(file_path, mtime)
+            self._cache[key] = asdict(result)
+            import time
+            self._timestamps[key] = time.time()
+        except:
+            pass
+    
+    def clear(self):
+        self._cache.clear()
+        self._timestamps.clear()
+
+
+# ==================== 数据分析器主类 ====================
+
 class DataAnalyzer:
-    """数据分析器主类"""
+    """数据分析器主类 v2.0"""
     
     SUPPORTED_FORMATS = ['.xlsx', '.xls', '.csv', '.docx', '.pdf', '.txt', '.md', '.markdown']
     
-    def __init__(self, folder_path: str = None):
+    def __init__(self, folder_path: str = None, use_cache: bool = True):
         self.folder = Path(folder_path) if folder_path else None
         self.files = {'excel': [], 'csv': [], 'word': [], 'pdf': [], 'txt': [], 'markdown': []}
-        self.analysis_results = []
+        self.analysis_results: List[FileAnalysisResult] = []
+        
+        # DeerFlow: 管道和缓存
+        self.pipeline = AnalysisPipeline()
+        self.pipeline.use(MetadataEnrichmentMiddleware())
+        self.pipeline.use(LoggingMiddleware())
+        
+        self.cache = AnalysisCache() if use_cache else None
         
         if self.folder and self.folder.exists():
             self._scan_files()
@@ -69,27 +250,35 @@ class DataAnalyzer:
                 elif ext in ['.md', '.markdown']:
                     self.files['markdown'].append(str(f))
     
-    def analyze_excel(self, file_path: str) -> Dict[str, Any]:
+    def _create_result(self, **kwargs) -> FileAnalysisResult:
+        """创建分析结果对象"""
+        return FileAnalysisResult(**kwargs)
+    
+    def analyze_excel(self, file_path: str) -> FileAnalysisResult:
         """分析Excel文件"""
         try:
+            import pandas as pd
             df = pd.read_excel(file_path)
-            return {
-                'success': True,
-                'rows': len(df),
-                'columns': len(df.columns),
-                'column_names': list(df.columns),
-                'dtypes': {col: str(dtype) for col, dtype in df.dtypes.items()},
-                'numeric_columns': list(df.select_dtypes(include=['number']).columns),
-                'missing_values': df.isnull().sum().to_dict(),
-                'basic_stats': df.describe().to_dict() if not df.empty else {},
-                'data': df
-            }
+            
+            return self._create_result(
+                success=True,
+                name=os.path.basename(file_path),
+                path=file_path,
+                file_type='excel',
+                rows=len(df),
+                columns=len(df.columns),
+                column_names=list(df.columns),
+                numeric_columns=list(df.select_dtypes(include=['number']).columns),
+                missing_values=df.isnull().sum().to_dict() if hasattr(df.isnull().sum(), 'to_dict') else {}
+            )
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='excel', error=str(e))
     
-    def analyze_csv(self, file_path: str, encoding: str = 'utf-8') -> Dict[str, Any]:
+    def analyze_csv(self, file_path: str, encoding: str = 'utf-8') -> FileAnalysisResult:
         """分析CSV文件"""
         try:
+            import pandas as pd
+            
             # 尝试不同编码
             for enc in [encoding, 'gbk', 'gb2312', 'latin1']:
                 try:
@@ -98,51 +287,45 @@ class DataAnalyzer:
                 except:
                     continue
             
-            return {
-                'success': True,
-                'rows': len(df),
-                'columns': len(df.columns),
-                'column_names': list(df.columns),
-                'dtypes': {col: str(dtype) for col, dtype in df.dtypes.items()},
-                'numeric_columns': list(df.select_dtypes(include=['number']).columns),
-                'missing_values': df.isnull().sum().to_dict(),
-                'basic_stats': df.describe().to_dict() if not df.empty else {},
-                'data': df
-            }
+            return self._create_result(
+                success=True,
+                name=os.path.basename(file_path),
+                path=file_path,
+                file_type='csv',
+                rows=len(df),
+                columns=len(df.columns),
+                column_names=list(df.columns),
+                numeric_columns=list(df.select_dtypes(include=['number']).columns),
+                missing_values=df.isnull().sum().to_dict() if hasattr(df.isnull().sum(), 'to_dict') else {}
+            )
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='csv', error=str(e))
     
-    def analyze_word(self, file_path: str) -> Dict[str, Any]:
+    def analyze_word(self, file_path: str) -> FileAnalysisResult:
         """分析Word文件"""
         if not HAS_DOCX:
-            return {'success': False, 'error': 'python-docx未安装'}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='word', error='python-docx未安装')
         
         try:
             doc = Document(file_path)
             paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-            tables = []
             
-            for table in doc.tables:
-                table_data = []
-                for row in table.rows:
-                    row_data = [cell.text for cell in row.cells]
-                    table_data.append(row_data)
-                tables.append(table_data)
-            
-            return {
-                'success': True,
-                'paragraphs': len(paragraphs),
-                'total_text': '\n'.join(paragraphs),
-                'tables_count': len(tables),
-                'tables': tables
-            }
+            return self._create_result(
+                success=True,
+                name=os.path.basename(file_path),
+                path=file_path,
+                file_type='word',
+                paragraphs=len(paragraphs),
+                characters=sum(len(p) for p in paragraphs),
+                text_preview='\n'.join(paragraphs[:10])
+            )
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='word', error=str(e))
     
-    def analyze_pdf(self, file_path: str) -> Dict[str, Any]:
+    def analyze_pdf(self, file_path: str) -> FileAnalysisResult:
         """分析PDF文件"""
         if not HAS_PYMUPDF:
-            return {'success': False, 'error': 'PyMuPDF未安装'}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='pdf', error='PyMuPDF未安装')
         
         try:
             doc = fitz.open(file_path)
@@ -150,18 +333,21 @@ class DataAnalyzer:
             for page in doc:
                 text += page.get_text()
             
-            result = {
-                'success': True,
-                'pages': len(doc),
-                'text_length': len(text),
-                'text_preview': text[:500] if text else ''
-            }
+            result = self._create_result(
+                success=True,
+                name=os.path.basename(file_path),
+                path=file_path,
+                file_type='pdf',
+                pages=len(doc),
+                characters=len(text),
+                text_preview=text[:500] if text else ''
+            )
             doc.close()
             return result
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='pdf', error=str(e))
     
-    def analyze_txt(self, file_path: str, encoding: str = 'utf-8') -> Dict[str, Any]:
+    def analyze_txt(self, file_path: str, encoding: str = 'utf-8') -> FileAnalysisResult:
         """分析文本文件"""
         try:
             with open(file_path, 'r', encoding=encoding, errors='ignore') as f:
@@ -170,55 +356,62 @@ class DataAnalyzer:
             lines = content.split('\n')
             words = content.split()
             
-            return {
-                'success': True,
-                'lines': len(lines),
-                'words': len(words),
-                'characters': len(content),
-                'preview': content[:500] if content else ''
-            }
+            return self._create_result(
+                success=True,
+                name=os.path.basename(file_path),
+                path=file_path,
+                file_type='txt',
+                lines=len(lines),
+                words=len(words),
+                characters=len(content),
+                text_preview=content[:500] if content else ''
+            )
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            return self._create_result(success=False, name=os.path.basename(file_path), path=file_path, file_type='txt', error=str(e))
     
-    def analyze_markdown(self, file_path: str) -> Dict[str, Any]:
+    def analyze_markdown(self, file_path: str) -> FileAnalysisResult:
         """分析Markdown文件"""
-        return self.analyze_txt(file_path)  # 复用txt分析
+        return self.analyze_txt(file_path)
     
-    def analyze_file(self, file_path: str, encoding: str = 'utf-8') -> Dict[str, Any]:
-        """自动检测并分析任何支持的文件"""
+    def analyze_file(self, file_path: str, encoding: str = 'utf-8') -> FileAnalysisResult:
+        """自动检测并分析任何支持的文件（带管道和缓存）"""
+        # 缓存检查
+        if self.cache:
+            cached = self.cache.get(file_path)
+            if cached:
+                return cached
+        
         ext = Path(file_path).suffix.lower()
         
-        analyzers = {
-            'excel': self.analyze_excel,
-            'csv': self.analyze_csv,
-            'word': self.analyze_word,
-            'pdf': self.analyze_pdf,
-            'txt': self.analyze_txt,
-            'markdown': self.analyze_markdown
-        }
+        # 使用管道执行分析
+        if ext in ['.xlsx', '.xls']:
+            result = self.pipeline.execute(file_path, self.analyze_excel)
+        elif ext == '.csv':
+            result = self.pipeline.execute(file_path, self.analyze_csv, encoding)
+        elif ext == '.docx':
+            result = self.pipeline.execute(file_path, self.analyze_word)
+        elif ext == '.pdf':
+            result = self.pipeline.execute(file_path, self.analyze_pdf)
+        elif ext == '.txt':
+            result = self.pipeline.execute(file_path, self.analyze_txt, encoding)
+        elif ext in ['.md', '.markdown']:
+            result = self.pipeline.execute(file_path, self.analyze_markdown)
+        else:
+            result = self._create_result(success=False, name=os.path.basename(file_path), path=file_path, error=f'不支持的格式: {ext}')
         
-        for ftype, analyzer in analyzers.items():
-            if ext in getattr(self.files, 'excel', ['.xlsx', '.xls']):
-                return self.analyze_excel(file_path)
-            elif ext == '.csv':
-                return self.analyze_csv(file_path, encoding)
-            elif ext == '.docx':
-                return self.analyze_word(file_path)
-            elif ext == '.pdf':
-                return self.analyze_pdf(file_path)
-            elif ext == '.txt':
-                return self.analyze_txt(file_path, encoding)
-            elif ext in ['.md', '.markdown']:
-                return self.analyze_markdown(file_path)
+        # 缓存结果
+        if self.cache and result.success:
+            self.cache.set(file_path, result)
         
-        return {'success': False, 'error': f'不支持的格式: {ext}'}
+        return result
     
     def generate_summary(self) -> Dict[str, Any]:
         """生成分析摘要"""
         summary = {
             'total_files': 0,
             'file_count_by_type': {},
-            'file_details': [],
+            'successful': 0,
+            'failed': 0,
             'errors': []
         }
         
@@ -227,24 +420,14 @@ class DataAnalyzer:
             summary['total_files'] += len(flist)
             
             for fpath in flist:
-                try:
-                    analysis = self.analyze_file(fpath)
-                    self.analysis_results.append({
-                        'name': os.path.basename(fpath),
-                        'path': fpath,
-                        'type': ftype,
-                        'analysis': analysis
-                    })
-                    summary['file_details'].append({
-                        'name': os.path.basename(fpath),
-                        'type': ftype,
-                        'status': 'success'
-                    })
-                except Exception as e:
-                    summary['errors'].append({
-                        'file': fpath,
-                        'error': str(e)
-                    })
+                result = self.analyze_file(fpath)
+                self.analysis_results.append(result)
+                
+                if result.success:
+                    summary['successful'] += 1
+                else:
+                    summary['failed'] += 1
+                    summary['errors'].append({'file': fpath, 'error': result.error})
         
         return summary
     
@@ -257,13 +440,16 @@ class DataAnalyzer:
         
         return {
             'files_count': len(results),
-            'results': results
+            'successful': sum(1 for r in results if r.success),
+            'failed': sum(1 for r in results if not r.success),
+            'results': [r.to_dict() for r in results]
         }
     
-    def merge_data(self, file_paths: List[str], output_path: str = None) -> pd.DataFrame:
+    def merge_data(self, file_paths: List[str], output_path: str = None) -> Any:
         """合并多个数据文件"""
-        dfs = []
+        import pandas as pd
         
+        dfs = []
         for fpath in file_paths:
             ext = Path(fpath).suffix.lower()
             if ext in ['.xlsx', '.xls', '.csv']:
@@ -289,37 +475,35 @@ class DataAnalyzer:
         
         return pd.DataFrame()
     
-    def generate_statistics(self, df: pd.DataFrame) -> Dict[str, Any]:
+    def generate_statistics(self, df: Any) -> Dict[str, Any]:
         """生成数据统计"""
         stats = {
-            'row_count': len(df),
-            'column_count': len(df.columns),
+            'row_count': len(df) if hasattr(df, '__len__') else 0,
+            'column_count': len(df.columns) if hasattr(df, 'columns') else 0,
             'numeric_columns': [],
             'categorical_columns': [],
             'missing_data': {}
         }
         
-        if df.empty:
+        if not hasattr(df, 'empty') or df.empty:
             return stats
         
         for col in df.columns:
             if df[col].dtype in ['int64', 'float64']:
                 stats['numeric_columns'].append({
                     'name': col,
-                    'mean': float(df[col].mean()),
-                    'median': float(df[col].median()),
-                    'std': float(df[col].std()),
-                    'min': float(df[col].min()),
-                    'max': float(df[col].max())
+                    'mean': float(df[col].mean()) if not df[col].isnull().all() else 0,
+                    'median': float(df[col].median()) if not df[col].isnull().all() else 0,
+                    'std': float(df[col].std()) if not df[col].isnull().all() else 0,
+                    'min': float(df[col].min()) if not df[col].isnull().all() else 0,
+                    'max': float(df[col].max()) if not df[col].isnull().all() else 0
                 })
             else:
                 stats['categorical_columns'].append({
                     'name': col,
                     'unique_count': int(df[col].nunique()),
-                    'top_values': df[col].value_counts().head(5).to_dict()
+                    'top_values': df[col].value_counts().head(5).to_dict() if hasattr(df[col], 'value_counts') else {}
                 })
-        
-        stats['missing_data'] = df.isnull().sum().to_dict()
         
         return stats
     
@@ -332,31 +516,30 @@ class DataAnalyzer:
             content = f"""# {title}
 
 **生成时间：** {timestamp}
+**分析器版本：** v2.0
 
 ## 摘要统计
 
-- **总文件数：** {self.summary.get('total_files', 0)}
-{self._format_file_count()}
-
-## 详细分析
-
-"""
-            for detail in self.analysis_results:
-                content += f"""### {detail['name']}
-
-- **类型：** {detail['type']}
-- **状态：** {'成功' if detail['analysis'].get('success') else '失败'}
+- **总文件数：** {len(self.analysis_results)}
+- **成功：** {sum(1 for r in self.analysis_results if r.success)}
+- **失败：** {sum(1 for r in self.analysis_results if not r.success)}
 
 """
-                if detail['analysis'].get('success'):
-                    analysis = detail['analysis']
-                    if 'rows' in analysis:
-                        content += f"- **行数：** {analysis['rows']}\n"
-                        content += f"- **列数：** {analysis['columns']}\n"
-                    if 'pages' in analysis:
-                        content += f"- **页数：** {analysis['pages']}\n"
-                    if 'text_length' in analysis:
-                        content += f"- **文字长度：** {analysis['text_length']}\n"
+            for result in self.analysis_results:
+                content += f"""### {result.name}
+
+- **类型：** {result.file_type}
+- **状态：** {'成功' if result.success else '失败'}
+
+"""
+                if result.success:
+                    if result.rows > 0:
+                        content += f"- **行数：** {result.rows}\n"
+                        content += f"- **列数：** {result.columns}\n"
+                    if result.pages > 0:
+                        content += f"- **页数：** {result.pages}\n"
+                    if result.characters > 0:
+                        content += f"- **字符数：** {result.characters}\n"
                 
                 content += "\n"
             
@@ -366,44 +549,26 @@ class DataAnalyzer:
             
             return content
         
-        elif format == 'excel':
-            if not output_path:
-                output_path = 'analysis_report.xlsx'
+        elif format == 'json':
+            data = {
+                'title': title,
+                'timestamp': timestamp,
+                'version': '2.0',
+                'summary': {
+                    'total': len(self.analysis_results),
+                    'successful': sum(1 for r in self.analysis_results if r.success),
+                    'failed': sum(1 for r in self.analysis_results if not r.success)
+                },
+                'results': [r.to_dict() for r in self.analysis_results]
+            }
             
-            with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
-                summary_df = pd.DataFrame([{
-                    '文件名': d['name'],
-                    '类型': d['type'],
-                    '状态': '成功' if d['analysis'].get('success') else '失败'
-                } for d in self.analysis_results])
-                summary_df.to_excel(writer, sheet_name='摘要', index=False)
-                
-                # 写入详细数据
-                for detail in self.analysis_results:
-                    if detail['analysis'].get('success') and 'data' in detail['analysis']:
-                        df = detail['analysis']['data']
-                        sheet_name = detail['name'][:31]  # Excel限制31字符
-                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+            if output_path:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
             
-            return f"报告已保存到: {output_path}"
+            return json.dumps(data, ensure_ascii=False, indent=2)
         
         return "不支持的格式"
-    
-    def _format_file_count(self) -> str:
-        """格式化文件数量"""
-        lines = []
-        for ftype, count in self.summary.get('file_count_by_type', {}).items():
-            if count > 0:
-                emoji = {
-                    'excel': '📊',
-                    'csv': '📄',
-                    'word': '📝',
-                    'pdf': '📕',
-                    'txt': '📃',
-                    'markdown': '📋'
-                }.get(ftype, '📁')
-                lines.append(f"- {emoji} **{ftype.upper()}：** {count} 个文件")
-        return '\n'.join(lines) if lines else '- 无文件'
     
     @property
     def summary(self) -> Dict[str, Any]:
@@ -412,8 +577,8 @@ class DataAnalyzer:
             return self.generate_summary()
         return {
             'total_files': len(self.analysis_results),
-            'file_count_by_type': {},
-            'file_details': self.analysis_results
+            'successful': sum(1 for r in self.analysis_results if r.success),
+            'failed': sum(1 for r in self.analysis_results if not r.success)
         }
 
 
@@ -423,7 +588,7 @@ def analyze_folder(folder_path: str, output_path: str = None) -> Dict[str, Any]:
     return analyzer.generate_summary()
 
 
-def analyze_file(file_path: str) -> Dict[str, Any]:
+def analyze_file(file_path: str) -> FileAnalysisResult:
     """便捷函数：分析单个文件"""
     analyzer = DataAnalyzer()
     return analyzer.analyze_file(file_path)

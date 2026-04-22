@@ -1,0 +1,106 @@
+{
+  "workflow_id": "default_novel_creation",
+  "name": "默认小说创作工作流",
+  "version": "1.2.0",
+  
+  "provider": "minimax",
+  "model": "MiniMax-M2.7",
+  "temperature": 0.7,
+  "max_tokens": 4096,
+
+  "nodes": [
+    {
+      "node_id": "radar",
+      "type": "radar",
+      "enabled": true,
+      "config": {
+        "scan_depth": "deep",
+        "genre_detection": true
+      }
+    },
+    {
+      "node_id": "architect",
+      "type": "architect",
+      "enabled": true,
+      "config": {
+        "outline_style": "classical",
+        "chapter_count": 10
+      }
+    },
+    {
+      "node_id": "writer",
+      "type": "writer",
+      "enabled": true,
+      "config": {
+        "writing_style": "literary",
+        "scene_detail": "high"
+      }
+    },
+    {
+      "node_id": "auditor",
+      "type": "auditor",
+      "enabled": true,
+      "config": {
+        "audit_dimensions": 33,
+        "strict_mode": true
+      }
+    },
+    {
+      "node_id": "reviser",
+      "type": "reviser",
+      "enabled": true,
+      "config": {
+        "remove_ai_trace": true,
+        "preserve_style": true
+      }
+    }
+  ],
+
+  "truth_files": {
+    "current_state": {
+      "enabled": true,
+      "path": ".storyflow_cache/current_state.json"
+    },
+    "character_matrix": {
+      "enabled": true,
+      "path": ".storyflow_cache/character_matrix.json"
+    },
+    "pending_hooks": {
+      "enabled": true,
+      "path": ".storyflow_cache/pending_hooks.json"
+    }
+  },
+
+  "audit": {
+    "dimensions": 33,
+    "categories": [
+      "世界观构建",
+      "人物塑造",
+      "情节发展",
+      "情感表达",
+      "语言风格",
+      "逻辑连贯",
+      "创意独特"
+    ],
+    "enabled": true,
+    "fail_threshold": 60
+  },
+
+  "ai_trace": {
+    "detection_enabled": true,
+    "removal_enabled": true,
+    "sensitivity": "medium"
+  },
+
+  "output": {
+    "format": "markdown",
+    "save_path": ".storyflow_output",
+    "checkpoint_enabled": true
+  },
+
+  "server": {
+    "host": "127.0.0.1",
+    "port": 5001,
+    "debug": false
+  }
+}

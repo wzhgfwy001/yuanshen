@@ -1,132 +1,325 @@
 /**
- * category-mapping.json 映射表加载器
- * 
- * 功能：
- * - 启动时自动加载 category-mapping.json
- * - 提供 getMappedCategory() 获取映射后的分类
- * - 缓存映射表避免重复读取
+ * category-mapping.json 映射表加载器 v2.0
+ * 基于DeerFlow架构优化：
+ * 1. 异步化
+ * 2. 事件系统
+ * 3. 结构化结果
+ * 4. 中间件管道
  */
 
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 
-// 缓存
+// ==================== DeerFlow借鉴: 结构化状态 ====================
+
+class MappingResult {
+  constructor(mappedCategory, wasMapped, source) {
+    this.mappedCategory = mappedCategory;
+    this.wasMapped = wasMapped;
+    this.source = source;
+    this.timestamp = new Date().toISOString();
+  }
+
+  toJSON() {
+    return {
+      mappedCategory: this.mappedCategory,
+      wasMapped: this.wasMapped,
+      source: this.source,
+      timestamp: this.timestamp
+    };
+  }
+}
+
+class LoadResult {
+  constructor(success, config = {}) {
+    this.success = success;
+    this.enabled = config.enabled || false;
+    this.reason = config.reason || '';
+    this.remapCount = config.remapCount || 0;
+    this.newCategories = config.newCategories || 0;
+    this.lastLoadTime = config.lastLoadTime || null;
+    this.error = config.error || null;
+    this.timestamp = new Date().toISOString();
+  }
+
+  toJSON() {
+    return {
+      success: this.success,
+      enabled: this.enabled,
+      reason: this.reason,
+      remapCount: this.remapCount,
+      newCategories: this.newCategories,
+      lastLoadTime: this.lastLoadTime,
+      error: this.error,
+      timestamp: this.timestamp
+    };
+  }
+}
+
+// ==================== DeerFlow借鉴: 事件系统 ====================
+
+class MappingEmitter {
+  constructor() {
+    this.events = {};
+  }
+
+  on(event, listener) {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(listener);
+    return this;
+  }
+
+  off(event, listener) {
+    if (!this.events[event]) return this;
+    this.events[event] = this.events[event].filter(l => l !== listener);
+    return this;
+  }
+
+  emit(event, data) {
+    if (!this.events[event]) return;
+    this.events[event].forEach(listener => {
+      try {
+        listener(data);
+      } catch (e) {
+        console.error(`[MappingEmitter] ${event} error:`, e.message);
+      }
+    });
+  }
+}
+
+const emitter = new MappingEmitter();
+
+const EVENTS = {
+  MAPPING_LOADED: 'mapping_loaded',
+  MAPPING_DISABLED: 'mapping_disabled',
+  MAPPING_APPLIED: 'mapping_applied',
+  MAPPING_ERROR: 'mapping_error'
+};
+
+emitter.on(EVENTS.MAPPING_LOADED, (result) => {
+  console.log(`[mapping-loader] ✅ 映射表已加载，${result.remapCount}个映射规则`);
+});
+
+emitter.on(EVENTS.MAPPING_DISABLED, (result) => {
+  console.log(`[mapping-loader] ⚠️ 映射表未启用: ${result.reason}`);
+});
+
+emitter.on(EVENTS.MAPPING_APPLIED, (result) => {
+  console.log(`[mapping-loader] 🔄 映射应用: ${result.originalCategory} → ${result.mappedCategory}`);
+});
+
+// ==================== DeerFlow借鉴: 中间件管道 ====================
+
+class MappingMiddleware {
+  beforeMap(category, agentName, context) { return { category, agentName, context }; }
+  afterMap(result, context) { return result; }
+}
+
+class MappingPipeline {
+  constructor() {
+    this.middlewares = [];
+  }
+
+  use(mw) {
+    this.middlewares.push(mw);
+    return this;
+  }
+
+  execute(category, agentName, context, mapFn) {
+    let ctx = { category, agentName, context, errors: [] };
+
+    for (const mw of this.middlewares) {
+      try {
+        const result = mw.beforeMap(ctx.category, ctx.agentName, ctx.context);
+        ctx.category = result.category;
+        ctx.agentName = result.agentName;
+        ctx.context = result.context;
+      } catch (e) {
+        ctx.errors.push(e.message);
+      }
+    }
+
+    let result;
+    try {
+      result = mapFn(ctx.category, ctx.agentName, ctx.context);
+    } catch (e) {
+      ctx.errors.push(e.message);
+      result = new MappingResult(category, false, 'error');
+    }
+
+    for (const mw of this.middlewares) {
+      try {
+        result = mw.afterMap(result, ctx.context) || result;
+      } catch (e) {
+        ctx.errors.push(e.message);
+      }
+    }
+
+    if (ctx.errors.length > 0) {
+      result.errors = ctx.errors;
+    }
+
+    return result;
+  }
+}
+
+class NormalizationMiddleware extends MappingMiddleware {
+  beforeMap(category, agentName, context) {
+    return {
+      category: (category || '').trim().toLowerCase(),
+      agentName: agentName ? agentName.trim() : null,
+      context
+    };
+  }
+}
+
+class LoggingMiddleware extends MappingMiddleware {
+  afterMap(result, context) {
+    if (result.wasMapped) {
+      console.log(`[mapping-loader] 🔄 ${result.source}: ${result.originalCategory || result.mappedCategory} → ${result.mappedCategory}`);
+    }
+    return result;
+  }
+}
+
+// ==================== 配置 ====================
+
+const MAPPING_FILE = path.join(__dirname, 'category-mapping.json');
+
+// 内存缓存
 let _mappingCache = null;
 let _mappingEnabled = false;
 let _categoryRemap = {};
 let _lastLoadTime = null;
 
-// 映射表文件路径
-const MAPPING_FILE = path.join(__dirname, 'category-mapping.json');
+// 管道实例
+const pipeline = new MappingPipeline();
+pipeline.use(new NormalizationMiddleware());
+pipeline.use(new LoggingMiddleware());
 
-/**
- * 加载映射表（启动时自动调用）
- * @returns {Object} 映射配置
- */
-function loadCategoryMapping() {
+// ==================== 异步加载 ====================
+
+async function loadCategoryMapping() {
   try {
-    if (!fs.existsSync(MAPPING_FILE)) {
-      console.log('[mapping-loader] category-mapping.json not found, mapping disabled');
+    if (!fsSync.existsSync(MAPPING_FILE)) {
       _mappingEnabled = false;
-      return { enabled: false, reason: 'file_not_found' };
+      const result = new LoadResult(false, { reason: 'file_not_found' });
+      emitter.emit(EVENTS.MAPPING_DISABLED, result);
+      return result;
     }
 
-    const content = fs.readFileSync(MAPPING_FILE, 'utf-8');
+    const content = await fs.readFile(MAPPING_FILE, 'utf-8');
     const config = JSON.parse(content);
 
-    // 检查是否启用
     if (!config._enabled) {
-      console.log('[mapping-loader] category-mapping.json exists but _enabled=false');
       _mappingEnabled = false;
       _mappingCache = null;
-      return { enabled: false, reason: 'disabled_in_config' };
+      const result = new LoadResult(false, { reason: 'disabled_in_config' });
+      emitter.emit(EVENTS.MAPPING_DISABLED, result);
+      return result;
     }
 
-    // 缓存映射数据
     _mappingEnabled = true;
     _categoryRemap = config.category_remap || {};
     _mappingCache = config;
     _lastLoadTime = new Date().toISOString();
 
-    console.log(`[mapping-loader] Loaded category-mapping.json at ${_lastLoadTime}`);
-    console.log(`[mapping-loader] Remap entries: ${Object.keys(_categoryRemap.specialized || {}).length}`);
-
-    return {
+    const result = new LoadResult(true, {
       enabled: true,
       remapCount: Object.keys(_categoryRemap.specialized || {}).length,
       newCategories: Object.keys(config.new_categories || {}).length,
       lastLoadTime: _lastLoadTime
-    };
+    });
+
+    emitter.emit(EVENTS.MAPPING_LOADED, result);
+    return result;
 
   } catch (error) {
-    console.error('[mapping-loader] Failed to load category-mapping.json:', error.message);
     _mappingEnabled = false;
     _mappingCache = null;
-    return { enabled: false, reason: 'load_error', error: error.message };
+    const result = new LoadResult(false, { reason: 'load_error', error: error.message });
+    emitter.emit(EVENTS.MAPPING_ERROR, result);
+    return result;
   }
 }
 
 /**
- * 获取映射后的分类
- * @param {string} originalCategory - 原始分类
- * @param {string} agentName - Agent名称（可选，用于精确匹配）
- * @returns {Object} { mappedCategory, wasMapped, source }
+ * 获取映射后的分类（同步版本，使用管道）
  */
 function getMappedCategory(originalCategory, agentName = null) {
-  // 如果未启用映射，直接返回原分类
+  return pipeline.execute(
+    originalCategory,
+    agentName,
+    {},
+    (cat, agent, ctx) => _doMap(cat, agent)
+  );
+}
+
+function _doMap(originalCategory, agentName) {
   if (!_mappingEnabled) {
-    return {
-      mappedCategory: originalCategory,
-      wasMapped: false,
-      source: 'registry'
-    };
+    return new MappingResult(originalCategory, false, 'disabled');
   }
 
-  // 支持所有category的映射（不限于specialized）
-  if (agentName) {
-    // 遍历所有category_remap中的分类
-    for (const [srcCategory, remapEntries] of Object.entries(_categoryRemap)) {
-      // 跳过内部元数据字段（以_开头的）
-      if (srcCategory.startsWith('_')) continue;
-      
-      // 如果原始分类匹配
-      if (originalCategory === srcCategory || srcCategory === '*') {
-        // 检查是否有该agent的映射
-        if (remapEntries && typeof remapEntries === 'object') {
-          // 支持两种格式：
-          // 1. 直接映射："agentName": "targetCategory"
-          // 2. 详细映射："agentName": { target: "targetCategory", ... }
-          const entry = remapEntries[agentName];
-          if (entry) {
-            const mappedTo = typeof entry === 'string' ? entry : entry.target;
-            if (mappedTo) {
-              console.log(`[mapping-loader] Mapped [${srcCategory}/${agentName}] → ${mappedTo}`);
-              return {
-                mappedCategory: mappedTo,
-                wasMapped: true,
-                source: 'category-mapping.json',
-                originalCategory: originalCategory,
-                mappedFrom: srcCategory,
-                agentName: agentName
-              };
-            }
+  for (const [srcCategory, remapEntries] of Object.entries(_categoryRemap)) {
+    if (srcCategory.startsWith('_')) continue;
+
+    if (originalCategory === srcCategory || srcCategory === '*') {
+      if (remapEntries && typeof remapEntries === 'object') {
+        const entry = remapEntries[agentName];
+        if (entry) {
+          const mappedTo = typeof entry === 'string' ? entry : entry.target;
+          if (mappedTo) {
+            const result = new MappingResult(mappedTo, true, 'category-mapping.json');
+            result.originalCategory = originalCategory;
+            result.mappedFrom = srcCategory;
+            result.agentName = agentName;
+            emitter.emit(EVENTS.MAPPING_APPLIED, result);
+            return result;
           }
         }
       }
     }
   }
 
-  // 非specialized或无映射，返回原分类
-  return {
-    mappedCategory: originalCategory,
-    wasMapped: false,
-    source: _mappingEnabled ? 'category-mapping.json' : 'registry'
-  };
+  return new MappingResult(originalCategory, false, 'no_mapping');
+}
+
+/**
+ * 获取映射后的分类（异步版本）
+ */
+async function getMappedCategoryAsync(originalCategory, agentName = null) {
+  // 如果未启用映射，直接返回
+  if (!_mappingEnabled) {
+    return new MappingResult(originalCategory, false, 'disabled');
+  }
+
+  // 遍历映射
+  for (const [srcCategory, remapEntries] of Object.entries(_categoryRemap)) {
+    if (srcCategory.startsWith('_')) continue;
+
+    if (originalCategory === srcCategory || srcCategory === '*') {
+      if (remapEntries && typeof remapEntries === 'object') {
+        const entry = remapEntries[agentName];
+        if (entry) {
+          const mappedTo = typeof entry === 'string' ? entry : entry.target;
+          if (mappedTo) {
+            const result = new MappingResult(mappedTo, true, 'category-mapping.json');
+            result.originalCategory = originalCategory;
+            result.mappedFrom = srcCategory;
+            result.agentName = agentName;
+            return result;
+          }
+        }
+      }
+    }
+  }
+
+  return new MappingResult(originalCategory, false, 'no_mapping');
 }
 
 /**
  * 检查映射是否启用
- * @returns {boolean}
  */
 function isMappingEnabled() {
   return _mappingEnabled;
@@ -134,7 +327,6 @@ function isMappingEnabled() {
 
 /**
  * 获取缓存状态
- * @returns {Object}
  */
 function getCacheStatus() {
   return {
@@ -147,21 +339,26 @@ function getCacheStatus() {
 
 /**
  * 重新加载映射表
- * @returns {Object} 加载结果
  */
-function reload() {
+async function reload() {
   console.log('[mapping-loader] Reloading category-mapping.json...');
   return loadCategoryMapping();
 }
 
-// 启动时自动加载
+// 启动时自动加载（同步）
 loadCategoryMapping();
 
 // 导出
 module.exports = {
   loadCategoryMapping,
   getMappedCategory,
+  getMappedCategoryAsync,
   isMappingEnabled,
   getCacheStatus,
-  reload
+  reload,
+  MappingResult,
+  LoadResult,
+  MappingPipeline,
+  emitter,
+  EVENTS
 };

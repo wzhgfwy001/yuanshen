@@ -1,0 +1,123 @@
+{
+  "workflow_id": "inkos_5agent",
+  "name": "INKOS 5-Agent 接力工作流",
+  "description": "完整小说创作管线：雷达 → 建筑师 → 真相文件 → 写手 → 审计 → 修订",
+  "nodes": [
+    {
+      "id": "radar",
+      "type": "RadarNode",
+      "name": "市场趋势雷达",
+      "config": {
+        "genre": "玄幻",
+        "platform": "起点",
+        "trend_keywords": ["修仙", "重生", "系统"]
+      }
+    },
+    {
+      "id": "architect",
+      "type": "ArchitectNode",
+      "name": "章节结构建筑师",
+      "config": {
+        "chapter_number": 1,
+        "target_words": 3000
+      }
+    },
+    {
+      "id": "truth_init",
+      "type": "TruthFilesNode",
+      "name": "真相文件初始化",
+      "config": {
+        "init_mode": "create"
+      }
+    },
+    {
+      "id": "writer",
+      "type": "WriterNode",
+      "name": "章节写手",
+      "config": {
+        "style": "immersive",
+        "pacing": "balanced"
+      }
+    },
+    {
+      "id": "audit",
+      "type": "AuditNode",
+      "name": "33维度审计员",
+      "config": {
+        "strict_mode": true,
+        "critical_dimensions": ["逻辑一致性", "角色行为", "剧情连贯"]
+      }
+    },
+    {
+      "id": "revise",
+      "type": "ReviserNode",
+      "name": "智能修订者",
+      "config": {
+        "remove_ai_traces": true,
+        "enhance_readability": true
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source": "radar",
+      "output": "market_report",
+      "target": "architect",
+      "input": "market_context"
+    },
+    {
+      "source": "architect",
+      "output": "chapter_outline",
+      "target": "truth_init",
+      "input": "chapter_outline"
+    },
+    {
+      "source": "architect",
+      "output": "chapter_outline",
+      "target": "writer",
+      "input": "chapter_outline"
+    },
+    {
+      "source": "truth_init",
+      "output": "truth_files",
+      "target": "writer",
+      "input": "truth_context"
+    },
+    {
+      "source": "writer",
+      "output": "chapter_draft",
+      "target": "audit",
+      "input": "chapter_content"
+    },
+    {
+      "source": "writer",
+      "output": "state_update",
+      "target": "audit",
+      "input": "current_state"
+    },
+    {
+      "source": "audit",
+      "output": "audit_report",
+      "target": "revise",
+      "input": "audit_issues"
+    },
+    {
+      "source": "writer",
+      "output": "chapter_draft",
+      "target": "revise",
+      "input": "original_content"
+    },
+    {
+      "source": "revise",
+      "output": "final_chapter",
+      "target": "output",
+      "input": "result"
+    }
+  ],
+  "loop_config": {
+    "enabled": true,
+    "loop_nodes": ["revise", "audit"],
+    "max_iterations": 3,
+    "exit_condition": "critical_issues_count == 0"
+  }
+}
