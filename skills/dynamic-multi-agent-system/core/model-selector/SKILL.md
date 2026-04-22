@@ -1,94 +1,238 @@
 ---
-name: model-selector
-description: 智能模型选择器，根据任务复杂度、预算、延迟要求自动选择最优模型，支持成本优化和性能预测
+name: deerflow-model-selector
+description: DeerFlow增强版模型选择器 - 动态路由、成本控制、故障转移、自动重试
 parent: dynamic-multi-agent-system
-version: 2.1.0
+version: 1.0.0
+trigger: deerflow_mode=true | model_selection=advanced | multi_model=true | cost_control=true
 ---
 
-# model-selector
+# DeerFlow增强版模型选择器
 
-**【奥术智慧】Arcane Intel — 模型选择器** - 
+**【附魔·改】Model Enchant**
 
-## 功能概述
+## 触发条件
 
-| 功能 | 说明 | 优先级 |
-|------|------|--------|
-| 任务复杂度评估 | 自动分析任务难度 | ⭐⭐⭐⭐⭐ |
-| 成本优化 | 同等效果选更便宜的模型 | ⭐⭐⭐⭐⭐ |
-| 备选模型自动切换 | 主模型失败自动切换 | ⭐⭐⭐⭐⭐ |
-| 模型质量评分 | 实时评分，动态调整 | ⭐⭐⭐⭐ |
+| 条件 | 配置键 | 说明 |
+|------|--------|------|
+| DeerFlow模式 | `deerflow_mode=true` | 使用DeerFlow增强模式 |
+| 高级模型选择 | `model_selection=advanced` | 动态路由选择 |
+| 多模型支持 | `multi_model=true` | 使用多个模型 |
+| 成本控制 | `cost_control=true` | 预算和token限制 |
 
----
+## 核心功能
 
-## 模型矩阵
+### 1. 模型注册
 
-| 模型 | 能力 | 速度 | 成本 | 上下文 | 适用场景 |
-|------|------|------|------|--------|----------|
-| MiniMax-M2.5 | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ¥ | 32K | 简单任务 |
-| MiniMax-M2.7 | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ¥¥ | 32K | 标准任务 |
-| Qwen3-Coder | ⭐⭐⭐⭐ | ⭐⭐⭐ | ¥¥ | 32K | 代码开发 |
-| Qwen3.5-Plus | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ¥¥¥ | 32K | 平衡任务 |
-| Qwen3-Max | ⭐⭐⭐⭐⭐ | ⭐⭐ | ¥¥¥¥ | 32K | 复杂推理 |
-| Qwen3.5-Max | ⭐⭐⭐⭐⭐ | ⭐⭐ | ¥¥¥¥ | 128K | 长文本 |
-| GPT-4o | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ¥¥¥¥ | 128K | 国际场景 |
-| Claude-3.5 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ¥¥¥¥ | 200K | 长文本分析 |
+```javascript
+const { ModelSelector, SELECTION_STRATEGIES } = require('./deerflow_enhanced.js');
 
-**详细模型规格：** [references/MODEL-MATRIX.md](references/MODEL-MATRIX.md)
-
----
-
-## 快速使用
-
-```typescript
-const selector = new IntelligentModelSelector();
-
-const profile = selector.analyzeTask({
-  description: '撰写一篇3000字的产品分析报告',
-  expectedLength: '3000字'
+const selector = new ModelSelector({
+  strategy: SELECTION_STRATEGIES.COST_OPTIMIZED,
+  maxBudget: 100,
+  maxTokensPerDay: 100000
 });
 
-const recommendations = selector.select(profile, { preferQuality: true });
-console.log(`最优模型：${recommendations[0].model}`);
+// 注册模型
+selector.registerModel({
+  name: 'gpt-4',
+  provider: 'openai',
+  modelId: 'gpt-4',
+  maxTokens: 8192,
+  costPer1KInput: 0.03,
+  costPer1KOutput: 0.06,
+  latencyMs: 2000,
+  qualityScore: 0.95,
+  capabilities: ['general', 'coding', 'reasoning'],
+  rateLimit: 100,
+  rateLimitWindow: 60000,
+  fallback: 'gpt-3.5-turbo'
+});
 
-const cost = selector.estimateCost(recommendations[0].model, inputTokens, outputTokens);
+selector.registerModel({
+  name: 'gpt-3.5-turbo',
+  provider: 'openai',
+  modelId: 'gpt-3.5-turbo-16k',
+  maxTokens: 16384,
+  costPer1KInput: 0.001,
+  costPer1KOutput: 0.002,
+  latencyMs: 500,
+  qualityScore: 0.8,
+  capabilities: ['general', 'fast'],
+  rateLimit: 500
+});
+
+selector.registerModel({
+  name: 'claude',
+  provider: 'anthropic',
+  modelId: 'claude-3-opus',
+  maxTokens: 4096,
+  costPer1KInput: 0.015,
+  costPer1KOutput: 0.075,
+  latencyMs: 1500,
+  qualityScore: 0.9,
+  capabilities: ['general', 'writing', 'reasoning']
+});
 ```
 
----
+### 2. 模型选择
 
-## Fallback Chain
+```javascript
+// 根据上下文选择模型
+const model = selector.selectModel({
+  taskType: 'coding',           // 任务类型
+  requiredCapabilities: [],      // 必需能力
+  maxCost: 0.01,                // 最大成本
+  maxLatency: 3000,             // 最大延迟
+  qualityWeight: 0.6,            // 质量权重
+  costWeight: 0.3,              // 成本权重
+  latencyWeight: 0.1            // 延迟权重
+});
 
-| 场景 | 主模型 | Fallback链 |
-|------|--------|------------|
-| 高质量 | qwen3.5-max | → qwen3-max → qwen3.5-plus → minimax-m2.7 |
-| 平衡 | qwen3.5-plus | → qwen3-max → minimax-m2.7 |
-| 速度优先 | minimax-m2.7 | → minimax-m2.5 → qwen3.5-plus |
-| 代码 | qwen3-coder-plus | → qwen3.5-plus → minimax-m2.7 |
-| 长文本 | claude-3.5 | → qwen3.5-max → qwen3.5-plus |
+console.log(`选择模型: ${model.name}`);
+console.log(`预计成本: $${model.calculateCost(1000, 500)}`);
+```
 
-**完整Fallback配置：** [references/MODEL-MATRIX.md](references/MODEL-MATRIX.md)
+### 3. 成本控制
 
----
+```javascript
+// 检查预算
+const remaining = selector.budgetController.getRemaining();
+console.log(`
+剩余预算: $${remaining.budget.toFixed(2)} (${remaining.budgetPercent.toFixed(1)}%)
+剩余Token: ${remaining.tokens.toLocaleString()} (${remaining.tokensPercent.toFixed(1)}%)
+`);
 
-## 成本优化
+// 设置告警阈值
+selector.budgetController.on('budget_exceeded', (info) => {
+  console.error('预算超限!', info);
+  // 发送警告或切换到低成本模型
+});
+```
 
-- 启用成本优化后，平均节省 30-40%
-- 支持同效果选更便宜模型
-- 自动推荐成本节省方案
+### 4. 自动重试与故障转移
 
----
+```javascript
+// 执行带重试的请求
+const result = await selector.executeWithRetry(
+  { taskType: 'coding', maxCost: 0.01 },
+  async (model) => {
+    console.log(`使用模型: ${model.name}`);
+    
+    const response = await callModelAPI(model.modelId, prompt);
+    
+    return {
+      content: response.content,
+      latencyMs: response.latencyMs,
+      tokens: response.usage.total
+    };
+  },
+  {
+    maxRetries: 3,
+    retryDelay: 1000
+  }
+);
 
-## 最佳实践
+console.log('成功:', result.content);
+```
 
-### ✅ 推荐
-1. **使用复杂度评估** - 用 `analyzeTask()` 不要手动估算
-2. **开启成本优化** - 定期检查优化建议
-3. **配置Fallback链** - 根据任务类型选择
+### 5. 批量注册模型
 
-### ❌ 避免
-1. **固定最强模型** - 造成不必要的成本浪费
-2. **忽略Fallback** - 单点故障风险高
-3. **不看质量评分** - 可能选到近期表现差的模型
+```javascript
+selector.registerModels([
+  { name: 'mixtral', provider: 'mistral', capabilities: ['general'] },
+  { name: 'gemini', provider: 'google', capabilities: ['general', 'vision'] },
+  { name: 'llama', provider: 'meta', capabilities: ['general', 'fast'] }
+]);
+```
 
----
+### 6. 获取统计信息
 
-*详细模型矩阵和Fallback链见 references/MODEL-MATRIX.md*
+```javascript
+const stats = selector.getStatistics();
+
+console.log(`
+总模型数: ${stats.totalModels}
+可用模型: ${stats.availableModels}
+总请求数: ${stats.totalRequests}
+总失败数: ${stats.totalFailures}
+
+预算状态:
+${stats.budgetStatus.budget.toFixed(2)} / 100.00
+${stats.budgetStatus.tokens.toLocaleString()} / 100,000 tokens
+
+各模型状态:
+${stats.byModel.map(m => `- ${m.name}: ${m.status} (负载:${m.load}, 错误率:${(m.errorRate*100).toFixed(1)}%)`).join('\n')}
+`);
+```
+
+## 选择策略
+
+| 策略 | 说明 | 适用场景 |
+|------|------|----------|
+| `ROUND_ROBIN` | 轮询分配请求 | 均匀负载 |
+| `LEAST_LOADED` | 选择负载最低 | 高并发 |
+| `COST_OPTIMIZED` | 选择成本最低 | 成本敏感 |
+| `LATENCY_OPTIMIZED` | 选择延迟最低 | 实时响应 |
+| `QUALITY_OPTIMIZED` | 选择质量最高 | 高质量输出 |
+
+## 事件系统
+
+```javascript
+selector.on('model_selected', ({ model, strategy }) => {
+  console.log(`选择 ${model.name} (策略: ${strategy})`);
+});
+
+selector.on('model_switched', ({ original, fallback, reason }) => {
+  console.log(`切换模型: ${original} -> ${fallback} (原因: ${reason})`);
+});
+
+selector.on('model_failed', ({ model, error }) => {
+  console.error(`模型失败: ${model.name}`, error);
+});
+
+selector.on('budget_exceeded', (info) => {
+  console.error('预算超限:', info);
+});
+```
+
+## 集成到主系统
+
+```javascript
+// 在系统初始化时
+const modelSelector = new ModelSelector({
+  strategy: SELECTION_STRATEGIES.QUALITY_OPTIMIZED,
+  maxBudget: 50,  // $50
+  maxTokensPerDay: 50000
+});
+
+// 注册所有模型
+for (const config of defaultModels) {
+  modelSelector.registerModel(config);
+}
+
+// 使用模型
+async function callLLM(prompt, context = {}) {
+  // 估算成本
+  const estimatedTokens = estimateTokens(prompt);
+  
+  // 检查预算
+  if (!modelSelector.budgetController.canExecute(0.001, estimatedTokens)) {
+    throw new Error('预算不足');
+  }
+  
+  // 选择并执行
+  return await modelSelector.executeWithRetry(
+    context,
+    async (model) => {
+      const result = await modelAPI(model.modelId, prompt);
+      return result;
+    }
+  );
+}
+```
+
+## 维护
+
+- **版本**: 1.0.0
+- **借鉴**: DeerFlow 2.0 by ByteDance
+- **更新**: 2026-04-22

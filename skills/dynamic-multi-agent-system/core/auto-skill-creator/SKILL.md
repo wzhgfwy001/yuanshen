@@ -1,113 +1,144 @@
-# 自动技能创建器
-
-**版本：** v1.0.0  
-**功能：** 监控任务执行，自动创建可复用技能
-
+---
+name: deerflow-auto-skill-creator
+description: DeerFlow增强版自动技能创建器 - 从任务学习、模板生成、技能优化
+parent: dynamic-multi-agent-system
+version: 1.0.0
+trigger: deerflow_mode=true | auto_skill=true | skill_generation=true | pattern_learning=true
 ---
 
-## 工作原理
+# DeerFlow增强版自动技能创建器
 
-```
-任务执行 → 类型识别 → 次数统计 → 达标时建议创建技能
-```
+**【附魔·改】AutoCreate Enchant**
 
----
+## 触发条件
 
-## 内置任务类型
+| 条件 | 配置键 | 说明 |
+|------|--------|------|
+| DeerFlow模式 | `deerflow_mode=true` | 使用DeerFlow增强模式 |
+| 自动创建技能 | `auto_skill=true` | 自动从任务创建技能 |
+| 模式学习 | `pattern_learning=true` | 从任务历史学习模式 |
 
-| 类型 | 触发关键词 | 创建阈值 |
-|------|-----------|----------|
-| writing-blog | 写博客、写文章、blog、article | 5次 |
-| code-review | 代码审查、code review | 3次 |
-| data-analysis | 数据分析、data analysis | 5次 |
-| writing-report | 写报告、report | 5次 |
-| market-research | 市场调研、市场分析 | 5次 |
-| novel-creation | 写小说、小说创作 | 3次 |
+## 核心功能
 
----
-
-## 接口使用
-
-### 1. 记录任务执行
+### 1. 从任务学习创建技能
 
 ```javascript
-const autoSkill = require('./auto-skill-creator.js');
+const { AutoSkillCreator } = require('./deerflow_enhanced.js');
 
-// 识别任务类型
-const taskType = autoSkill.analyzeTaskType('帮我写一篇技术博客');
-if (taskType) {
-  // 记录执行
-  const result = autoSkill.recordTask(taskType);
-  if (result.readyToCreate) {
-    console.log('可以创建技能了！');
-  }
-}
+const creator = new AutoSkillCreator({
+  outputDir: './skills'
+});
+
+// 从任务历史学习
+const skills = await creator.learnFromTasks(taskHistory, {
+  minFrequency: 3,
+  extractPatterns: true,
+  generateExamples: true
+});
+
+console.log(`创建了 ${skills.length} 个技能`);
 ```
 
-### 2. 查看统计
+### 2. 分析任务模式
 
 ```javascript
-const stats = autoSkill.getTaskStats();
-console.log(stats);
-// 输出: { 'writing-blog': { count: 3, threshold: 5, progress: 60, created: false }, ... }
+// 自动分析高频任务模式
+const patterns = creator._analyzePatterns(tasks);
+
+console.log(patterns.slice(0, 5));
+// [
+//   { keyword: 'code', frequency: 42, examples: [...] },
+//   { keyword: 'write', frequency: 38, examples: [...] },
+//   ...
+// ]
 ```
 
-### 3. 获取待创建技能
+### 3. 保存技能
 
 ```javascript
-const pending = autoSkill.getPendingSkills();
-if (pending.length > 0) {
-  console.log('待创建技能:', pending);
-}
+// 保存单个技能
+const filePath = await creator.saveSkill(skill);
+
+// 保存所有技能
+const results = await creator.saveAllSkills();
+console.log(`保存了 ${results.length} 个技能文件`);
 ```
 
-### 4. 生成技能建议
+### 4. 优化技能
 
 ```javascript
-const suggestion = autoSkill.generateSkillSuggestion('writing-blog');
-console.log(suggestion);
-// 输出技能模板建议
+// 根据使用反馈优化技能
+const optimized = await creator.optimizeSkill('auto-code-skill', {
+  successRate: 0.75,
+  failureReasons: ['timeout', 'incorrect format']
+});
+
+console.log(optimized.metadata.suggestion);
+// "Add more examples or refine capabilities"
 ```
 
+### 5. 事件监听
+
+```javascript
+creator.on('learning_started', ({ taskCount }) => {
+  console.log(`开始学习 ${taskCount} 个任务`);
+});
+
+creator.on('patterns_found', ({ count }) => {
+  console.log(`发现 ${count} 个模式`);
+});
+
+creator.on('skill_created', ({ name }) => {
+  console.log(`创建技能: ${name}`);
+});
+
+creator.on('skill_saved', ({ name, path }) => {
+  console.log(`保存技能: ${name} -> ${path}`);
+});
+```
+
+## 生成的技能格式
+
+自动生成的技能遵循DeerFlow的SKILL.md格式：
+
+```markdown
+---
+name: auto-code-skill
+description: Auto-generated skill for code tasks
+version: 1.0.0
+author: auto-generated
+tags:
+  - code
+  - auto-generated
+triggers:
+  - code
 ---
 
-## 自动化流程
+# auto-code-skill
 
-### 完整循环
+## 描述
+Auto-generated skill for code tasks
 
-```
-1. 用户执行任务
-2. 阳神分析任务类型并记录
-3. 达到阈值时提示可以创建技能
-4. 调用 skill-creator 创建技能
-5. 标记为已创建
-```
+## 功能
+- Handle code related tasks
+- Process code requests
 
-### 配置存储
-
-- 路径：`core/auto-skill-creator/config/auto-skill-creator.json`
-- 内容：任务计数、已创建技能列表
-
----
-
-## 与阳神的集成
-
-阳神执行完任务后，自动调用：
-
-```javascript
-// 任务完成后
-const taskType = autoSkill.analyzeTaskType(userInput);
-if (taskType) {
-  const result = autoSkill.recordTask(taskType);
-  
-  // 检查是否达到创建阈值
-  if (result.readyToCreate) {
-    // 询问用户是否创建技能
-    // 或自动创建
-  }
-}
+## 示例
+### 示例 1
+...
 ```
 
----
+## 配置
 
-*v1.0.0 - 2026-04-11*
+| 选项 | 默认值 | 说明 |
+|------|--------|------|
+| `outputDir` | ./skills | 技能输出目录 |
+| `minFrequency` | 3 | 最小出现频率 |
+| `extractPatterns` | true | 提取模式 |
+| `generateExamples` | true | 生成示例 |
+
+## 维护
+
+- **版本**: 1.0.0
+- **借鉴**: DeerFlow 2.0 by ByteDance
+- **更新**: 2026-04-22

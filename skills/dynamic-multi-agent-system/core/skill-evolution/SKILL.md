@@ -1,432 +1,140 @@
 ---
-name: skill-evolution
-description: 混合动态多Agent协作系统核心模块 - Skill固化追踪器，跟踪任务执行效果，自动检测模式，稳定后触发Skill固化流程
+name: deerflow-skill-evolution
+description: DeerFlow增强版技能进化系统 - 使用追踪、成功率分析、自动优化建议、版本管理
 parent: dynamic-multi-agent-system
-version: 1.3.0
+version: 1.0.0
+trigger: deerflow_mode=true | skill_evolution=true | analytics=true | performance_tracking=true
 ---
 
-# skill-evolution
+# DeerFlow增强版技能进化系统
 
-**【灵魂链接】Soul Link — Skill进化追踪** - 
+**【附魔·改】Evolution Enchant**
 
-**版本：** 1.1.0  
-**类型：** 核心模块  
-**依赖：** 无  
-**状态：** 🟢 增强完成
+## 触发条件
 
----
+| 条件 | 配置键 | 说明 |
+|------|--------|------|
+| DeerFlow模式 | `deerflow_mode=true` | 使用DeerFlow增强模式 |
+| 技能进化 | `skill_evolution=true` | 启用技能追踪 |
+| 分析 | `analytics=true` | 使用分析 |
+| 性能追踪 | `performance_tracking=true` | 追踪性能 |
 
-## 📖 简介
+## 核心功能
 
-Skill固化追踪器跟踪任务执行效果，分析成功模式，当相同类型任务稳定执行后，触发Skill固化流程。
+### 1. 记录技能使用
 
-### 核心功能 (v1.1)
+```javascript
+const { SkillEvolution } = require('./deerflow_enhanced.js');
 
-| 功能 | 说明 | 状态 |
-|------|------|------|
-| 📊 **模式追踪** | 跟踪任务类型和执行指标 | ✅ |
-| 🎯 **质量评估** | 平均分、一致性、趋势分析 | ✅ |
-| 🔄 **稳定性检测** | 自动判断模式是否稳定 | ✅ |
-| ⚡ **固化就绪检测** | 自动检测可固化的模式 | ✅ |
-| 📝 **Skill生成** | 自动生成SKILL.md模板 | ✅ |
-| 📋 **Skill注册表** | 集中管理所有固化Skill | ✅ |
-| 📈 **演进报告** | 完整的演进数据统计 | ✅ |
+const evolution = new SkillEvolution({
+  successThreshold: 0.8,
+  minUsesForEvolution: 10
+});
 
----
+// 记录成功使用
+evolution.recordUsage('my-skill', true, 1500, {
+  context: 'user-request',
+  taskType: 'coding'
+});
 
-## 固化规则
-
-### 触发条件
-
-| 条件 | 阈值 | 说明 |
-|------|------|------|
-| 成功次数 | ≥3 | 相同类型任务成功执行次数 |
-| 质量分数 | ≥80 | 平均质量分数 |
-| 一致性分数 | ≥70 | Agent角色和配置一致性 |
-| 稳定性 | true | 最近无重大失败 |
-
-### 固化检查
-
-```powershell
-$check = Check-SolidifyReadiness -taskType "sci-fi-writing"
-
-# 输出：
-# {
-#   ready: true,
-#   reason: "All requirements met",
-#   checks: {
-#     successCount: { required: 3, actual: 5, passed: true },
-#     qualityScore: { required: 80, actual: 87, passed: true },
-#     consistency: { required: 70, actual: 85, passed: true },
-#     stability: { required: true, actual: true, passed: true }
-#   },
-#   estimatedSpeedup: "3-5x",
-#   confidence: "High"
-# }
+// 记录失败使用
+evolution.recordUsage('my-skill', false, 500, {
+  error: new Error('Timeout')
+});
 ```
 
----
+### 2. 获取技能状态
 
-## API 参考
-
-### 记录任务执行
-
-```powershell
-$result = Record-TaskExecution `
-    -taskType "sci-fi-writing" `
-    -result "success" `
-    -metrics @{
-        taskId = "task-001"
-        qualityScore = 92
-        tokenUsage = 8000
-        duration = 180
-        userSatisfaction = 4.8
-    } `
-    -agentRoles @("世界观专家", "大纲专家", "写作专家")
+```javascript
+const status = evolution.getSkillStatus('my-skill');
+console.log(`
+技能: ${status.name}
+版本: ${status.currentVersion}
+成功率: ${(status.stats.successRate * 100).toFixed(1)}%
+使用次数: ${status.stats.uses}
+需要进化: ${status.needsEvolution}
+`);
 ```
 
-### 记录成功（简化版）
+### 3. 获取优化建议
 
-```powershell
-Record-TaskSuccess -taskType "sci-fi-writing" -metrics @{
-    qualityScore = 90
-    tokenUsage = 7500
-    duration = 150
-    userSatisfaction = 4.5
-}
-```
-
-### 获取模式详情
-
-```powershell
-$details = Get-PatternDetails -taskType "sci-fi-writing"
-
-# 输出：
-# {
-#   type: "sci-fi-writing",
-#   stats: { successCount: 5, failureCount: 1, totalCount: 6, successRate: 83.3 },
-#   averages: { qualityScore: 88, tokenUsage: 7200, duration: 165, userSatisfaction: 4.6 },
-#   indicators: { consistencyScore: 87, isStable: true, qualityTrend: "stable" },
-#   agentRoles: [...],
-#   isSolidified: true,
-#   version: "1.0.0"
-# }
-```
-
-### 获取所有模式
-
-```powershell
-$all = Get-AllPatterns
-# { count: 12, patterns: [...] }
-```
-
-### 固化模式
-
-```powershell
-$result = Invoke-SolidifyPattern `
-    -taskType "sci-fi-writing" `
-    -skillName "sci-fi-writing-skill" `
-    -version "1.0.0"
-
-# 输出：
-# {
-#   success: true,
-#   message: "Pattern sci-fi-writing solidified as skill 'sci-fi-writing-skill' v1.0.0",
-#   skill: { name: "sci-fi-writing-skill", version: "1.0.0", ... },
-#   estimatedSpeedup: "3-5x"
-# }
-```
-
-### 获取固化Skill列表
-
-```powershell
-$skills = Get-SolidifiedSkills
-# { count: 5, skills: [...] }
-```
-
-### 记录Skill使用
-
-```powershell
-Record-SkillUsage -skillName "sci-fi-writing-skill" -metrics @{
-    tokenSaved = 5000
-    timeSaved = 60
-}
-```
-
-### 导出Skill模板
-
-```powershell
-Export-SkillTemplate -taskType "sci-fi-writing" -outputPath ".\exports\sci-fi-SKILL.md"
-```
-
-### 获取演进报告
-
-```powershell
-$report = Get-SkillEvolutionReport
-
-# 输出：
-# {
-#   generatedAt: "2026-04-07T12:00:00Z",
-#   patterns: {
-#     total: 15,
-#     solidified: 3,
-#     inDevelopment: 8,
-#     readyForSolidification: 2,
-#     avgQuality: 82.5,
-#     avgConsistency: 75.3
-#   },
-#   registry: {
-#     totalSkills: 3,
-#     totalUsages: 47,
-#     avgUsagePerSkill: 15.7
-#   },
-#   topPatterns: [...],
-#   recentEvolutions: [...]
-# }
-```
-
----
-
-## 指标计算
-
-### 一致性分数
-
-```
-一致性分数 = (角色一致性 × 0.4) + (配置一致性 × 0.3) + (执行时间稳定性 × 0.3)
-
-- 角色一致性：最近N次执行的Agent角色是否相同
-- 配置一致性：配置参数是否保持一致
-- 执行时间稳定性：执行时间的变异系数
-```
-
-### 质量趋势
-
-```
-趋势计算：
-- improving：后半段平均分比前半段高 >5分
-- stable：差异在 ±5分以内
-- declining：后半段平均分比前半段低 >5分
-```
-
----
-
-## Skill注册表
-
-### 注册表结构
-
-```json
-{
-  "version": "1.1",
-  "skills": [
-    {
-      "name": "sci-fi-writing-skill",
-      "originalType": "sci-fi-writing",
-      "version": "1.0.0",
-      "createdAt": "2026-04-07T10:00:00Z",
-      "solidifiedAt": "2026-04-07T10:00:00Z",
-      "agentRoles": ["世界观专家", "大纲专家", "写作专家"],
-      "stats": {
-        "successCount": 5,
-        "avgQualityScore": 88,
-        "avgTokenUsage": 7200,
-        "avgDuration": 165,
-        "totalTokenSaved": 36000,
-        "totalTimeSaved": 450
-      },
-      "estimatedSpeedup": "3-5x",
-      "usageCount": 12,
-      "lastUsedAt": "2026-04-07T15:00:00Z"
+```javascript
+// 当需要进化时触发
+evolution.on('optimization_suggested', ({ skill, suggestions }) => {
+  console.log(`技能 ${skill} 需要优化:`);
+  for (const s of suggestions) {
+    console.log(`- [${s.priority}] ${s.suggestion}`);
+    if (s.errors) {
+      for (const e of s.errors) {
+        console.log(`  - ${e.error}: ${e.count}次`);
+      }
     }
-  ],
-  "metadata": {
-    "totalSkills": 1
   }
-}
+});
 ```
 
----
+### 4. 创建新版本
 
-## 固化流程（Solidification Workflow）
+```javascript
+// 基于分析创建新版本
+const version = evolution.createVersion('my-skill', {
+  changes: [
+    '增加超时处理',
+    '优化错误处理逻辑',
+    '添加新的示例'
+  ]
+});
 
-当任务类型执行次数达到固化阈值时，按以下步骤操作：
-
-### 步骤1：检查固化条件
-
-读取 `skill-counters.json` 中的 `taskTypeCounts`：
-
-```powershell
-$json = Get-Content "$stateDir\skill-counters.json" | ConvertFrom-Json
-$count = $json.taskTypeCounts."code-review"
-$threshold = 3  # 固化阈值
-
-if ($count -ge $threshold) {
-    Write-Host "固化条件满足: $count >= $threshold"
-    # 继续步骤2
-}
+console.log(`新版本: ${version.version}`);
 ```
 
-### 步骤2：在 skill-patterns.json 中添加模式记录
+### 5. 获取所有技能状态
 
-```powershell
-$pattern = @{
-    solidifyRecommended = $true
-    solidified = $true
-    solidifyAt = (Get-Date).ToString("o")
-    lastSuccessAt = (Get-Date).ToString("o")
-    avgQualityScore = 90
-    type = "code-review"
-    createdAt = (Get-Date).ToString("o")
-    skillPath = "C:\Users\DELL\.openclaw\workspace\skills\code-review"
-    skillVersion = "1.0.0"
-    executions = @()
-    successCount = $count
-}
+```javascript
+const allStatus = evolution.getAllStatus();
+console.log(`共 ${allStatus.length} 个技能`);
+
+// 按需要进化排序
+const needsEvolution = allStatus.filter(s => s.needsEvolution);
+console.log(`需要进化的技能: ${needsEvolution.length}`);
 ```
 
-### 步骤3：更新 skill-counters.json 中的固化计数
+### 6. 获取统计
 
-```powershell
-$json.solidification.skills_solidified = $json.solidification.skills_solidified + 1
-$json | ConvertTo-Json -Depth 10 | Set-Content "$stateDir\skill-counters.json"
+```javascript
+const stats = evolution.getStatistics();
+console.log(`
+总技能数: ${stats.totalSkills}
+总使用次数: ${stats.totalUses}
+总成功: ${stats.totalSuccesses}
+总失败: ${stats.totalFailures}
+整体成功率: ${stats.overallSuccessRate}
+需要进化: ${stats.skillsNeedingEvolution}
+`);
 ```
 
-### 步骤4：更新本文件（SKILL.md）注册表
+### 7. 导出/导入数据
 
-在上述 Skill注册表 中添加新条目。
+```javascript
+// 导出
+const data = evolution.exportData();
+fs.writeFileSync('evolution-data.json', JSON.stringify(data, null, 2));
 
-### 步骤5：验证固化状态
-
-```powershell
-$patterns = Get-Content "$stateDir\skill-patterns.json" | ConvertFrom-Json
-$cr = $patterns.patterns | Where-Object { $_.type -eq "code-review" }
-$cr.solidified  # 应为 true
-$cr.successCount  # 应为实际执行次数
+// 导入
+const importedData = JSON.parse(fs.readFileSync('evolution-data.json'));
+evolution.importData(importedData);
 ```
-
----
-
-## 已固化技能
-
-| 技能名 | 类型 | 执行次数 | 阈值 | 状态 | 路径 |
-|--------|------|----------|------|------|------|
-| code-review-assistant | code-review | 14 | 3 | ✅ 固化 | `workspace/skills/code-review/` |
-
----
-
----
-
-## 最佳实践
-
-1. **自动记录**：每次任务完成自动调用 `Record-TaskExecution`
-2. **提供完整指标**：包括质量分数、Token使用、执行时间、用户满意度
-3. **保持Agent角色一致**：相同的任务使用相同的Agent角色组合
-4. **监控固化就绪**：定期检查 `Check-SolidifyReadiness`
-5. **固化后使用**：固化后的Skill应通过注册表调用
-
----
 
 ## 配置
 
-```powershell
-# 查看当前配置
-$script:config
+| 选项 | 默认值 | 说明 |
+|------|--------|------|
+| `successThreshold` | 0.8 | 成功率阈值 |
+| `minUsesForEvolution` | 10 | 触发进化的最小使用次数 |
+| `maxVersions` | 5 | 最大版本数 |
 
-# 可配置项：
-# - solidificationThreshold: 固化阈值（默认3）
-# - qualityThreshold: 质量阈值（默认80）
-# - stabilityWindow: 稳定性评估窗口（默认5）
-# - maxExecutionsHistory: 历史记录保留数（默认20）
-# - autoDetectEnabled: 自动检测（默认true）
-# - approvalRequired: 是否需要确认（默认true）
-```
+## 维护
 
----
-
-## 标准交付物输出格式
-
-本SKILL执行完毕后，必须输出以下格式的交付物：
-
-```json
-{
-  "task": "跟踪模式任务描述",
-  "result": {
-    "summary": "简要结果（1-2句话）",
-    "details": "详细跟踪结果，包括模式状态和固化建议",
-    "data": {
-      "patternType": "code-review",
-      "stats": {
-        "successCount": 5,
-        "failureCount": 0,
-        "successRate": 100
-      },
-      "averages": {
-        "qualityScore": 88,
-        "tokenUsage": 6200,
-        "duration": 145
-      },
-      "isSolidified": false,
-      "solidifyReady": true,
-      "estimatedSpeedup": "3-5x"
-    }
-  },
-  "quality": {
-    "completeness": 95,
-    "accuracy": 90,
-    "readability": 85
-  },
-  "issues": [],
-  "suggestions": ["固化后可获得更快的执行速度"]
-}
-```
-
----
-
-## 🧪 测试
-
-```powershell
-# 加载模块
-Import-Module (Join-Path $PSScriptRoot "skill-evolution-enhancer.ps1") -Force
-
-# 运行测试
-Test-SkillEvolution
-```
-
-### 测试用例
-
-| 测试 | 说明 |
-|------|------|
-| Test 1 | 注册新模式 |
-| Test 2 | 记录执行结果 |
-| Test 3 | 多次执行达到固化条件 |
-| Test 4 | 检查固化就绪状态 |
-| Test 5 | 执行固化 |
-| Test 6 | 获取模式详情 |
-| Test 7 | 记录Skill使用 |
-| Test 8 | 获取演进报告 |
-
----
-
-## 📝 更新日志
-
-### v1.1.0 (2026-04-07)
-
-- ✅ **增强一致性计算**：多维度评估模式稳定性
-- ✅ **质量趋势分析**：自动检测质量趋势（提升/稳定/下降）
-- ✅ **Skill注册表**：集中管理所有固化Skill
-- ✅ **自动检测就绪**：自动检测可固化的模式
-- ✅ **Skill模板生成**：自动导出SKILL.md
-- ✅ **演进时间线**：完整的模式演进历史
-- ✅ **使用统计**：跟踪固化Skill的使用情况
-
-### v1.0.0 (2026-04-07)
-
-- ✅ 基础模式追踪
-- ✅ 成功计数
-- ✅ 质量指标
-- ✅ 固化推荐
-
----
-
-**创建时间：** 2026-04-07  
-**维护人：** 开发团队  
-**版本：** v1.1
+- **版本**: 1.0.0
+- **借鉴**: DeerFlow 2.0 by ByteDance
+- **更新**: 2026-04-22
