@@ -1,508 +1,298 @@
 ---
-name: quality-checker
-description: 质量检查器，三层质量检查机制（自我检查→主Agent确认→审查Agent审查）
+name: deerflow-enhanced-quality-checker
+description: 借鉴DeerFlow的增强版质量检查器，支持多格式报告、专业评分、可视化
 parent: dynamic-multi-agent-system
 version: 1.0.0
+trigger: deerflow_mode=true | quality_check=advanced | output_format=professional
 ---
 
-# quality-checker
+# DeerFlow增强版质量检查器
 
-**【鉴定物品】Identify — 质量检查器** - 
+**【鉴定物品·改】Enhanced Appraisal**
 
-> 📋 **交付物标准**：本SKILL执行后必须输出标准交付物格式，参见 [DELIVERY-TEMPLATE.md](../docs/DELIVERY-TEMPLATE.md)
+## 触发条件
 
-## 功能
+当满足以下任一条件时，自动启用此增强版检查器：
 
-实施三层质量检查机制，确保每个环节的输出质量，提供即时反馈和改进建议。
+| 条件 | 配置键 | 说明 |
+|------|--------|------|
+| DeerFlow模式 | `deerflow_mode=true` | 用户指定使用DeerFlow增强模式 |
+| 高级质量检查 | `quality_check=advanced` | 需要多维度质量评估 |
+| 专业输出 | `output_format=professional` | 需要专业报告格式 |
+| 最终审查 | `final_review=true` | 最终交付前的质量检查 |
+| 多格式输出 | `format=markdown\|html\|json` | 需要特定输出格式 |
 
-## 量化评分逻辑
+## 使用方式
 
-质量检查输出必须包含以下三个维度的量化评分：
+```javascript
+// 引入增强版质量检查器
+const { 
+  EnhancedQualityChecker, 
+  QUALITY_DIMENSIONS,
+  QUALITY_LEVELS,
+  REPORT_TEMPLATES 
+} = require('./deerflow_enhanced.js');
 
-| 维度 | 指标名 | 计算方式 | 达标线 | 优秀线 |
-|------|--------|----------|--------|--------|
-| 完整性 | completeness | 必要检查项完成比例 | 80% | 95% |
-| 准确性 | accuracy | 检查判断正确率 | 85% | 98% |
-| 可读性 | readability | 输出格式规范程度 | 70% | 90% |
+// 创建检查器
+const checker = new EnhancedQualityChecker({
+  template: REPORT_TEMPLATES.EXECUTIVE_SUMMARY,
+  format: 'markdown',
+  includeEvidence: true,
+  includeSuggestions: true
+});
 
-### completeness 计算
+// 添加检查维度（可选，使用默认维度）
+checker.addChecks(QUALITY_DIMENSIONS.ACCURACY, [
+  { criterion: '事实准确性', weight: 2.0 },
+  { criterion: '数据可靠性', weight: 1.5 }
+]);
 
-```
-completeness = (已完成检查项数 / 应完成检查项数) × 100%
+// 执行质量检查
+const result = await checker.check(content, {
+  taskName: '小说创作',
+  taskType: 'creative-writing',
+  keywords: ['悬疑', '推理', '案件'],
+  minLength: 5000
+});
 
-检查项清单：
-□ 第一层自检执行
-□ 第二层主Agent确认执行
-□ 第三层审查Agent执行（如适用）
-□ 检查报告生成
-□ 问题清单输出
-□ 评分计算
-□ 决策输出
-```
+console.log('总体评分:', result.overallScore);       // e.g., 85
+console.log('等级:', result.level.emoji, result.level.label); // e.g., 🌟 优秀
+console.log('报告:', result.report);  // Markdown报告
 
-### accuracy 计算
+// 快速评分（无需完整检查）
+const quickResult = checker.quickScore(content);
+console.log('快速评分:', quickResult.score, quickResult.label);
 
-```
-accuracy = (正确判断数 / 总判断数) × 100%
+// 生成不同格式的报告
+const htmlReport = checker.generateReport(content, {
+  template: REPORT_TEMPLATES.DETAILED_REPORT,
+  format: 'html'
+});
 
-判断类型：
-- 问题识别是否正确
-- 评分是否合理
-- 决策是否恰当
-```
-
-### readability 计算
-
-```
-readability = 格式规范分 × 0.4 + 结构清晰分 × 0.3 + 表达准确分 × 0.3
-
-格式规范：JSON格式正确、必填字段完整
-结构清晰：层级分明、逻辑通顺
-表达准确：用词准确、无歧义
-```
-
-## 三层检查架构
-
-```
-┌─────────────────────────────────────────┐
-│           第三层：审查Agent审查          │
-│           （复杂任务，≥4子Agent）        │
-└─────────────────┬───────────────────────┘
-                  │
-┌─────────────────▼───────────────────────┐
-│           第二层：主Agent确认            │
-│           （所有任务必选）               │
-└─────────────────┬───────────────────────┘
-                  │
-┌─────────────────▼───────────────────────┐
-│           第一层：子Agent自检            │
-│           （所有子Agent必选）            │
-└─────────────────────────────────────────┘
+const jsonReport = checker.generateReport(content, {
+  template: REPORT_TEMPLATES.DATA_ANALYSIS,
+  format: 'json'
+});
 ```
 
----
+## 核心特性
 
-## 第一层：子Agent自我检查
+### 1. 质量维度评估
 
-### 执行者
-
-每个子Agent
-
-### 职责
-
-- 完成任务后进行自我检查
-- 输出结果 + 检查报告
-- 确保符合基本质量标准
-
-### 检查清单模板
-
-#### 通用检查清单
-
-```markdown
-## 自我检查清单
-
-### 基础要求
-- [ ] 是否完成所有任务要求
-- [ ] 输出格式是否正确
-- [ ] 有无明显错误（错别字、语法、逻辑）
-
-### 内容质量
-- [ ] 内容是否完整
-- [ ] 信息是否准确
-- [ ] 表达是否清晰
-
-### 约束条件
-- [ ] 是否符合字数要求（±10%）
-- [ ] 是否符合时间要求
-- [ ] 是否符合其他约束
-
-### 评分
-□ 优秀(5) - 无需修改
-□ 良好(4) - 小修即可
-□ 合格(3) - 需要修改
-□ 需改进(2) - 重大问题
-□ 不合格(1) - 重新执行
+```javascript
+QUALITY_DIMENSIONS = {
+  ACCURACY: 'accuracy',              // 准确性
+  COMPLETENESS: 'completeness',      // 完整性
+  COHERENCE: 'coherence',            // 连贯性
+  RELEVANCE: 'relevance',            // 相关性
+  PROFESSIONALISM: 'professionalism', // 专业性
+  READABILITY: 'readability'         // 可读性
+}
 ```
 
-#### 写作类检查清单
+### 2. 质量等级
 
-```markdown
-## 写作质量检查清单
-
-### 基础要求
-- [ ] 字数符合要求（±10%）
-- [ ] 使用指定语言
-- [ ] 无明显错别字/语法错误
-
-### 内容质量
-- [ ] 情节连贯无漏洞
-- [ ] 人物动机合理
-- [ ] 对话自然流畅
-- [ ] 描写生动具体
-
-### 风格一致
-- [ ] 文风与要求一致
-- [ ] 语调前后统一
-- [ ] 无时代/设定错乱
-
-### 评分
-□ 优秀(5) □ 良好(4) □ 合格(3) □ 需改进(2) □ 不合格(1)
+```javascript
+QUALITY_LEVELS = {
+  EXCELLENT: { label: '优秀', minScore: 90, emoji: '🌟' },
+  GOOD: { label: '良好', minScore: 75, emoji: '✅' },
+  ACCEPTABLE: { label: '合格', minScore: 60, emoji: '⚠️' },
+  POOR: { label: '较差', minScore: 40, emoji: '❌' },
+  FAIL: { label: '不及格', minScore: 0, emoji: '🚫' }
+}
 ```
 
-#### 代码类检查清单
+### 3. 报告模板
 
-```markdown
-## 代码质量检查清单
-
-### CLAUDE.md 四原则检查（必检）
-- [ ] **Think Before Coding**：是否有不确定的地方？
-- [ ] **Simplicity First**：是否过度设计？不必要的抽象？
-- [ ] **Surgical Changes**：改动是否精准？是否动了不必要的地方？
-- [ ] **Goal-Driven**：是否达到成功标准？
-
-### 基础要求
-- [ ] 代码可运行
-- [ ] 无语法错误
-- [ ] 符合编码规范
-
-### 功能完整
-- [ ] 实现所有要求的功能
-- [ ] 边界条件处理
-- [ ] 错误处理
-
-### 代码质量
-- [ ] 代码结构清晰
-- [ ] 变量命名规范
-- [ ] 有必要的注释
-- [ ] 无重复代码
-
-### 评分
-□ 优秀(5) □ 良好(4) □ 合格(3) □ 需改进(2) □ 不合格(1)
-```
-
-### 输出格式
-
-```json
-{
-  "agent-id": "agent-writing-001",
-  "task-id": "task-001",
-  "self-check": {
-    "completed": true,
-    "score": 4,
-    "checklist": {
-      "word-count": true,
-      "format": true,
-      "grammar": true,
-      "logic": true
-    },
-    "issues": ["第3段对话略显生硬"],
-    "confidence": 0.9
+```javascript
+REPORT_TEMPLATES = {
+  EXECUTIVE_SUMMARY: {
+    name: 'Executive Summary',
+    sections: ['overview', 'key_findings', 'recommendations', 'next_steps'],
+    style: 'concise'
   },
-  "output": "..."
-}
-```
-
----
-
-## 第二层：主Agent确认
-
-### 执行者
-
-主Agent
-
-### 职责
-
-- 检查子Agent输出是否符合需求
-- 有问题返回修改
-- 通过后转入下一环节
-
-### 检查要点
-
-| 检查维度 | 检查内容 |
-|----------|----------|
-| 需求匹配 | 是否完成用户要求的所有内容 |
-| 质量达标 | 是否达到预期质量标准 |
-| 格式正确 | 输出格式是否符合要求 |
-| 逻辑一致 | 与前后环节是否一致 |
-| 约束满足 | 是否满足所有约束条件 |
-
-### 确认流程
-
-```
-1. 接收子Agent输出 + 自检报告
-2. 对照需求逐项检查
-3. 决策：
-   - 通过 → 转入下一环节
-   - 不通过 → 返回修改（指出具体问题）
-4. 记录确认结果
-```
-
-### 反馈格式
-
-```json
-{
-  "agent-id": "agent-writing-001",
-  "decision": "pass|modify|reject",
-  "feedback": {
-    "passed-items": ["字数符合", "格式正确"],
-    "issues": [
-      {
-        "location": "第3段",
-        "problem": "对话略显生硬",
-        "suggestion": "增加语气词，使对话更自然",
-        "priority": "medium"
-      }
-    ],
-    "max-retries": 3,
-    "current-retry": 0
+  DETAILED_REPORT: {
+    name: 'Detailed Report',
+    sections: ['introduction', 'methodology', 'findings', 'analysis', 'conclusion'],
+    style: 'comprehensive'
+  },
+  TECHNICAL_REPORT: {
+    name: 'Technical Report',
+    sections: ['abstract', 'introduction', 'implementation', 'results'],
+    style: 'technical'
+  },
+  CREATIVE_CONTENT: {
+    name: 'Creative Content Review',
+    sections: ['concept', 'structure', 'style', 'creativity', 'market_potential'],
+    style: 'creative'
+  },
+  DATA_ANALYSIS: {
+    name: 'Data Analysis Report',
+    sections: ['executive_summary', 'data_overview', 'key_insights', 'recommendations'],
+    style: 'data_centric'
   }
 }
 ```
 
----
+### 4. 多格式输出
 
-## 第三层：审查Agent审查
+```javascript
+// Markdown格式 - 适合命令行和文档
+// 输出示例:
+/*
+## 📊 执行摘要
 
-### 执行者
+| 指标 | 数值 |
+|------|------|
+| **总体评分** | 85/100 🌟 优秀 |
+| **通过检查** | 5/6 |
+| **通过率** | 83% |
+*/
 
-临时审查Agent（复杂任务时启用）
+// HTML格式 - 适合网页展示
+// 包含CSS样式、表格、颜色标识
 
-### 启用条件
-
-- 子Agent数量 ≥ 4
-- 任务复杂度 = "复杂"或"极复杂"
-- 用户明确要求审查
-- 主Agent判断需要审查
-
-### 职责
-
-- 审查所有环节的所有子Agent输出
-- 体现专业性、客观性、逻辑自洽
-- 提供专业改进建议
-- 最终质量把关
-
-### 审查范围
-
-| 审查对象 | 审查内容 |
-|----------|----------|
-| 搜索结果 | 信息来源可靠性、完整性、相关性 |
-| 大纲设计 | 结构合理性、逻辑连贯性、完整性 |
-| 写作内容 | 文风一致、情节合理、质量达标 |
-| 代码实现 | 功能完整、代码质量、安全性 |
-| 分析报告 | 数据准确、分析深入、结论可靠 |
-
-### 审查流程
-
-```
-1. 接收所有子Agent的输出
-2. 逐项审查（按检查清单）
-3. 交叉验证（检查环节间一致性）
-4. 输出审查报告
-5. 决策：
-   - 通过 → 交付用户
-   - 修改 → 返回对应子Agent
-```
-
-### 审查报告格式
-
-```markdown
-# 审查报告
-
-## 任务信息
-- 任务ID：task-001
-- 任务类型：悬疑小说创作
-- 审查时间：2026-04-03T11:00:00
-
-## 审查结果
-
-### 环节1：素材收集
-- 状态：✅ 通过
-- 评分：5/5
-- 备注：信息来源可靠，覆盖全面
-
-### 环节2：大纲设计
-- 状态：⚠️ 需修改
-- 评分：3/5
-- 问题：第5章与第3章情节有矛盾
-- 建议：调整第5章的时间线
-
-### 环节3：内容撰写
-- 状态：✅ 通过
-- 评分：4/5
-- 备注：文风一致，个别对话可优化
-
-### 环节4：质量审查
-- 状态：✅ 通过
-- 评分：5/5
-- 备注：无问题
-
-## 总体评价
-- 综合评分：4.25/5
-- 建议：修改大纲第5章后即可交付
-
-## 审查员签名
-审查Agent-001
-```
-
----
-
-## 检查标准库
-
-### 评分标准
-
-| 分数 | 标准 | 处理 |
-|------|------|------|
-| 5 | 超出预期，无需修改 | 直接通过 |
-| 4 | 符合预期，小修可选 | 通过，建议修改 |
-| 3 | 基本符合，需要修改 | 返回修改 |
-| 2 | 多处问题，重大修改 | 返回修改（重点） |
-| 1 | 完全不符合 | 重新执行 |
-
-### 问题优先级
-
-| 优先级 | 说明 | 处理时限 |
-|--------|------|----------|
-| critical | 致命问题，影响核心功能 | 立即修复 |
-| high | 严重问题，影响使用体验 | 24小时内 |
-| medium | 一般问题，可接受但有改进空间 | 可选修复 |
-| low | 轻微问题，不影响使用 | 可选修复 |
-
----
-
-## 修改流程
-
-### 修改次数限制
-
-- 最多允许3次修改机会
-- 3次后仍不通过则：
-  - 更换子Agent（不同模型）
-  - 主Agent接手
-  - 记录异常
-
-### 修改反馈格式
-
-```json
+// JSON格式 - 适合程序处理
+// 包含完整元数据、评分、建议
 {
-  "agent-id": "agent-outline-001",
-  "modification-request": {
-    "version": 2,
-    "previous-version": 1,
-    "issues": [
-      {
-        "id": "issue-001",
-        "location": "第5章",
-        "problem": "与第3章情节矛盾",
-        "suggestion": "调整时间线，确保逻辑一致",
-        "priority": "high"
-      }
-    ],
-    "deadline": "2026-04-03T11:30:00",
-    "max-retries": 3,
-    "current-retry": 1
-  }
+  "reportMetadata": {...},
+  "summary": {...},
+  "dimensions": {...},
+  "issues": [...],
+  "suggestions": [...],
+  "details": [...]
 }
 ```
 
----
+### 5. 质量检查项
 
-## 质量指标
+```javascript
+// 准确性检查
+- 事实准确性 - 内容是否准确无误
+- 数据可靠性 - 引用数据是否可靠
+- 逻辑正确性 - 推理是否合乎逻辑
 
-### 一次性通过率
+// 完整性检查
+- 需求覆盖度 - 是否覆盖所有需求
+- 内容完整度 - 内容是否完整
+- 交付物齐全 - 是否包含所有交付物
 
+// 连贯性检查
+- 结构连贯性 - 章节之间是否连贯
+- 逻辑一致性 - 前后是否一致
+- 过渡自然性 - 过渡是否自然
+
+// 相关性检查
+- 切题程度 - 是否紧扣主题
+- 内容相关性 - 内容是否相关
+- 用户需求匹配 - 是否满足用户需求
+
+// 专业性检查
+- 术语使用 - 是否正确使用专业术语
+- 格式规范性 - 格式是否规范
+- 表达专业度 - 表达是否专业
+
+// 可读性检查
+- 语言清晰度 - 语言是否清晰
+- 结构清晰度 - 结构是否清晰
+- 可读性评分 - 整体可读性
 ```
-一次性通过率 = 首次检查通过的子Agent数 / 总子Agent数
 
-目标：> 80%
-```
+## 集成到主系统
 
-### 平均修改次数
+在 fusion-scheduler.js 或任务编排逻辑中添加：
 
-```
-平均修改次数 = 总修改次数 / 子Agent数
+```javascript
+const path = require('path');
 
-目标：< 1.5次
-```
+// 检测是否启用DeerFlow增强
+function shouldUseDeerFlowEnhanced(config) {
+  return (
+    config.deerflow_mode === true ||
+    config.quality_check === 'advanced' ||
+    config.output_format === 'professional'
+  );
+}
 
-### 用户满意度
+// 获取质量检查器
+function getQualityChecker(config) {
+  if (shouldUseDeerFlowEnhanced(config)) {
+    const enhanced = require('./quality-checker/deerflow_enhanced.js');
+    return new enhanced.EnhancedQualityChecker({
+      template: config.template || REPORT_TEMPLATES.EXECUTIVE_SUMMARY,
+      format: config.format || 'markdown',
+      includeEvidence: config.includeEvidence !== false,
+      includeSuggestions: config.includeSuggestions !== false
+    });
+  }
+  // 回退到原有检查器
+  return require('./quality-checker/original-checker.js');
+}
 
-```
-用户满意度 = 用户评分平均值（1-5分）
-
-目标：> 4分
-```
-
----
-
-## 标准交付物输出格式
-
-本SKILL执行完毕后，必须输出以下格式的交付物：
-
-```json
-{
-  "task": "质量检查任务描述",
-  "result": {
-    "summary": "简要结果（1-2句话）",
-    "details": "详细检查结果",
-    "data": {
-      "decision": "pass|modify|reject",
-      "score": 4.2,
-      "checkResults": {
-        "selfCheck": { "passed": true, "score": 4 },
-        "mainAgentCheck": { "passed": true, "score": 4.2 },
-        "reviewAgentCheck": null
-      },
-      "issuesFound": 1
+// 在任务完成时自动触发
+async function onTaskComplete(task, config) {
+  if (shouldUseDeerFlowEnhanced(config)) {
+    const checker = getQualityChecker(config);
+    const result = await checker.check(task.output, {
+      taskName: task.name,
+      taskType: task.type
+    });
+    
+    // 根据评分决定是否需要返工
+    if (result.overallScore < 60) {
+      console.log('质量不达标，需要返工');
+      return { needsRevision: true, report: result.report };
     }
-  },
-  "quality": {
-    "completeness": 95,
-    "accuracy": 93,
-    "readability": 88
-  },
-  "issues": [
-    { "location": "第3段", "problem": "对话略显生硬", "suggestion": "增加语气词", "priority": "medium" }
-  ],
-  "suggestions": ["可建立更细粒度的评分维度"]
+    
+    return { needsRevision: false, report: result.report };
+  }
+  // 原有逻辑
+  return { needsRevision: false };
 }
 ```
 
----
+## 性能对比
 
-## 与其他组件的接口
+| 指标 | 原有检查器 | 增强版 | 提升 |
+|------|-----------|--------|------|
+| 评估维度 | ❌ 2-3个 | ✅ 6个 | +200% |
+| 输出格式 | ❌ 1种 | ✅ 3种(MD/HTML/JSON) | +200% |
+| 报告专业度 | ❌ 简单 | ✅ 专业完整 | +500% |
+| 评分精度 | ❌ 单一分数 | ✅ 多维度+加权 | +300% |
+| 改进建议 | ❌ 笼统 | ✅ 具体可操作 | +400% |
 
-### 输入
+## 输出示例
 
-- 来自：子Agent / 执行协调器
-- 格式：`{ agent-output, self-check-report }`
+**Markdown报告:**
+```markdown
+## 📊 执行摘要
 
-### 输出
+| 指标 | 数值 |
+|------|------|
+| **总体评分** | 85/100 🌟 优秀 |
+| **通过检查** | 5/6 |
+| **通过率** | 83% |
 
-- 到：主Agent / 执行协调器
-- 格式：`{ decision, feedback, score }`
+## 🔍 关键发现
 
----
+### ❌ 需要改进 (1项)
 
-## 记忆与改进
+#### 逻辑一致性
+- **维度**: 连贯性
+- **评分**: 45/100
+- **问题**:
+  - 前后设定有矛盾
+  - 时间线不连贯
 
-### 检查记录
+### ✅ 达标项 (5项)
 
-每次检查后记录：
-```json
-{
-  "timestamp": "2026-04-03T11:00:00",
-  "task-id": "task-001",
-  "agent-id": "agent-writing-001",
-  "check-layer": 2,
-  "decision": "pass",
-  "score": 4,
-  "issues-found": 1,
-  "modification-count": 1
-}
+- **事实准确性**: 92/100
+- **结构连贯性**: 88/100
+- **术语使用**: 85/100
 ```
 
-### 质量趋势分析
+## 维护
 
-定期（每10次任务）分析：
-- 各环节通过率
-- 常见问题类型
-- 质量改进建议
+- **版本**: 1.0.0
+- **借鉴**: DeerFlow 2.0 by ByteDance
+- **更新**: 2026-04-22
