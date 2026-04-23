@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元神系统 - 能力分布可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/@anthropic-ai/claude-code@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #888;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+        
+        .stat-card .number {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-card .label {
+            color: #888;
+            margin-top: 5px;
+            font-size: 0.95em;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title .icon {
+            font-size: 1.2em;
+        }
+        
+        /* MCP Cards */
+        .mcp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .mcp-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .mcp-card:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.15);
+        }
+        
+        .mcp-card.github {
+            border-left: 4px solid #6e5494;
+        }
+        
+        .mcp-card.firecrawl {
+            border-left: 4px solid #00ff88;
+        }
+        
+        .mcp-card.playwright {
+            border-left: 4px solid #45b7d1;
+        }
+        
+        .mcp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .mcp-name {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .mcp-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        
+        .mcp-status.connected {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        
+        .mcp-status.disconnected {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6464;
+        }
+        
+        .mcp-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .mcp-stat {
+            text-align: center;
+            flex: 1;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .mcp-stat .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .mcp-stat .label {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .capability-tag {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            background: rgba(0, 212, 255, 0.15);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        
+        /* Category Section */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .category-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .category-card.browser { border-left: 3px solid #45b7d1; }
+        .category-card.web_scraping { border-left: 3px solid #00ff88; }
+        .category-card.github { border-left: 3px solid #6e5494; }
+        .category-card.other { border-left: 3px solid #888; }
+        
+        .category-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-stats {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        
+        .category-caps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .category-cap {
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        
+        /* Tool List */
+        .tool-section {
+            margin-top: 20px;
+        }
+        
+        .tool-category {
+            margin-bottom: 20px;
+        }
+        
+        .tool-category-title {
+            font-size: 1em;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+        
+        .tool-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        
+        .tool-item .name {
+            color: #00d4ff;
+            font-family: monospace;
+            margin-bottom: 5px;
+        }
+        
+        .tool-item .desc {
+            color: #888;
+            font-size: 0.85em;
+        }
+        
+        /* Mermaid Diagram */
+        .diagram-container {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .mermaid {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        /* Search */
+        .search-section {
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-box:focus {
+            border-color: #00d4ff;
+        }
+        
+        .search-box::placeholder {
+            color: #666;
+        }
+        
+        .search-results {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .search-result {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .search-result .mcp {
+            font-size: 0.85em;
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+        
+        .search-result .tool {
+            font-family: monospace;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+        
+        .search-result .match {
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 元神能力分布</h1>
+            <p>MCP能力可视化 · 阳神系统 v1.1.0</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="number" id="mcp-count">0</div>
+                <div class="label">MCP 数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="cap-count">0</div>
+                <div class="label">能力总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="tool-count">0</div>
+                <div class="label">工具总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="connected-count">0</div>
+                <div class="label">已连接</div>
+            </div>
+        </div>
+        
+        <!-- Capability Graph -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🔗</span> 能力关系图</h2>
+            <div class="diagram-container">
+                <pre class="mermaid">
+flowchart LR
+    subgraph MCPs["MCP 节点"]
+        GITHUB["<b>GitHub MCP</b><br/>62 tools"]
+        FIRECRAWL["<b>Firecrawl MCP</b><br/>6 tools"]
+    end
+    
+    subgraph Caps["能力层"]
+        direction TB
+        GR["github-repos<br/>仓库操作"]
+        GI["github-issues<br/>Issue管理"]
+        GP["github-pull_requests<br/>PR管理"]
+        GA["github-actions<br/>Actions"]
+        GU["github-users<br/>用户查询"]
+        GG["github-gists<br/>Gist"]
+        GN["github-notifications<br/>通知"]
+        GS["github-search<br/>搜索"]
+        FC["firecrawl-crawl<br/>网页爬取"]
+        FE["firecrawl-extract<br/>内容提取"]
+    end
+    
+    GITHUB --> GR
+    GITHUB --> GI
+    GITHUB --> GP
+    GITHUB --> GA
+    GITHUB --> GU
+    GITHUB --> GG
+    GITHUB --> GN
+    GITHUB --> GS
+    FIRECRAWL --> FC
+    FIRECRAWL --> FE
+    
+    style GITHUB fill:#6e5494,color:#fff,border-color:#6e5494
+    style FIRECRAWL fill:#00aa55,color:#fff,border-color:#00aa55
+    style GR fill:#9b7dce,color:#fff
+    style GI fill:#9b7dce,color:#fff
+    style GP fill:#9b7dce,color:#fff
+    style GA fill:#9b7dce,color:#fff
+    style GU fill:#9b7dce,color:#fff
+    style GG fill:#9b7dce,color:#fff
+    style GN fill:#9b7dce,color:#fff
+    style GS fill:#9b7dce,color:#fff
+    style FC fill:#00cc66,color:#fff
+    style FE fill:#00cc66,color:#fff
+                </pre>
+            </div>
+        </div>
+        
+        <!-- MCP Cards -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">📦</span> MCP 详情</h2>
+            <div class="mcp-grid" id="mcp-grid">
+                <!-- GitHub MCP -->
+                <div class="mcp-card github">
+                    <div class="mcp-header">
+                        <span class="mcp-name">GitHub MCP</span>
+                        <span class="mcp-status connected">● 已连接</span>
+                    </div>
+                    <div class="mcp-stats">
+                        <div class="mcp-stat">
+                            <div class="value">62</div>
+                            <div class="label">工具数</div>
+                        </div>
+                        <div class="mcp-stat">
+                            <div class="value">8</div>
+                            <div class="label">能力数</div>
+                        </div>
+                    </div>
+                    <div class="capabilities">
+                        <span class="capability-tag">github-repos</span>
+                        <span class="capability-tag">github-issues</span>
+                        <span class="capability-tag">github-pull_requests</span>
+                        <span class="capability-tag">github-actions</span>
+                        <span class="capability-tag">github-users</span>
+                        <span class="capability-tag">github-gists</span>
+                        <span class="capability-tag">github-notifications</span>
+                        <span class="capability-tag">github-search</span>
+                    </div>
+                    <div class="tool-section">
+                        <div class="tool-category">
+                            <div class="tool-category-title">仓库操作</div>
+                            <div class="tool-list">
+                                <div class="tool-item">
+                                    <div class="name">github_create_repository</div>
+                                    <div class="desc">创建新仓库</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">github_list_repositories</div>
+                                    <div class="desc">列出仓库</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">github_search_repositories</div>
+                                    <div class="desc">搜索仓库</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-category">
+                            <div class="tool-category-title">Issue & PR</div>
+                            <div class="tool-list">
+                                <div class="tool-item">
+                                    <div class="name">github_create_issue</div>
+                                    <div class="desc">创建Issue</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">github_list_issues</div>
+                                    <div class="desc">列出Issue</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">github_create_pull_request</div>
+                                    <div class="desc">创建PR</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Firecrawl MCP -->
+                <div class="mcp-card firecrawl">
+                    <div class="mcp-header">
+                        <span class="mcp-name">Firecrawl MCP</span>
+                        <span class="mcp-status connected">● 已连接</span>
+                    </div>
+                    <div class="mcp-stats">
+                        <div class="mcp-stat">
+                            <div class="value">6</div>
+                            <div class="label">工具数</div>
+                        </div>
+                        <div class="mcp-stat">
+                            <div class="value">2</div>
+                            <div class="label">能力数</div>
+                        </div>
+                    </div>
+                    <div class="capabilities">
+                        <span class="capability-tag">firecrawl-crawl</span>
+                        <span class="capability-tag">firecrawl-extract</span>
+                    </div>
+                    <div class="tool-section">
+                        <div class="tool-category">
+                            <div class="tool-category-title">网页爬取</div>
+                            <div class="tool-list">
+                                <div class="tool-item">
+                                    <div class="name">firecrawl_crawl</div>
+                                    <div class="desc">爬取网页</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">firecrawl_scrape</div>
+                                    <div class="desc">抓取页面</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tool-category">
+                            <div class="tool-category-title">内容提取</div>
+                            <div class="tool-list">
+                                <div class="tool-item">
+                                    <div class="name">firecrawl_extract</div>
+                                    <div class="desc">提取内容</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Playwright MCP (Not Connected) -->
+                <div class="mcp-card playwright">
+                    <div class="mcp-header">
+                        <span class="mcp-name">Playwright MCP</span>
+                        <span class="mcp-status disconnected">● 未连接</span>
+                    </div>
+                    <div class="mcp-stats">
+                        <div class="mcp-stat">
+                            <div class="value">21</div>
+                            <div class="label">工具数</div>
+                        </div>
+                        <div class="mcp-stat">
+                            <div class="value">7</div>
+                            <div class="label">能力数</div>
+                        </div>
+                    </div>
+                    <div class="capabilities">
+                        <span class="capability-tag">browser-automation</span>
+                        <span class="capability-tag">browser-control</span>
+                        <span class="capability-tag">web-interaction</span>
+                        <span class="capability-tag">screenshot</span>
+                        <span class="capability-tag">page-navigation</span>
+                        <span class="capability-tag">form-fill</span>
+                        <span class="capability-tag">javascript-execution</span>
+                    </div>
+                    <div class="tool-section">
+                        <div class="tool-category">
+                            <div class="tool-category-title">浏览器自动化</div>
+                            <div class="tool-list">
+                                <div class="tool-item">
+                                    <div class="name">browser_navigate</div>
+                                    <div class="desc">导航到页面</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">browser_click</div>
+                                    <div class="desc">点击元素</div>
+                                </div>
+                                <div class="tool-item">
+                                    <div class="name">browser_snapshot</div>
+                                    <div class="desc">页面快照</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Categories -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">📂</span> 能力分类</h2>
+            <div class="category-grid">
+                <div class="category-card browser">
+                    <div class="category-name">🌐 浏览器控制</div>
+                    <div class="category-stats">1 个 MCP · 7 种能力</div>
+                    <div class="category-caps">
+                        <span class="category-cap">browser-automation</span>
+                        <span class="category-cap">browser-control</span>
+                        <span class="category-cap">web-interaction</span>
+                        <span class="category-cap">screenshot</span>
+                        <span class="category-cap">page-navigation</span>
+                        <span class="category-cap">form-fill</span>
+                        <span class="category-cap">javascript-execution</span>
+                    </div>
+                </div>
+                <div class="category-card web_scraping">
+                    <div class="category-name">🕷️ 网页爬取</div>
+                    <div class="category-stats">1 个 MCP · 2 种能力</div>
+                    <div class="category-caps">
+                        <span class="category-cap">web-scraping</span>
+                        <span class="category-cap">firecrawl-crawl</span>
+                        <span class="category-cap">firecrawl-extract</span>
+                        <span class="category-cap">content-extraction</span>
+                        <span class="category-cap">link-discovery</span>
+                    </div>
+                </div>
+                <div class="category-card github">
+                    <div class="category-name">📦 GitHub 操作</div>
+                    <div class="category-stats">1 个 MCP · 8 种能力</div>
+                    <div class="category-caps">
+                        <span class="category-cap">github-repos</span>
+                        <span class="category-cap">github-issues</span>
+                        <span class="category-cap">github-pull_requests</span>
+                        <span class="category-cap">github-actions</span>
+                        <span class="category-cap">github-users</span>
+                        <span class="category-cap">github-gists</span>
+                        <span class="category-cap">github-notifications</span>
+                        <span class="category-cap">github-search</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🔍</span> 能力搜索</h2>
+            <div class="search-section">
+                <input type="text" class="search-box" placeholder="输入关键词搜索，如：爬虫、GitHub、browser..." id="search-input" oninput="handleSearch()">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        
+        <!-- Keywords -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">💡</span> 支持的关键词</h2>
+            <div style="color: #888; line-height: 2; font-size: 0.95em;">
+                <p style="margin-bottom: 15px;">以下关键词可以触发能力推荐：</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <span class="capability-tag">爬虫</span>
+                    <span class="capability-tag">爬取</span>
+                    <span class="capability-tag">抓取</span>
+                    <span class="capability-tag">网页爬取</span>
+                    <span class="capability-tag">网页抓取</span>
+                    <span class="capability-tag">数据采集</span>
+                    <span class="capability-tag">GitHub</span>
+                    <span class="capability-tag">仓库</span>
+                    <span class="capability-tag">Issue</span>
+                    <span class="capability-tag">PR</span>
+                    <span class="capability-tag">browser</span>
+                    <span class="capability-tag">screenshot</span>
+                    <span class="capability-tag">截图</span>
+                    <span class="capability-tag">搜索</span>
+                    <span class="capability-tag">extract</span>
+                    <span class="capability-tag">crawl</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>元神系统 · 阳神引擎 v1.1.0 · Capability Manager</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/wzhgfwy001/yuanshen" target="_blank">GitHub</a> ·
+                <a href="https://cn.clawhub.ai" target="_blank">SkillHub</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+        
+        // Update stats
+        document.getElementById('mcp-count').textContent = '2';
+        document.getElementById('cap-count').textContent = '10';
+        document.getElementById('tool-count').textContent = '68';
+        document.getElementById('connected-count').textContent = '2';
+        
+        // Search functionality
+        const searchIndex = [
+            // GitHub tools
+            { mcp: 'github-mcp', tool: 'github_create_repository', desc: '创建新仓库', caps: ['仓库', 'repo', 'GitHub'] },
+            { mcp: 'github-mcp', tool: 'github_list_repositories', desc: '列出仓库列表', caps: ['仓库', 'repo', 'GitHub'] },
+            { mcp: 'github-mcp', tool: 'github_search_repositories', desc: '搜索仓库', caps: ['搜索', '仓库', 'GitHub'] },
+            { mcp: 'github-mcp', tool: 'github_create_issue', desc: '创建Issue', caps: ['Issue', 'issue'] },
+            { mcp: 'github-mcp', tool: 'github_list_issues', desc: '列出Issue', caps: ['Issue', 'issue'] },
+            { mcp: 'github-mcp', tool: 'github_create_pull_request', desc: '创建Pull Request', caps: ['PR', 'pull_request'] },
+            { mcp: 'github-mcp', tool: 'github_list_pull_requests', desc: '列出PR', caps: ['PR', 'pull_request'] },
+            { mcp: 'github-mcp', tool: 'github_search_commits', desc: '搜索提交', caps: ['搜索', 'code', '代码'] },
+            { mcp: 'github-mcp', tool: 'github_list_commits', desc: '列出提交', caps: ['code', '代码'] },
+            { mcp: 'github-mcp', tool: 'github_get_file_contents', desc: '获取文件内容', caps: ['code', '代码', '仓库'] },
+            // Firecrawl tools
+            { mcp: 'firecrawl-mcp', tool: 'firecrawl_crawl', desc: '爬取网页', caps: ['爬虫', '爬取', '抓取', 'crawl', 'scrape'] },
+            { mcp: 'firecrawl-mcp', tool: 'firecrawl_scrape', desc: '抓取页面', caps: ['爬虫', '爬取', '抓取', 'scrape'] },
+            { mcp: 'firecrawl-mcp', tool: 'firecrawl_extract', desc: '提取内容', caps: ['提取', 'extract', '内容'] },
+            { mcp: 'firecrawl-mcp', tool: 'firecrawl_map', desc: '发现链接', caps: ['链接', 'links'] },
+            // Browser tools
+            { mcp: 'playwright-mcp', tool: 'browser_navigate', desc: '导航到页面', caps: ['browser', '浏览器', '导航'] },
+            { mcp: 'playwright-mcp', tool: 'browser_click', desc: '点击元素', caps: ['browser', '浏览器', '点击'] },
+            { mcp: 'playwright-mcp', tool: 'browser_snapshot', desc: '页面快照', caps: ['browser', '浏览器', '截图', 'screenshot'] },
+        ];
+        
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('search-results');
+            
+            if (!query) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+            
+            const results = searchIndex.filter(item => {
+                const searchable = [
+                    item.tool.toLowerCase(),
+                    item.desc.toLowerCase(),
+                    item.caps.join(' ').toLowerCase(),
+                    item.mcp.toLowerCase()
+                ].join(' ');
+                return searchable.includes(query);
+            });
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div style="color: #888; padding: 20px;">未找到匹配的能力</div>';
+                return;
+            }
+            
+            resultsContainer.innerHTML = results.map(r => `
+                <div class="search-result">
+                    <div class="mcp">${r.mcp}</div>
+                    <div class="tool">${r.tool}</div>
+                    <div class="desc">${r.desc}</div>
+                    <div class="match">匹配: ${r.caps.join(', ')}</div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
