@@ -237,8 +237,12 @@ class CapabilityManager {
   async loadMCP(name, loader) {
     try {
       const mcp = await loader();
+      console.log(`[loadMCP.${name}] Received MCP, toolCount=${mcp ? mcp.toolCount : 'N/A'}`);
+      
       // 检查MCP是否成功连接
       if (mcp && mcp.isConnected && mcp.isConnected()) {
+        console.log(`[loadMCP.${name}] isConnected() returned true, calling registry.register`);
+        console.log(`[loadMCP.${name}] Before register: toolCount=${mcp.toolCount}, capabilities.length=${mcp.capabilities ? mcp.capabilities.length : 'N/A'}`);
         this.registry.register(name, mcp);
         // 清空缓存
         this.capabilityCache.clear();
@@ -255,16 +259,35 @@ class CapabilityManager {
 
   /**
    * 尝试加载Playwright MCP
+   * 使用无头模式配置，避免显示窗口问题
    */
   async tryLoadPlaywrightMCP() {
     return new Promise((resolve) => {
       try {
         const bridgePath = path.join(
           process.env.OPENCLAW_WORKSPACE || 'C:/Users/DELL/.openclaw/workspace',
-          'skills/playwright-mcp/dist/bridge'
+          'skills/playwright-mcp/dist'
         );
-        const { createPlaywrightMCPBridge } = require(bridgePath);
-        const bridge = createPlaywrightMCPBridge();
+        // index.js 会 re-export bridge.js 的内容
+        const { createPlaywrightMCPBridge, TOOLS } = require(bridgePath);
+        
+        // 使用无头模式配置
+        const bridge = createPlaywrightMCPBridge({
+          browser: {
+            browserName: 'chromium',  // 使用 chromium 而不是 edge
+            headless: true,  // 强制无头模式
+            launchOptions: {
+              headless: true,
+              args: [
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-software-rasterizer'
+              ]
+            }
+          },
+          isolated: true  // 使用临时上下文，避免与现有浏览器冲突
+        });
         
         // 添加错误事件监听器，防止崩溃
         bridge.on('error', (error) => {
@@ -272,6 +295,42 @@ class CapabilityManager {
         });
         
         bridge.start().then(() => {
+          // 设置 Playwright MCP 的能力和工具数
+          // 这些属性是 registry 期望的格式
+          const toolCount = TOOLS ? TOOLS.length : 16;
+          const capabilities = [
+            'browser-automation',  // 浏览器自动化
+            'browser-control',     // 浏览器控制
+            'web-interaction',     // 网页交互
+            'screenshot',          // 截图
+            'page-navigation',     // 页面导航
+            'form-fill',          // 表单填写
+            'javascript-execution' // JavaScript执行
+          ];
+          
+          // 直接设置在 bridge 上
+          bridge.capabilities = capabilities;
+          bridge.toolCount = toolCount;
+          
+          // 提供 getToolList 方法
+          bridge.getToolList = () => {
+            return TOOLS ? TOOLS.map(t => ({
+              name: t.name,
+              description: t.description,
+              category: t.category
+            })) : [];
+          };
+          
+          // 添加 getCapabilities 和 getToolCount 方法 (registry 需要这些)
+          bridge.getCapabilities = () => capabilities;
+          bridge.getToolCount = () => toolCount;
+          bridge.getStats = () => ({
+            totalTools: toolCount,
+            connected: true,
+            browserName: 'chromium'
+          });
+          
+          console.log(`[CapabilityManager] Playwright MCP启动成功 (${toolCount} 工具)`);
           resolve(bridge);
         }).catch((error) => {
           console.log(`[CapabilityManager] Playwright MCP启动失败: ${error.message}`);
