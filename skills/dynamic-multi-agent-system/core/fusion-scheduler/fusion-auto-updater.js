@@ -1,105 +1,24 @@
 /**
- * 融合调度器 - 自动注册更新器 v2.0
- * 基于DeerFlow架构优化：
- * 1. 异步化
- * 2. 结构化状态
- * 3. 事件系统
+ * 融合调度器 - 自动注册更新器
+ * 
+ * 功能：
+ * 1. 扫描brain/agents/*/SKILL.md，自动注册女娲人格
+ * 2. 扫描roles/*.md，自动注册Agency模板
+ * 3. 增量更新，只注册新增的
  */
 
-const fs = require('fs').promises;
-const fsSync = require('fs');
+const fs = require('fs');
 const path = require('path');
 
 const WORKSPACE = process.env.WORKSPACE_PATH || 'C:/Users/DELL/.openclaw/workspace';
 const REGISTRY_PATH = path.join(__dirname, 'fusion-registry.json');
 
-// ==================== DeerFlow借鉴: 结构化状态 ====================
-
-class UpdateResult {
-  constructor(added = 0, skipped = 0, errors = 0) {
-    this.added = added;
-    this.skipped = skipped;
-    this.errors = errors;
-    this.timestamp = new Date().toISOString();
-  }
-
-  toJSON() {
-    return {
-      added: this.added,
-      skipped: this.skipped,
-      errors: this.errors,
-      timestamp: this.timestamp
-    };
-  }
-}
-
-class ScanResult {
-  constructor(type, stats, items = []) {
-    this.type = type;
-    this.stats = new UpdateResult(stats.added, stats.skipped, stats.errors);
-    this.items = items;
-    this.timestamp = new Date().toISOString();
-  }
-
-  toJSON() {
-    return {
-      type: this.type,
-      stats: this.stats.toJSON(),
-      items: this.items,
-      timestamp: this.timestamp
-    };
-  }
-}
-
-// ==================== DeerFlow借鉴: 事件系统 ====================
-
-class UpdaterEmitter {
-  constructor() {
-    this.events = {};
-  }
-
-  on(event, listener) {
-    if (!this.events[event]) this.events[event] = [];
-    this.events[event].push(listener);
-    return this;
-  }
-
-  off(event, listener) {
-    if (!this.events[event]) return this;
-    this.events[event] = this.events[event].filter(l => l !== listener);
-    return this;
-  }
-
-  emit(event, data) {
-    if (!this.events[event]) return;
-    this.events[event].forEach(listener => {
-      try {
-        listener(data);
-      } catch (e) {
-        console.error(`[UpdaterEmitter] ${event} error:`, e.message);
-      }
-    });
-  }
-}
-
-const emitter = new UpdaterEmitter();
-
-const EVENTS = {
-  PERSONA_ADDED: 'persona_added',
-  PERSONA_UPDATED: 'persona_updated',
-  AGENCY_ADDED: 'agency_added',
-  UPDATE_COMPLETE: 'update_complete'
-};
-
-emitter.on(EVENTS.PERSONA_ADDED, (name) => console.log(`[AutoUpdater] ➕ 注册女娲人格: ${name}`));
-emitter.on(EVENTS.PERSONA_UPDATED, (name) => console.log(`[AutoUpdater] 🔄 更新女娲人格: ${name}`));
-emitter.on(EVENTS.AGENCY_ADDED, (name, category) => console.log(`[AutoUpdater] ➕ 注册Agency模板: ${name} (${category})`));
-
-// ==================== 异步操作 ====================
-
-async function loadRegistryAsync() {
+/**
+ * 加载注册表
+ */
+function loadRegistry() {
   try {
-    const content = await fs.readFile(REGISTRY_PATH, 'utf8');
+    const content = fs.readFileSync(REGISTRY_PATH, 'utf8');
     return JSON.parse(content);
   } catch (e) {
     console.error('[AutoUpdater] 注册表加载失败:', e.message);
@@ -107,19 +26,13 @@ async function loadRegistryAsync() {
   }
 }
 
-function loadRegistrySync() {
-  try {
-    const content = fsSync.readFileSync(REGISTRY_PATH, 'utf8');
-    return JSON.parse(content);
-  } catch (e) {
-    return null;
-  }
-}
-
-async function saveRegistryAsync(registry) {
+/**
+ * 保存注册表
+ */
+function saveRegistry(registry) {
   try {
     registry.updated = new Date().toISOString().split('T')[0];
-    await fs.writeFile(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf8');
+    fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf8');
     return true;
   } catch (e) {
     console.error('[AutoUpdater] 注册表保存失败:', e.message);
@@ -127,35 +40,28 @@ async function saveRegistryAsync(registry) {
   }
 }
 
-function saveRegistrySync(registry) {
-  try {
-    registry.updated = new Date().toISOString().split('T')[0];
-    fsSync.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf8');
-    return true;
-  } catch (e) {
-    console.error('[AutoUpdater] 注册表保存失败:', e.message);
-    return false;
-  }
-}
-
-// ==================== 辅助函数 ====================
-
+/**
+ * 从SKILL.md提取触发词和描述
+ */
 function extractFromSkillMd(filePath) {
   try {
-    const content = fsSync.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, 'utf8');
     
+    // 提取描述（第一个段落或description字段）
     let description = '';
     const descMatch = content.match(/description:\s*\|?\s*\n([^\n#]+)/);
     if (descMatch) {
       description = descMatch[1].trim();
     }
     
+    // 提取触发词（从triggers或对话示例中）
     let triggers = [];
     const triggerMatch = content.match(/triggers:\s*\[([^\]]+)\]/);
     if (triggerMatch) {
       triggers = triggerMatch[1].split(',').map(t => t.trim().replace(/['"]/g, ''));
     }
     
+    // 如果没有触发词，尝试从文件名推断
     if (triggers.length === 0) {
       const fileName = path.basename(filePath, '.md');
       triggers = fileName.split(/[-_]/).filter(t => t.length > 1);
@@ -167,44 +73,50 @@ function extractFromSkillMd(filePath) {
   }
 }
 
-// ==================== 扫描函数 ====================
-
-async function scanNuwaPersonasAsync(registry) {
+/**
+ * 扫描brain/agents目录，自动注册女娲人格
+ */
+function scanNuwaPersonas(registry) {
   const agentsDir = path.join(WORKSPACE, 'brain', 'agents');
-  const stats = { added: 0, skipped: 0, errors: 0 };
-  const added = [];
   
-  if (!fsSync.existsSync(agentsDir)) {
+  if (!fs.existsSync(agentsDir)) {
     console.log('[AutoUpdater] brain/agents目录不存在');
-    return new ScanResult('nuwa', stats, added);
+    return { added: 0, skipped: 0, errors: 0 };
   }
   
+  const stats = { added: 0, skipped: 0, errors: 0 };
   const existingNames = Object.keys(registry.personas || {});
-  const dirs = fsSync.readdirSync(agentsDir);
+  
+  const dirs = fs.readdirSync(agentsDir);
   
   for (const dir of dirs) {
     const skillPath = path.join(agentsDir, dir, 'SKILL.md');
     
-    if (!fsSync.existsSync(skillPath)) {
+    // 检查SKILL.md是否存在
+    if (!fs.existsSync(skillPath)) {
       continue;
     }
     
+    // 检查是否已注册
     if (existingNames.includes(dir)) {
+      // 检查是否需要更新
       const existing = registry.personas[dir];
       const { description, triggers } = extractFromSkillMd(skillPath);
       
       if (existing.triggers && existing.triggers.length > 0 && 
           JSON.stringify(existing.triggers) !== JSON.stringify(triggers)) {
+        // 更新触发词
         existing.triggers = triggers;
         existing.autoUpdatedAt = new Date().toISOString();
         stats.skipped++;
-        emitter.emit(EVENTS.PERSONA_UPDATED, dir);
+        console.log(`[AutoUpdater] 更新女娲人格: ${dir}`);
       } else {
         stats.skipped++;
       }
       continue;
     }
     
+    // 提取信息并注册
     const { description, triggers } = extractFromSkillMd(skillPath);
     
     registry.personas[dir] = {
@@ -217,39 +129,44 @@ async function scanNuwaPersonasAsync(registry) {
       registeredAt: new Date().toISOString()
     };
     
+    console.log(`[AutoUpdater] 注册女娲人格: ${dir}`);
     stats.added++;
-    added.push(dir);
-    emitter.emit(EVENTS.PERSONA_ADDED, dir);
   }
   
-  return new ScanResult('nuwa', stats, added);
+  return stats;
 }
 
-async function scanAgencyRolesAsync(registry) {
+/**
+ * 扫描roles目录，自动注册Agency模板
+ */
+function scanAgencyRoles(registry) {
   const rolesDir = path.join(WORKSPACE, 'skills', 'dynamic-multi-agent-system', 
                              'core', 'subagent-manager', 'roles');
-  const stats = { added: 0, skipped: 0, errors: 0 };
-  const added = [];
   
-  if (!fsSync.existsSync(rolesDir)) {
+  if (!fs.existsSync(rolesDir)) {
     console.log('[AutoUpdater] roles目录不存在');
-    return new ScanResult('agency', stats, added);
+    return { added: 0, skipped: 0, errors: 0 };
   }
   
+  const stats = { added: 0, skipped: 0, errors: 0 };
   const existingNames = Object.keys(registry.agencyTemplates || {});
-  const files = fsSync.readdirSync(rolesDir).filter(f => f.endsWith('.md'));
+  
+  const files = fs.readdirSync(rolesDir).filter(f => f.endsWith('.md'));
   
   for (const file of files) {
     const roleName = path.basename(file, '.md');
     const skillPath = path.join(rolesDir, file);
     
+    // 检查是否已注册
     if (existingNames.includes(roleName)) {
       stats.skipped++;
       continue;
     }
     
+    // 提取信息并注册
     const { description, triggers } = extractFromSkillMd(skillPath);
     
+    // 推断分类
     let category = 'general';
     const categoryKeywords = {
       'data': ['data', 'analyst', 'science', 'bi'],
@@ -277,106 +194,87 @@ async function scanAgencyRolesAsync(registry) {
       registeredAt: new Date().toISOString()
     };
     
+    console.log(`[AutoUpdater] 注册Agency模板: ${roleName} (${category})`);
     stats.added++;
-    added.push({ name: roleName, category });
-    emitter.emit(EVENTS.AGENCY_ADDED, roleName, category);
   }
   
-  return new ScanResult('agency', stats, added);
+  return stats;
 }
 
-// ==================== 主函数 ====================
-
-async function fullUpdateAsync() {
+/**
+ * 完整更新注册表
+ */
+function fullUpdate() {
   console.log('=== 融合调度器自动更新 ===');
   console.log(`时间: ${new Date().toISOString()}`);
   
-  const registry = await loadRegistryAsync();
+  const registry = loadRegistry();
   if (!registry) {
     console.error('[AutoUpdater] 无法加载注册表');
-    return { success: false, error: 'registry_load_failed' };
+    return false;
   }
   
+  // 初始化personas和agencyTemplates
   if (!registry.personas) registry.personas = {};
   if (!registry.agencyTemplates) registry.agencyTemplates = {};
   
-  const nuwaResult = await scanNuwaPersonasAsync(registry);
-  const agencyResult = await scanAgencyRolesAsync(registry);
+  // 扫描并注册
+  const nuwaStats = scanNuwaPersonas(registry);
+  const agencyStats = scanAgencyRoles(registry);
   
-  if (await saveRegistryAsync(registry)) {
-    const summary = {
-      success: true,
-      nuwa: nuwaResult.toJSON(),
-      agency: agencyResult.toJSON(),
-      timestamp: new Date().toISOString()
-    };
-    
+  // 保存
+  if (saveRegistry(registry)) {
     console.log('\n=== 更新完成 ===');
-    console.log(`女娲人格: +${nuwaResult.stats.added} | ~${nuwaResult.stats.skipped}`);
-    console.log(`Agency模板: +${agencyResult.stats.added} | ~${agencyResult.stats.skipped}`);
+    console.log(`女娲人格: +${nuwaStats.added} | ~${nuwaStats.skipped}`);
+    console.log(`Agency模板: +${agencyStats.added} | ~${agencyStats.skipped}`);
     console.log(`注册表已保存: ${REGISTRY_PATH}`);
-    
-    emitter.emit(EVENTS.UPDATE_COMPLETE, summary);
-    return summary;
+    return true;
   }
   
-  return { success: false, error: 'registry_save_failed' };
+  return false;
 }
 
-async function incrementalUpdateAsync() {
+/**
+ * 增量更新（只检查新增）
+ */
+function incrementalUpdate() {
   console.log('=== 增量更新 ===');
   
-  const registry = await loadRegistryAsync();
-  if (!registry) return { success: false };
+  const registry = loadRegistry();
+  if (!registry) return false;
   
   if (!registry.personas) registry.personas = {};
   if (!registry.agencyTemplates) registry.agencyTemplates = {};
   
-  const nuwaResult = await scanNuwaPersonasAsync(registry);
-  const agencyResult = await scanAgencyRolesAsync(registry);
+  const nuwaStats = scanNuwaPersonas(registry);
+  const agencyStats = scanAgencyRoles(registry);
   
-  if (nuwaResult.stats.added > 0 || agencyResult.stats.added > 0) {
+  if (nuwaStats.added > 0 || agencyStats.added > 0) {
     console.log('\n发现新内容，保存更新...');
-    const saved = await saveRegistryAsync(registry);
-    if (saved) {
-      emitter.emit(EVENTS.UPDATE_COMPLETE, {
-        nuwa: nuwaResult.toJSON(),
-        agency: agencyResult.toJSON()
-      });
-    }
-    return { success: saved, nuwa: nuwaResult, agency: agencyResult };
+    return saveRegistry(registry);
   }
   
   console.log('没有新内容需要注册');
-  return { success: true, nuwa: nuwaResult, agency: agencyResult };
+  return true;
 }
 
-// ==================== 导出 ====================
-
+// 导出
 module.exports = {
-  loadRegistry: loadRegistrySync,
-  loadRegistryAsync,
-  saveRegistry: saveRegistrySync,
-  saveRegistryAsync,
-  scanNuwaPersonas: scanNuwaPersonasAsync,
-  scanAgencyRoles: scanAgencyRolesAsync,
-  fullUpdate: fullUpdateAsync,
-  incrementalUpdate: incrementalUpdateAsync,
-  UpdateResult,
-  ScanResult,
-  emitter,
-  EVENTS
+  loadRegistry,
+  saveRegistry,
+  scanNuwaPersonas,
+  scanAgencyRoles,
+  fullUpdate,
+  incrementalUpdate
 };
 
 // 直接运行时执行更新
 if (require.main === module) {
   const args = process.argv.slice(2);
   
-  (async () => {
-    if (args.includes('--full')) {
-      await fullUpdateAsync();
-    } else {
-      await incrementalUpdateAsync();
-    }
-  })();
+  if (args.includes('--full')) {
+    fullUpdate();
+  } else {
+    incrementalUpdate();
+  }
 }
