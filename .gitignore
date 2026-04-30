@@ -38,5 +38,14 @@ node_modules/
 *.log
 dreaming.log
 
+# Private projects (never upload to GitHub)
+novel-wuming/
+skills/dynamic-multi-agent-system/novel-wuming/
+skills/xiaochengxu/
+skills/gaokao/
+skills/mini-program/
+*.xcodeproj/
+*.xcworkspace/
+
 # Heartbeat state (local only)
 heartbeat-state.json
