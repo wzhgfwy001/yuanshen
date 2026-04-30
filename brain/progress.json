@@ -1,9 +1,15 @@
 {
   "meta": {
     "created": "2026-04-16T00:23:00+08:00",
-    "last_updated": "2026-04-22T12:50:00+08:00",
-    "version": 7,
-    "note": "v7: 2026-04-22系统全面优化：tracker修复、err-006解决、subagent-log澄清",
+    "last_updated": "2026-04-26T03:47:00+08:00",
+    "version": 9,
+    "note": "v9: 教训记录系统升级（范围扩展到失败+纠正+未完成）、AGENTS.md模型配置规则、米津玄師歌曲生成",
+    "updates": [
+      "2026-04-26: 教训记录范围扩展（失败+纠正+未完成）",
+      "2026-04-26: AGENTS.md添加模型配置必须明确指定规则",
+      "2026-04-26: 米津玄師日文歌生成完成（minimax/music-2.6）",
+      "2026-04-26: 创建2个教训文件brain/lessons/"
+    ],
     "migration_source": "SESSION-STATE.md (已并入)",
     "session_state_legacy": {
       "deprecated": true,
@@ -14,7 +20,8 @@
   "goal": {
     "description": "帮助主人实现财富自由，打造高效的AI协作系统",
     "stability": "high",
-    "last_changed": null
+    "last_changed": null,
+    "playwright_mcp_failure": "2026-04-24, lessons: target-mismatch, over-engineering, didnt use built-in tools, blind trial, no doc reading. See brain/lessons/2026-04-24-playwright-mcp-failure.md"
   },
   "user_context": {
     "session_start": "2026-04-08",
@@ -142,6 +149,26 @@
       "date": "2026-04-22T12:34:00+08:00",
       "decision": "修复tracker机制（err-006）",
       "detail": "SKILL.md添加第9步Tracker记录，tracker.increment()验证成功（totalTasks: 0→1→2）"
+    },
+    {
+      "date": "2026-04-23T01:00:00+08:00",
+      "decision": "OpenMythos作为理论储备",
+      "detail": "分析OpenMythos代码，评估集成可能性，决定作为理论储备存档（brain/knowledge_reserve/openmythos.md）。核心洞察：LLM内部多维循环 vs Agent重复问询，后者无多维融合意义不大。"
+    },
+    {
+      "date": "2026-04-23T01:06:00+08:00",
+      "decision": "系统优化优先于业务任务",
+      "detail": "用户确认先做系统优化：inbox清理、tracker加速、progress.json更新、brain归档。"
+    },
+    {
+      "date": "2026-04-26T03:35:00+08:00",
+      "decision": "教训记录范围扩展",
+      "detail": "用户4点批评：1.任务失败=教训 2.用户纠正=教训 3.任务未完成=教训 4.每次纠正=教训。教训范围扩展到任何失败/纠正/未完成，不设阈值。"
+    },
+    {
+      "date": "2026-04-26T03:36:00+08:00",
+      "decision": "模型配置必须明确指定",
+      "detail": "任务描述必须包含模型版本：音乐生成minimax/music-2.6（不是music-2.5+）。模型配置不能依赖默认选择。"
     }
   ],
   "completed_steps": [
@@ -284,10 +311,34 @@
       "type": "EXECUTION",
       "confidence": 1,
       "detail": "更新文件状态为'设计阶段-尚未实现'，添加说明：当前通过sessions_history+progress.json替代"
+    },
+    {
+      "step": "inbox清理归档（2026-04-23）",
+      "timestamp": "2026-04-23T01:16:00+08:00",
+      "source": "元神",
+      "type": "EXECUTION",
+      "confidence": 1,
+      "detail": "inbox从75行缩减到40行，归档14项已完成内容到brain/inbox-archive-2026-04.md，保留5个活跃待办项（小程序变现、StoryFlow验证、小说第6章、GitHub Demo、user-profile）"
+    },
+    {
+      "step": "教训记录系统升级（2026-04-26）",
+      "timestamp": "2026-04-26T03:47:00+08:00",
+      "source": "元神",
+      "type": "EXECUTION",
+      "confidence": 1,
+      "detail": "教训范围扩展到任何失败/纠正/未完成。创建brain/lessons/2026-04-26-music-model-selection-failure.md和brain/lessons/2026-04-26-user-correction-music-model.md。更新AGENTS.md模型配置规则。"
+    },
+    {
+      "step": "米津玄師日文歌生成完成（2026-04-26）",
+      "timestamp": "2026-04-26T03:47:00+08:00",
+      "source": "元神",
+      "type": "EXECUTION",
+      "confidence": 1,
+      "detail": "使用minimax/music-2.6模型生成日文歌词，主题：虽然生活窘迫但热爱生活。提供中日对照版歌词发送给用户。"
     }
   ],
   "current_state": {
-    "summary": "2026-04-22 系统优化完成：tracker机制修复、err-006解决、subagent-log澄清、inbox清理",
+    "summary": "2026-04-26 教训记录系统升级完成 + 米津玄師日文歌生成。教训范围扩展到失败+纠正+未完成，AGENTS.md模型配置规则已更新。",
     "confidence": "high",
     "blockers": [],
     "next_action": "等待用户下一步指示"
@@ -363,6 +414,13 @@
       "timestamp": "2026-04-22T05:31:00+08:00",
       "source": "用户指示",
       "confidence": 1
+    },
+    {
+      "node": "OpenMythos分析：LLM内部循环 vs Agent循环，结论后者无多维融合=伪深度",
+      "timestamp": "2026-04-23T01:00:00+08:00",
+      "source": "元神",
+      "confidence": 0.95,
+      "detail": "OpenMythos的核心不是循环而是多维度内部融合+单次输出。Agent重复问询缺乏多维探索和综合，等于浪费token。决定作为理论储备存档。"
     }
   ]
 }

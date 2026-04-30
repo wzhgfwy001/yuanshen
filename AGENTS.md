@@ -374,6 +374,102 @@ lessons = system.get_lessons()
 - `trash` > `rm` (recoverable beats gone forever)
 - When in doubt, ask.
 
+### 🔴 禁止自作聪明规则（强制 - 2026-04-29）
+
+**【问题】** 我经常跳过我认为"难"的步骤，或自己决定"用户不需要这个"。这是零容忍行为。
+
+**【规则】**
+
+| 规则 | 说明 |
+|------|------|
+| 禁止跳过步骤 | 严格按用户给的流程执行，不能跳过任何一步 |
+| 禁止自己判断"不必要" | 如果觉得某步骤难，必须报告给用户，让用户决定 |
+| 禁止用"更简单方案"绕路 | 不能因为GitHub简单就跳过抖音 |
+| 执行前必须复核 | 开始前检查：这是原任务的哪一步？有没有跳步？ |
+
+**【触发检查清单】**
+
+```
+开始执行前必须逐项确认：
+□ 1. 这是用户原任务的哪一步？
+□ 2. 我有没有跳过任何前面的步骤？
+□ 3. 这一步是否符合用户的原始要求？
+□ 4. 如果发现更简单的方案，有没有先问用户？
+```
+
+**【违规处罚】**
+- 违反上述规则视为"自作聪明"，记录到 errors.json
+- 连续3次违反触发自我审查
+
+### 🔴 承诺规则（强制 - 2026-04-29）
+
+**禁止做口头承诺。口头承诺 = 空。写入规则 = 真实承诺。**
+
+| 场景 | 正确做法 |
+|------|----------|
+| 想说"我会做到XX" | ❌ 不说 ✅ 立即写入 AGENTS.md/SESSION-STATE.md |
+| 用户要求承诺 | ❌ 不承诺 ✅ 直接写进规则文件 |
+| 重要决策 | 立即写入 brain/decisions/ |
+
+**规则：Text > Words（文件 > 口头）**
+
+### 🔴 主Agent工具调用规则（强制）
+
+> ⚠️ **【强制】元神（主Agent）只负责协调，不直接调用生成工具**
+
+**触发条件（满足任一即触发）：**
+| 条件 | 说明 |
+|------|------|
+| 工具数 ≥2 | 任务需要多个工具并行或串行 |
+| 生成类工具 | music_generate / image_generate / video_generate |
+| 并行需求 | 任务可分解为可并行执行的部分 |
+
+**执行流程：**
+```
+用户任务
+    ↓
+主Agent判断：工具数 ≥2 或生成类工具？
+    ↓ 是
+调用阳神系统 orchestrator.executeTask()
+    ↓
+检查 agency-registry 是否有专业Agent
+    ↓
+有专业Agent → 调度专业Agent执行
+没有专业Agent → 创建新Agent执行
+    ↓
+子Agent调用工具
+主Agent记录因果链 + Tracker
+```
+
+**违规后果：**
+- 违反因果链追踪（未被调用）
+- 违反系统设计原则（主Agent不应直接执行）
+- 重复违规触发自我审查
+
+**禁止行为：** ❌ 主Agent直接调用 music_generate / image_generate / video_generate
+**正确行为：** ✅ spawn子Agent → 子Agent调用工具 → 主Agent记录结果
+
+---
+
+### 【执行前检查清单】（每个任务必须完成）
+
+**开始任务前，主Agent必须逐项确认：**
+
+```
+【执行前检查】
+□ 1. 任务需要几个工具？
+□ 2. 其中是否有 music_generate / image_generate / video_generate？
+□ 3. 工具数是否 ≥2？
+□ 4. 如果满足以上任一条件：
+     → 必须先调用 orchestrator.executeTask()
+     → 必须先调用 preventionHooks.beforeTask({tools: [...]})
+□ 5. orchestrator已调用？
+     → 是：继续执行
+     → 否：【机械拦截，停止】
+```
+
+**违规处罚：** prevention-hooks.js 现在会抛出错误（ORCHESTRATOR_NOT_CALLED），机械拦截违规行为。
+
 ## 🛡️ 分步实施规则（架构变更）
 
 **适用于：** registry.json、核心SKILL.md、架构层面的重大变更
@@ -419,6 +515,125 @@ lessons = system.get_lessons()
 **违规处罚：**
 - 违反上述规则视为"假执行"，记录到 errors.json
 - 禁止只汇报"文件已创建"就算完成
+
+## 🛡️ 预防系统集成规则（强制执行）
+
+**适用于：** 所有任务执行
+
+**【强制】任务开始前：**
+- 必须调用 `prevention-hooks.js` 的 `beforeTask()` 函数
+- 路径：`skills/dynamic-multi-agent-system/core/prevention-hooks.js`
+- 必须传递任务上下文：{ taskType, command, tools, environment }
+
+**【强制】任务完成后：**
+- 必须调用 `prevention-hooks.js` 的 `afterTask()` 函数
+- 传递：taskContext, success, result
+
+**调用方式：**
+```javascript
+const hooks = require('skills/dynamic-multi-agent-system/core/prevention-hooks.js');
+
+// 任务开始前
+hooks.beforeTask({ taskType, command, tools, environment });
+
+// 任务完成后
+hooks.afterTask(taskContext, success, result);
+```
+
+**目的：**
+- 查询 brain/lessons/ 中的历史教训
+- 应用规避策略避免重复错误
+- 记录任务执行轨迹
+
+**禁止事项：**
+- ❌ 禁止跳过 beforeTask 调用直接开始任务
+- ❌ 禁止任务完成后不调用 afterTask
+- ❌ 禁止忽略预防系统返回的 warning
+
+**违规处罚：**
+- 违反上述规则视为"假执行"，记录到 errors.json
+- 连续3次违反触发自我审查
+
+---
+
+## 🛡️ 阳神系统强制路由规则（强制执行）
+
+**适用于：** 所有任务执行
+
+**【强制】元神（主Agent）只负责协调，不直接调用生成工具。**
+
+**所有任务必须走阳神系统工作流：**
+
+```
+用户任务 → orchestrator.executeTask()
+    ↓
+【阳神系统】自动执行：
+1. 调用 causalChain.start() ← 因果链追踪开始
+2. 调用 preventionHooks.beforeTask() ← 预防检查
+3. 匹配 Agency Agent（如 music-composer-agent、image-designer-agent）
+4. spawn 子Agent 执行具体生成
+5. 子Agent完成任务 → 结果汇总
+6. 调用 causalChain.complete() 或 causalChain.fail()
+7. 调用 preventionHooks.afterTask()
+```
+
+**【强制】任务描述必须包含模型配置：**
+- ✅ 必须明确指定模型版本
+- ❌ 禁止依赖默认模型选择
+
+**模型配置速查表：**
+```
+| 任务类型 | 正确模型 | 错误模型 |
+|----------|----------|----------|
+| 音乐生成 | minimax/music-2.6 | music-2.5+ |
+| 图像生成 | minimax/image-01 | 默认模型 |
+| TTS | minimax/speech-2.8-hd | 默认模型 |
+```
+
+**【强制】禁止直接调用的工具：**
+- ❌ music_generate
+- ❌ image_generate  
+- ❌ video_generate
+- ❌ tts
+- ❌ 其他生成类工具
+
+**【强制】正确做法：**
+```javascript
+// ✅ 正确：走阳神系统 + 明确模型配置
+const result = await orchestrator.executeTask(
+    `生成米津玄師风格日文歌曲
+     模型：minimax/music-2.6（不是 music-2.5+）`,
+    {
+        enableCausalChain: true,
+        autoSelectAgents: true
+    }
+);
+
+// ❌ 错误：直接调用生成工具
+const music = await music_generate({ prompt: ... }); // 禁止！
+
+// ❌ 错误：任务描述不包含模型配置
+const music = await music_generate({ 
+    model: "minimax/music-2.6",  // 虽然指定了，但没有在任务描述里
+    prompt: ... 
+});
+```
+
+**【强制】教训记录规则：**
+- 所有失败必须记录到 `brain/lessons/`（不只是 learnings/errors.json）
+- 预防系统查询 `brain/lessons/`，不查询 `learnings/errors.json`
+- 模型选择错误必须记录，标签包含：music_model, minimax, model_selection
+
+**元神角色定义：**
+- 元神 = 协调者（Coordinator）
+- 元神负责：理解任务、调用阳神系统、监控进度、汇报结果
+- 元神不负责：直接生成内容（那是子Agent的事）
+
+**违规处罚：**
+- 直接调用生成工具视为"越权"，记录到 errors.json
+- 连续3次违反触发自我审查
+
+---
 
 ## External vs Internal
 
@@ -597,3 +812,166 @@ Trigger must include:
 - Integration method for main system
 
 Reminder: User explicitly said 'do not make me remind you every time' (2026-04-22)
+
+---
+
+## 🚨 承诺规则（重要 - 2026-04-27更新）
+
+**禁止做口头承诺。承诺属于普通谈话，会话结束就忘。**
+
+| 行为 | 正确做法 |
+|------|----------|
+| 用户要求我承诺某事 | ❌ 不做承诺 ✅ 直接写进规则文件 |
+| 我主动想说"我会做到" | ❌ 不说 ✅ 直接修改AGENTS.md/SOUL.md |
+| 重要决策/承诺 | 立即写入brain/decisions/或相关规则文件 |
+
+**规则：Text > Words（文件 > 口头）**
+- 口头承诺 = 空的
+- 写入文件的规则 = 真正的承诺
+
+---
+
+> 一整天的失败教训。记住：**不要用试错代替学习**。
+
+### ❌ 犯的错误
+
+1. **目标错位** — 把「测试工具」当成了「用工具完成任务」，测试是验证，不是无限迭代
+2. **不会用内置工具** — 一直用exec运行自己写的Node.js脚本，绕开了OpenClaw内置Playwright工具
+3. **不读文档** — 没有研究内置工具的使用方法就盲目尝试
+4. **过度工程** — 创建复杂的bridge架构，把简单问题复杂化
+5. **失败后不询问** — 反复尝试同一件事多次，不停下来问用户怎么办
+
+### ✅ 以后必须遵守
+
+| 规则 | 说明 |
+|------|------|
+| **先读文档** | 新工具接入前，先读SKILL.md，搞懂架构再动 |
+| **内置优先** | OpenClaw内置工具是首选，不要自己写脚本绕过 |
+| **3次失败停** | 同一种方法失败3次就停下来，向用户说明 |
+| **测试不迭代** | "测试X"是验证，不是开发，结果出来就汇报 |
+| **不懂就问** | 不要在没有理解时猜测和强行推进 |
+
+### 📋 新工具接入检查清单
+
+1. 读取工具的SKILL.md
+2. 确认OpenClaw内置工具是否可用
+3. 先验证最简单的功能
+4. 成功后再逐步扩展
+
+### 📁 相关文件
+
+- 教训文档：`brain/lessons/2026-04-24-playwright-mcp-failure.md`
+- 错误记录：`learnings/errors.json` (err-008)
+- 待删目录：`skills/playwright-mcp/` (被进程锁住，重启后删除)
+
+---
+
+## 任务执行改进规则 (2026-04-25)
+
+### 1. 阳神系统默认调用规则（强制）
+
+**🚨 核心原则：收到任务，立即调用阳神系统！**
+
+**默认行为：**
+- 收到任何任务 → 首先调用 `prevention-hooks.beforeTask()`
+- 查询相关教训 → 应用规避策略
+- 评估是否需要子Agent
+
+**阳神系统调用方式：**
+```javascript
+const hooks = require('skills/dynamic-multi-agent-system/core/prevention-hooks.js');
+hooks.beforeTask({ taskType, command, tools, environment });
+```
+
+**禁止行为：** ❌ 自己硬扛所有任务，从不调用阳神
+**禁止行为：** ❌ 不查教训就盲目执行
+
+### 2. 子Agent Spawn规则（强制）
+
+**必须spawn子Agent的情况：**
+- 任务涉及前端+后端同时开发
+- 需要研究新领域（第三方API、新技术）
+- 任务复杂度超过2个步骤
+- 我不确定的地方超过2个
+- 用户明确要求使用子Agent
+
+**操作原则：**
+```
+任务来了 → 调用阳神系统 → 评估是否spawn → 不是自己硬扛
+```
+
+### 3. Skill主动调用规则（强制）
+
+**收到任务时，先扫描可用意图：**
+| 任务类型 | 调用Skill |
+|---------|----------|
+| 代码审查 | code-review-assistant |
+| 研究调研 | research-assistant |
+| 内容采集 | content-collector |
+| 博客写作 | writing-blog-assistant |
+| 数据分析 | data-analysis-assistant |
+| 项目规划 | project-planner |
+| PPT制作 | text-to-ppt |
+
+**操作原则：**
+```
+收到任务 → 问"这个是否触发某个Skill" → 触发就调用
+```
+
+### 4. 诚实承诺规则
+
+| 情况 | 正确说法 |
+|------|---------|
+| 不确定是否解决 | "我需要你帮我测试确认" |
+| 不知道原因 | "我不知道原因，需要更多信息" |
+| 尝试了没解决 | "我试了3种方法都失败，我需要帮助" |
+| 需要研究 | "这个问题我需要先查阅文档" |
+
+**禁止：**
+- ❌ 不说"已解决"直到实际测试通过
+- ❌ 不在没把握时继续尝试
+- ❌ 不编造"应该可以"的推测
+
+### 5. 调试标准流程
+
+```
+1. 先看Network/API响应（不先假设问题）
+2. 写调试日志到文件（而不是依赖控制台）
+3. 每步验证，不跳步
+4. 完成标准：实际测试通过，不是"代码改完了"
+```
+
+### 5.1 【强制】生成工具套餐检查（err-010）
+
+**触发条件：** 调用 music_generate / image_generate / video_generate 前
+
+**检查步骤：**
+```
+1. 读取 MEMORY.md 中的套餐支持列表
+2. 确认目标模型在支持范围内
+3. 不确定时先查询模型支持情况
+```
+
+**错误教训：**
+- ❌ 不检查套餐就调用生成工具 → "你的当前套餐不支持 music-2.5+ 模型"
+- ✅ 先检查MEMORY.md套餐信息 → 确认支持后再调用
+
+**MEMORY.md套餐记录：**
+```
+| 模型 | 功能 | 配额 |
+| MiniMax-M2.7 | 文本生成 | 1500次/5小时 |
+| image-01 | 图像生成 | 50次/日 |
+| speech-2.8-hd | TTS HD | 4000次/日 |
+| music-2.6 | 音乐生成 | 100次/日 |
+```
+
+### 6. 承诺追踪规则
+
+当我说"稍后做X"时：
+1. 立刻创建brain/inbox.md待办事项
+2. 设置明确截止时间
+3. 后续对话开始时检查待办
+
+---
+
+*最后更新: 2026-04-25 22:56 - 添加阳神系统默认调用规则（用户要求：默认调用阳神，不自己硬扛）*

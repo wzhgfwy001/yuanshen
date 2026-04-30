@@ -1,0 +1,38 @@
+{
+  "description": "MiniMax套餐支持列表",
+  "lastUpdated": "2026-04-26T20:15:00",
+  "note": "用户指定默认音乐模型为 music-2.6，durationSeconds≤30秒防超5MB限制",
+  "packages": {
+    "MiniMax-Plus": {
+      "name": "MiniMax Plus",
+      "price": "￥49/月",
+      "textModels": {
+        "MiniMax-M2.7": { "status": "supported", "quota": "1500次/5小时" },
+        "MiniMax-M2.5": { "status": "supported", "quota": "-" }
+      },
+      "imageModels": {
+        "image-01": { "status": "supported", "quota": "50次/日" }
+      },
+      "audioModels": {
+        "speech-2.8-hd": { "status": "supported", "quota": "4000次/日" }
+      },
+      "musicModels": {
+        "music-2.6": { "status": "supported", "quota": "100次/月", "isDefault": true },
+        "music-2.5+": { "status": "supported", "quota": "100次/月" },
+        "music-2.5": { "status": "supported", "quota": "100次/月" },
+        "music-2.0": { "status": "supported", "quota": "100次/月" }
+      },
+      "videoModels": {
+        "video-01": { "status": "supported", "quota": "10次/日" }
+      }
+    }
+  },
+  "currentPackage": "MiniMax-Plus",
+  "constraints": {
+    "musicGeneration": {
+      "maxFileSizeMB": 5,
+      "recommendedDurationSeconds": 30,
+      "problem": "文件超过5MB会导致发送失败"
+    }
+  }
+}

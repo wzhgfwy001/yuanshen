@@ -44,6 +44,8 @@ skills/dynamic-multi-agent-system/novel-wuming/
 skills/xiaochengxu/
 skills/gaokao/
 skills/mini-program/
+cloudfunctions/
+excel-filter-project/
 *.xcodeproj/
 *.xcworkspace/
 

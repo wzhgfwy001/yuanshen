@@ -101,5 +101,51 @@
     "root_cause": "SKILL.md是文档/提示词，不会自动执行。需要实际调用tracker.js的代码。",
     "resolution": "子Agent实际执行任务时会调用tracker.js，今天的多Agent任务都有实际执行效果。",
     "status": "resolved"
+  },
+  {
+    "id": "err-008",
+    "timestamp": "2026-04-24T00:22:00",
+    "error_type": "目标错位 + 过度工程 + 不会用内置工具",
+    "error_message": "把'测试Playwright'当成了'用Playwright分析抖音'，绕开内置工具自己写脚本，浪费数小时未跑通",
+    "context": {
+      "task": "用Microsoft Playwright MCP打开Edge访问抖音账号",
+      "what_happened": "一直用exec运行自己写的Node.js脚本，没有学会使用OpenClaw内置Playwright工具",
+      "root_cause": "不懂装懂，不读文档，盲目试错"
+    },
+    "root_cause": "1) 目标错位：把测试工具当成完成任务 2) 不会用内置工具 3) 不读文档就盲目尝试 4) 失败后不询问用户",
+    "resolution": "见 brain/lessons/2026-04-24-playwright-mcp-failure.md",
+    "files_to_delete": "skills/playwright-mcp/ (被进程锁住，重启后删除)",
+    "status": "recorded"
+  },
+  {
+    "id": "err-010",
+    "timestamp": "2026-04-26T10:58:00.000Z",
+    "error_type": "套餐不支持 - 调用前未检查",
+    "error_message": "你的当前套餐不支持 music-2.5+ 模型",
+    "context": {
+      "task": "生成艾薇儿风格中文摇滚歌曲",
+      "tool": "music_generate",
+      "model_used": "music-2.5+",
+      "package": "MiniMax Plus"
+    },
+    "root_cause": "调用生成工具前没有检查当前套餐是否支持该模型。MEMORY.md记录了套餐信息但没有在执行流程中引用。",
+    "resolution": "【强制】调用生成工具前必须：1) 检查MEMORY.md中的套餐支持列表 2) 确认工具/模型在支持范围内 3) 不确定时先查询模型支持情况",
+    "status": "recorded"
+  },
+  {
+    "id": "err-009",
+    "timestamp": "2026-04-25T18:16:07.226Z",
+    "error_type": "ReferenceError - 引用错误",
+    "error_message": "ReferenceError: x is not defined",
+    "context": {
+      "task": "测试任务：分析代码错误",
+      "keywords": [
+        "测试任务：分析代码错误"
+      ],
+      "causalChainId": "ct_1777140967226_7o9jydmfu"
+    },
+    "root_cause": "变量/函数未定义：可能是因为没有正确引入模块或变量名拼写错误",
+    "resolution": null,
+    "status": "recorded"
   }
 ]

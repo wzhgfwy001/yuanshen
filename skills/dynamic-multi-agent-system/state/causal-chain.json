@@ -1,0 +1,28 @@
+{
+  "tasks": {
+    "ct_1777140651871_3v93pjala": {
+      "id": "ct_1777140651871_3v93pjala",
+      "task": "测试因果链任务",
+      "parentId": null,
+      "status": "completed",
+      "startTime": "2026-04-25T18:10:51.871Z",
+      "endTime": "2026-04-25T18:10:51.890Z",
+      "result": {
+        "success": true,
+        "duration": 20,
+        "agentsCount": 3
+      },
+      "error": null,
+      "children": [],
+      "success": true
+    }
+  },
+  "rootTasks": [
+    "ct_1777140651871_3v93pjala"
+  ],
+  "stats": {
+    "total": 1,
+    "completed": 1,
+    "failed": 0
+  }
+}

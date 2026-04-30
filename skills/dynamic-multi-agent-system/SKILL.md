@@ -1634,3 +1634,108 @@ brain/
 
 
 
+
+---
+
+## ⚠️ 重要补充：Tracker调用规则（2026-04-26）
+
+### 执行流程第5步后必须调用Tracker
+
+**问题诊断（2026-04-26）：**
+- 子Agent完成了任务（music+poster）
+- 因果链追踪正常（causalChain调用了）
+- 预防检查正常（preventionHooks调用了）
+- 但Tracker没有调用（tracker.increment未执行）
+- 导致任务不被计入task_tracking统计
+
+**修复方案：**
+在步骤5（执行协调器协调执行）和步骤6（主Agent整合输出）之间，添加：
+
+```javascript
+// 【强制】Tracker记录 - 每次子Agent完成后必须调用
+const tracker = require('./core/subagent-manager/tracker-increment.js');
+tracker.increment({
+  taskId: 'unique-task-id',        // 如 'creative-001'
+  category: 'creative',              // 任务类型
+  agentName: 'subagent-name',       // 子Agent名称
+  success: true,                    // 或 false
+  duration: 12345                   // 执行时长（毫秒）
+});
+```
+
+**有效category类型：**
+- simple（简单任务）
+- standard（标准任务）
+- complex（复杂任务）
+- innovative（创新任务）
+- batch（批量任务）
+- research（研究任务）
+- analysis（分析任务）
+- creative（创意任务）
+- hybrid（混合任务）
+
+**本任务已补录：**
+- creative-001: FAIL（米津玄師日文歌，部分失败）
+- creative-002: SUCCESS（周杰伦中文歌，91421ms）
+
+---
+
+## ⚠️ 重要更新（2026-04-26）：Tracker与因果链整合
+
+### 旧的工作流（分开调用）
+
+```javascript
+// 旧方式：需要两次调用
+causalChain.complete(chainId);
+tracker.increment({ taskId, category, agentName, success, duration });
+```
+
+### 新的工作流（整合调用）
+
+```javascript
+// 新方式：一次调用搞定
+causalChain.complete(chainId, {
+    result: { output: '...' },
+    tracker: {
+        taskId: 'creative-003',      // 追踪任务ID
+        category: 'creative',          // 任务类型
+        agentName: 'subagent-name',   // 子Agent名称
+        success: true,                // 或 false
+        duration: 91421               // 执行时长（毫秒）
+    },
+    lessons: [
+        '教训1：直接调用生成工具违反规则',
+        '教训2：必须spawn子Agent'
+    ]
+});
+```
+
+### 失败任务的整合调用
+
+```javascript
+// 失败时也整合
+causalChain.fail(chainId, '错误信息', null, null, {
+    tracker: {
+        taskId: 'creative-001',
+        category: 'creative',
+        agentName: 'subagent-name',
+        duration: 5000
+    },
+    lessons: [
+        '教训：模型配置错误导致生成失败'
+    ]
+});
+```
+
+### 核心改进
+
+1. 因果链complete()内部自动调用 tracker.increment()
+2. 因果链fail()内部自动调用 tracker.recordError()
+3. 教训自动记录到因果链任务记录中
+4. 一次调用，三个效果：完成标记 + Tracker记录 + 教训保存
+
+### 注意事项
+
+- tracker信息是可选的，不提供则不记录Tracker
+- lessons也是可选的，用于记录执行过程中的教训
+- causalChain.fail()依然会自动创建 learnings/errors.json 记录

@@ -1,18 +1,82 @@
 /**
  * 融合调度器 - Fusion Scheduler
- * 
- * 核心功能：
- * 1. 分析任务，匹配女娲人格或Agency模板
+ *
+ * 核心功能:
+ * 1. 分析任务,匹配女娲人格或Agency模板
  * 2. 自动装备对应的SKILL.md内容
  * 3. 无匹配时spawn自定义子Agent
- * 
- * 使用方式：
+ *
+ * 使用方式:
  * const scheduler = require('./fusion-scheduler.js');
  * const equipPlan = await scheduler.planEquip(subTask, registry);
  */
 
 const fs = require('fs');
 const path = require('path');
+
+// === 轨迹追踪集成 ===
+// 自动启动全局轨迹追踪(深度集成到执行流程)
+let trajectoryIntegration = null;
+try {
+  const trajectoryPath = path.join(__dirname, '..', 'trajectory-integration.js');
+  trajectoryIntegration = require(trajectoryPath);
+  trajectoryIntegration.startGlobalTracking();
+  console.log('[FusionScheduler] ✅ 轨迹追踪已集成');
+} catch (e) {
+  console.warn('[FusionScheduler] 轨迹追踪未集成:', e.message);
+  trajectoryIntegration = null;
+}
+// === 轨迹追踪集成结束 ===
+
+// === 主动预防系统集成 ===
+// 任务规划阶段自动查询教训并应用规避策略
+let activePrevention = null;
+try {
+  const preventionPath = path.join(__dirname, '..', 'active-prevention-system.js');
+  activePrevention = require(preventionPath);
+  console.log('[FusionScheduler] ✅ 主动预防系统已集成');
+} catch (e) {
+  console.warn('[FusionScheduler] 主动预防未集成:', e.message);
+  activePrevention = null;
+}
+// === 主动预防系统集成结束 ===
+
+/**
+ * 从任务描述中提取关键词（用于教训查询）
+ * @param {string} text - 任务描述
+ * @returns {string[]} 关键词数组
+ */
+function extractKeywords(text) {
+  if (!text) return [];
+  
+  // 移除常见停用词
+  const stopWords = ['的', '了', '是', '在', '和', '与', '或', '一个', '这个', '那', '我', '你', '他', '她', '它', '我们', '你们', '他们', '请', '帮', '做', '一下', '什么', '怎么', '如何', '为', '了', '用', '把', '到', '从', '到', '对', '以'];
+  
+  // 简单分词（中文按字符+双字词）
+  const words = [];
+  
+  // 提取英文和数字组合
+  const englishMatches = text.match(/[a-zA-Z0-9_-]+/g);
+  if (englishMatches) {
+    words.push(...englishMatches);
+  }
+  
+  // 移除停用词后的中文字符组合
+  let cleaned = text;
+  for (const sw of stopWords) {
+    cleaned = cleaned.replace(new RegExp(sw, 'g'), ' ');
+  }
+  
+  // 提取2-4字的中文词组
+  const chineseWords = cleaned.match(/[\u4e00-\u9fa5]{2,4}/g);
+  if (chineseWords) {
+    // 去重
+    const unique = [...new Set(chineseWords)];
+    words.push(...unique);
+  }
+  
+  return [...new Set(words)].slice(0, 20); // 最多20个关键词
+}
 
 // 注册表路径
 const REGISTRY_PATH = path.join(__dirname, 'fusion-registry.json');
@@ -27,7 +91,7 @@ const AGENCY_REGISTRY_DIR = path.join(__dirname, '..', '..', 'agency-registry');
 const MAPPING_LOADER_PATH = path.join(__dirname, '..', 'subagent-manager', 'mapping-loader.js');
 let mappingLoader = null;
 
-// 延迟加载mapping-loader（避免循环依赖）
+// 延迟加载mapping-loader(避免循环依赖)
 function getMappingLoader() {
   if (!mappingLoader) {
     try {
@@ -42,7 +106,7 @@ function getMappingLoader() {
 }
 
 /**
- * 应用category映射（Issue #67648修复）
+ * 应用category映射(Issue #67648修复)
  * @param {string} category - 原始分类
  * @param {string} agentName - Agent名称
  * @returns {object} { mappedCategory, wasMapped, source }
@@ -52,13 +116,13 @@ function applyCategoryMapping(category, agentName) {
   if (!loader) {
     return { mappedCategory: category, wasMapped: false, source: 'no_loader' };
   }
-  
+
   const result = loader.getMappedCategory(category, agentName);
-  
+
   if (result.wasMapped) {
     console.log(`[FusionScheduler] 分类映射: ${category}/${agentName} → ${result.mappedCategory}`);
   }
-  
+
   return result;
 }
 
@@ -69,8 +133,8 @@ function loadRegistry() {
   try {
     const content = fs.readFileSync(REGISTRY_PATH, 'utf8');
     const registry = JSON.parse(content);
-    
-    // 1. 动态扫描brain/agents，发现新的人格（女娲蒸馏）
+
+    // 1. 动态扫描brain/agents,发现新的人格(女娲蒸馏)
     const dynamicPersonas = scanDynamicPersonas();
     for (const [name, persona] of Object.entries(dynamicPersonas)) {
       if (!registry.personas[name]) {
@@ -81,8 +145,8 @@ function loadRegistry() {
         registry.personas[name].triggers = persona.triggers;
       }
     }
-    
-    // 2. 动态扫描roles/目录，发现新的Agency模板
+
+    // 2. 动态扫描roles/目录,发现新的Agency模板
     const dynamicTemplates = scanDynamicAgencyTemplates();
     for (const [key, template] of Object.entries(dynamicTemplates)) {
       if (!registry.agencyTemplates[key]) {
@@ -90,7 +154,7 @@ function loadRegistry() {
         console.log(`[FusionScheduler] 发现新Agency模板: ${template.name}`);
       }
     }
-    
+
     return registry;
   } catch (e) {
     console.error('[FusionScheduler] 注册表加载失败:', e.message);
@@ -99,32 +163,32 @@ function loadRegistry() {
 }
 
 /**
- * 动态扫描agency-registry目录，发现所有Agency模板（递归扫描子目录）
+ * 动态扫描agency-registry目录,发现所有Agency模板(递归扫描子目录)
  */
 function scanDynamicAgencyTemplates() {
   const templates = {};
-  
+
   if (!fs.existsSync(AGENCY_REGISTRY_DIR)) {
     return templates;
   }
-  
+
   // 递归扫描所有.md文件
   function scanDir(dir, relativePath = '') {
     try {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
         const relPath = path.join(relativePath, entry.name);
-        
+
         if (entry.isDirectory()) {
           // 递归扫描子目录
           scanDir(fullPath, relPath);
         } else if (entry.name.endsWith('.md')) {
-          // 构建key：category/filename 或 filename
+          // 构建key:category/filename 或 filename
           const key = relPath.replace(/\.md$/, '').replace(/\\/g, '/');
           const info = extractTemplateInfo(fullPath, entry.name.replace('.md', ''));
-          
+
           templates[key] = {
             name: info.name,
             path: fullPath,
@@ -140,7 +204,7 @@ function scanDynamicAgencyTemplates() {
       console.error(`[FusionScheduler] 扫描${dir}失败:`, e.message);
     }
   }
-  
+
   scanDir(AGENCY_REGISTRY_DIR);
   return templates;
 }
@@ -151,32 +215,32 @@ function scanDynamicAgencyTemplates() {
 function extractTemplateInfo(skillPath, fallbackKey) {
   try {
     const content = fs.readFileSync(skillPath, 'utf8');
-    
-    // 提取模板名称（从标题）
+
+    // 提取模板名称(从标题)
     let name = fallbackKey;
-    const titleMatch = content.match(/^#\s+(.+?)\s*[-–]/m);
+    const titleMatch = content.match(/^#\s+(.+?)\s*[--]/m);
     if (titleMatch) {
       name = titleMatch[1].trim();
     }
-    
-    // 提取分类（从适用任务或角色ID）
+
+    // 提取分类(从适用任务或角色ID)
     let category = 'general';
-    const categoryMatch = content.match(/专业领域[：:]\s*([^\n]+)/);
+    const categoryMatch = content.match(/专业领域[::]\s*([^\n]+)/);
     if (categoryMatch) {
       category = categoryMatch[1].trim();
     }
-    
-    // 提取触发词（从标题名称和职责中提取关键词）
+
+    // 提取触发词(从标题名称和职责中提取关键词)
     const triggers = [];
-    
-    // 从文件名提取（已转为key）
+
+    // 从文件名提取(已转为key)
     const keyWords = fallbackKey.split(/[-_]/).filter(w => w.length > 1 && w !== 'md');
     triggers.push(...keyWords);
-    
+
     // 从标题提取
     const titleWords = name.match(/[\u4e00-\u9fa5]{2,4}/g) || [];
     triggers.push(...titleWords);
-    
+
     // 从职责中提取
     const dutiesMatch = content.match(/职责\n([\s\S]+?)\n---/);
     if (dutiesMatch) {
@@ -184,7 +248,7 @@ function extractTemplateInfo(skillPath, fallbackKey) {
       const dutyWords = duties.match(/[\u4e00-\u9fa5]{2,4}/g) || [];
       triggers.push(...dutyWords.slice(0, 5));
     }
-    
+
     // 提取能力列表
     const capabilities = [];
     const skillsMatch = content.match(/技能\n([\s\S]+?)\n---/);
@@ -196,7 +260,7 @@ function extractTemplateInfo(skillPath, fallbackKey) {
         if (skill) capabilities.push(skill);
       }
     }
-    
+
     return {
       name,
       category,
@@ -214,31 +278,31 @@ function extractTemplateInfo(skillPath, fallbackKey) {
 }
 
 /**
- * 动态扫描brain/agents目录，发现所有女娲人格
+ * 动态扫描brain/agents目录,发现所有女娲人格
  */
 function scanDynamicPersonas() {
   const agentsDir = path.join(WORKSPACE, 'brain', 'agents');
   const personas = {};
-  
+
   if (!fs.existsSync(agentsDir)) {
     return personas;
   }
-  
+
   try {
     const entries = fs.readdirSync(agentsDir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
-      
-      const dirName = entry.name;  // 目录名（英文）
+
+      const dirName = entry.name;  // 目录名(英文)
       const skillPath = path.join(agentsDir, dirName, 'SKILL.md');
-      
+
       if (!fs.existsSync(skillPath)) continue;
-      
-      // 提取人格信息（info.name是真实中文名）
+
+      // 提取人格信息(info.name是真实中文名)
       const info = extractPersonaInfo(skillPath, dirName);
-      const personaName = info.name;  // 使用真实名称（如"毛泽东"）作为key
-      
+      const personaName = info.name;  // 使用真实名称(如"毛泽东")作为key
+
       personas[personaName] = {
         name: personaName,
         path: skillPath,
@@ -253,7 +317,7 @@ function scanDynamicPersonas() {
   } catch (e) {
     console.error('[FusionScheduler] 扫描brain/agents失败:', e.message);
   }
-  
+
   return personas;
 }
 
@@ -263,10 +327,10 @@ function scanDynamicPersonas() {
 function extractPersonaInfo(skillPath, fallbackName) {
   try {
     const content = fs.readFileSync(skillPath, 'utf8');
-    
-    // 提取真正的角色名称（多种方式尝试）
+
+    // 提取真正的角色名称(多种方式尝试)
     let realName = null;
-    
+
     // 方式1: frontmatter中description包含的"XX视角"或"XX·"
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/m);
     if (frontmatterMatch) {
@@ -288,7 +352,7 @@ function extractPersonaInfo(skillPath, fallbackName) {
         }
       }
     }
-    
+
     // 方式2: 表格中的"角色名称"或"**名字**"
     if (!realName) {
       const nameMatch = content.match(/角色名称\s*[|:]\s*\*\*([^\*]+)\*\*/);
@@ -296,7 +360,7 @@ function extractPersonaInfo(skillPath, fallbackName) {
         realName = nameMatch[1].trim();
       }
     }
-    
+
     // 方式3: 标题格式 # 名字 · ... 或 # 名字 - ...
     if (!realName) {
       const titleMatch = content.match(/^#\s+([^\s·-]+?)(?:\s*[·-]|$)/m);
@@ -304,7 +368,7 @@ function extractPersonaInfo(skillPath, fallbackName) {
         realName = titleMatch[1].trim();
       }
     }
-    
+
     // 方式4: 标题格式 # 名字AI角色
     if (!realName) {
       const titleMatch = content.match(/^#\s*([^\n#]+?)AI角色/i);
@@ -312,11 +376,11 @@ function extractPersonaInfo(skillPath, fallbackName) {
         realName = titleMatch[1].trim();
       }
     }
-    
+
     // 使用真实名称或回退到目录名
     const personaName = realName || fallbackName;
-    
-    // 提取描述（从第一个##标题）
+
+    // 提取描述(从第一个##标题)
     let description = personaName;
     const lines = content.split('\n');
     for (const line of lines) {
@@ -328,17 +392,17 @@ function extractPersonaInfo(skillPath, fallbackName) {
         }
       }
     }
-    
+
     // 提取触发词
     let triggers = [];
-    
+
     // 优先从triggers字段提取
     const triggerMatch = content.match(/triggers:\s*\[([^\]]+)\]/i);
     if (triggerMatch) {
       triggers = triggerMatch[1].split(',').map(t => t.trim().replace(/['"]/g, '')).filter(t => t);
     }
-    
-    // 如果没有triggers字段，从内容中提取关键词
+
+    // 如果没有triggers字段,从内容中提取关键词
     if (triggers.length === 0) {
       // 提取2-4个字的词
       const words = content.match(/[\u4e00-\u9fa5]{2,4}/g) || [];
@@ -346,22 +410,22 @@ function extractPersonaInfo(skillPath, fallbackName) {
       const filtered = words.filter(w => !['角色信息', '核心能力', '适用场景', '思想对话', '人生指导', '诗词鉴赏', '回答工作流'].includes(w));
       triggers = [...new Set(filtered)].slice(0, 8);
     }
-    
+
     // 确保真实名字在触发词中
     if (!triggers.includes(personaName)) {
       triggers.unshift(personaName);
     }
-    
-    return { 
+
+    return {
       name: personaName,
-      description, 
-      triggers: [...new Set(triggers)] 
+      description,
+      triggers: [...new Set(triggers)]
     };
   } catch (e) {
-    return { 
-      name: fallbackName, 
-      description: fallbackName, 
-      triggers: [fallbackName] 
+    return {
+      name: fallbackName,
+      description: fallbackName,
+      triggers: [fallbackName]
     };
   }
 }
@@ -388,49 +452,49 @@ function saveRegistry(registry) {
  * @returns {number} 匹配分数 0-1
  */
 function matchTriggers(taskText, triggers, rules = {}) {
-  const { 
-    caseSensitive = false, 
-    allowPartialMatch = true 
+  const {
+    caseSensitive = false,
+    allowPartialMatch = true
   } = rules;
-  
+
   const text = caseSensitive ? taskText : taskText.toLowerCase();
   let matchCount = 0;
   let exactMatch = false;
-  
+
   for (const trigger of triggers) {
     const triggerText = caseSensitive ? trigger : trigger.toLowerCase();
-    
+
     if (text.includes(triggerText)) {
       matchCount++;
-      
-      // 检查是否是精确匹配（整个任务文本就是这个触发词）
+
+      // 检查是否是精确匹配(整个任务文本就是这个触发词)
       if (text === triggerText) {
         exactMatch = true;
       }
     }
   }
-  
+
   // 如果没有任何匹配
   if (matchCount === 0) {
     return 0;
   }
-  
-  // 有匹配：基础分数0.6，多重匹配和精确匹配加分
+
+  // 有匹配:基础分数0.6,多重匹配和精确匹配加分
   let score = 0.6;
-  
-  // 多重匹配加分（每多一个+0.05，上限0.2）
+
+  // 多重匹配加分(每多一个+0.05,上限0.2)
   score += Math.min((matchCount - 1) * 0.05, 0.2);
-  
+
   // 精确匹配加分
   if (exactMatch) {
     score += 0.2;
   }
-  
+
   // 匹配数超过5个给满分
   if (matchCount >= 5) {
     score = 1.0;
   }
-  
+
   return Math.min(score, 1.0);
 }
 
@@ -444,9 +508,9 @@ function findMatchingPersona(taskText, registry) {
   const { personas, matchingRules } = registry;
   let bestMatch = null;
   let bestScore = matchingRules.matchThreshold || 0.6;
-  
+
   for (const [name, persona] of Object.entries(personas)) {
-    // 首先检查直接名字匹配（高优先级）
+    // 首先检查直接名字匹配(高优先级)
     if (taskText.includes(name)) {
       const directScore = 0.9; // 直接名字匹配给0.9分
       if (directScore >= bestScore) {
@@ -455,16 +519,16 @@ function findMatchingPersona(taskText, registry) {
       }
       continue;
     }
-    
+
     // 然后检查触发词匹配
     const score = matchTriggers(taskText, persona.triggers || [], matchingRules);
-    
+
     if (score >= bestScore) {
       bestScore = score;
       bestMatch = { name, ...persona, matchScore: score, matchType: 'trigger' };
     }
   }
-  
+
   return bestMatch;
 }
 
@@ -478,9 +542,9 @@ function findMatchingAgencyTemplate(taskText, registry) {
   const { agencyTemplates, matchingRules } = registry;
   let bestMatch = null;
   let bestScore = matchingRules.matchThreshold || 0.6;
-  
+
   for (const [name, template] of Object.entries(agencyTemplates)) {
-    // 首先检查直接名字匹配（高优先级）
+    // 首先检查直接名字匹配(高优先级)
     if (taskText.includes(name)) {
       const directScore = 0.9; // 直接名字匹配给0.9分
       if (directScore >= bestScore) {
@@ -489,16 +553,16 @@ function findMatchingAgencyTemplate(taskText, registry) {
       }
       continue;
     }
-    
+
     // 然后检查触发词匹配
     const score = matchTriggers(taskText, template.triggers || [], matchingRules);
-    
+
     if (score >= bestScore) {
       bestScore = score;
       bestMatch = { name, ...template, matchScore: score, matchType: 'trigger' };
     }
   }
-  
+
   return bestMatch;
 }
 
@@ -514,16 +578,16 @@ function loadSkillContent(skillPath) {
       process.env.WORKSPACE_PATH || 'C:/Users/DELL/.openclaw/workspace',
       skillPath
     );
-    
+
     if (fs.existsSync(workspacePath)) {
       return fs.readFileSync(workspacePath, 'utf8');
     }
-    
+
     // 尝试直接读取
     if (fs.existsSync(skillPath)) {
       return fs.readFileSync(skillPath, 'utf8');
     }
-    
+
     return null;
   } catch (e) {
     console.error('[FusionScheduler] SKILL加载失败:', skillPath, e.message);
@@ -539,6 +603,37 @@ function loadSkillContent(skillPath) {
  */
 function generateEquipPlan(subTask, registry) {
   const { priorityOrder } = registry.matchingRules;
+
+  // === 轨迹追踪:任务开始 ===
+  const taskId = subTask.id || subTask.taskId || `subtask_${Date.now()}`;
+  const taskType = subTask.category || subTask.type || 'general';
+  if (trajectoryIntegration) {
+    trajectoryIntegration.startTask(taskId, taskType, {
+      equipped: false,
+      taskText: subTask.description || subTask.text
+    });
+  }
+  // === 轨迹追踪结束 ===
+
+  // === 主动预防：在规划阶段查询教训并应用规避 ===
+  if (activePrevention && subTask.description) {
+    const taskContext = {
+      taskId,
+      taskType,
+      tool: subTask.tool,
+      command: subTask.command,
+      environment: subTask.environment,
+      keywords: extractKeywords(subTask.description)
+    };
+    const preventionResult = activePrevention.planWithPrevention(taskContext);
+    if (preventionResult.avoidanceApplied) {
+      console.log(`[FusionScheduler] ⚠️ 检测到高风险任务，应用规避策略`);
+      // 将规避信息附加到subTask，供后续执行使用
+      subTask._avoidance = preventionResult;
+    }
+  }
+  // === 主动预防结束 ===
+
   const plan = {
     subTask: subTask,
     equipped: false,
@@ -549,10 +644,10 @@ function generateEquipPlan(subTask, registry) {
     fallback: false,
     reasoning: []
   };
-  
+
   const taskText = subTask.description || subTask.text || JSON.stringify(subTask);
-  
-  // 特殊处理：如果任务明确提到女娲人格名字，跳过Agency直接装备人格
+
+  // 特殊处理:如果任务明确提到女娲人格名字,跳过Agency直接装备人格
   const explicitPersona = findExplicitPersonaMention(taskText, registry);
   if (explicitPersona) {
     plan.equipped = true;
@@ -564,8 +659,8 @@ function generateEquipPlan(subTask, registry) {
     plan.reasoning.push(`明确提到女娲人格: ${explicitPersona.name} (${explicitPersona.matchScore})`);
     return plan;
   }
-  
-  // 按优先级检查（Agency优先）
+
+  // 按优先级检查(Agency优先)
   for (const type of priorityOrder) {
     if (type === 'persona') {
       const persona = findMatchingPersona(taskText, registry);
@@ -581,13 +676,13 @@ function generateEquipPlan(subTask, registry) {
       }
       plan.reasoning.push('未匹配到女娲人格');
     }
-    
+
     if (type === 'agencyTemplate') {
       const template = findMatchingAgencyTemplate(taskText, registry);
       if (template) {
-        // 应用category映射（Issue #67648修复）
+        // 应用category映射(Issue #67648修复)
         const mappingResult = applyCategoryMapping(template.category, template.name);
-        
+
         plan.equipped = true;
         plan.type = 'agency';
         plan.name = template.name;
@@ -600,17 +695,28 @@ function generateEquipPlan(subTask, registry) {
         if (mappingResult.wasMapped) {
           plan.reasoning.push(`分类映射: ${template.category} → ${mappingResult.mappedCategory}`);
         }
+
+        // === 轨迹追踪:任务装备成功 ===
+        if (trajectoryIntegration) {
+          trajectoryIntegration.endTask(taskId, true, {
+            type: plan.type,
+            name: plan.name,
+            matched: true
+          });
+        }
+        // === 轨迹追踪结束 ===
+
         return plan;
       }
       plan.reasoning.push('未匹配到Agency模板');
     }
   }
-  
+
   // 触发fallback
   plan.fallback = true;
   plan.type = 'custom';
-  plan.reasoning.push('触发Fallback: 无匹配，spawn自定义Agent');
-  
+  plan.reasoning.push('触发Fallback: 无匹配,spawn自定义Agent');
+
   return plan;
 }
 
@@ -622,14 +728,14 @@ function generateEquipPlan(subTask, registry) {
  */
 function findExplicitPersonaMention(taskText, registry) {
   const { personas } = registry;
-  
+
   for (const [name, persona] of Object.entries(personas)) {
-    // 如果任务文本包含人格名字，认为是"明确提到"
+    // 如果任务文本包含人格名字,认为是"明确提到"
     if (taskText.includes(name)) {
       return { name, ...persona, matchScore: 0.95, matchType: 'explicit' };
     }
   }
-  
+
   return null;
 }
 
@@ -658,7 +764,7 @@ function equipPrompt(plan, basePrompt) {
   if (!plan.equipped || !plan.skillContent) {
     return basePrompt;
   }
-  
+
   if (plan.type === 'nuwa') {
     return `${basePrompt}
 
@@ -667,7 +773,7 @@ function equipPrompt(plan, basePrompt) {
 ${plan.skillContent}
 --- 人格注入结束 ---`;
   }
-  
+
   if (plan.type === 'agency') {
     return `${basePrompt}
 
@@ -676,12 +782,12 @@ ${plan.skillContent}
 ${plan.skillContent}
 --- 角色装备结束 ---`;
   }
-  
+
   return basePrompt;
 }
 
 /**
- * 自动注册新人格（女娲蒸馏后自动调用）
+ * 自动注册新人格(女娲蒸馏后自动调用)
  * @param {string} name - 人格名称
  * @param {string} skillPath - SKILL.md路径
  * @param {string[]} triggers - 触发词
@@ -690,7 +796,7 @@ ${plan.skillContent}
 function registerPersona(name, skillPath, triggers, description) {
   const registry = loadRegistry();
   if (!registry) return false;
-  
+
   registry.personas[name] = {
     name,
     path: skillPath,
@@ -700,7 +806,7 @@ function registerPersona(name, skillPath, triggers, description) {
     autoRegistered: true,
     registeredAt: new Date().toISOString()
   };
-  
+
   return saveRegistry(registry);
 }
 
@@ -714,7 +820,7 @@ function registerPersona(name, skillPath, triggers, description) {
 function registerTemplate(name, skillPath, triggers, category) {
   const registry = loadRegistry();
   if (!registry) return false;
-  
+
   registry.agencyTemplates[name] = {
     name,
     path: skillPath,
@@ -723,7 +829,7 @@ function registerTemplate(name, skillPath, triggers, category) {
     autoRegistered: true,
     registeredAt: new Date().toISOString()
   };
-  
+
   return saveRegistry(registry);
 }
 
@@ -733,7 +839,7 @@ function registerTemplate(name, skillPath, triggers, category) {
 function listPersonas() {
   const registry = loadRegistry();
   if (!registry) return [];
-  
+
   return Object.entries(registry.personas).map(([name, data]) => ({
     name,
     description: data.description,
@@ -747,7 +853,7 @@ function listPersonas() {
 function listTemplates() {
   const registry = loadRegistry();
   if (!registry) return [];
-  
+
   return Object.entries(registry.agencyTemplates).map(([name, data]) => ({
     name,
     category: data.category,
@@ -766,12 +872,12 @@ function planEquip(subTasks, options = {}) {
       plans: []
     };
   }
-  
+
   // 支持单个任务或多个任务
   const taskArray = Array.isArray(subTasks) ? subTasks : [subTasks];
-  
+
   const plans = generateBatchPlans(taskArray, registry);
-  
+
   return {
     success: true,
     registry: registry.matchingRules,
@@ -799,20 +905,20 @@ module.exports = {
   generateEquipPlan,
   generateBatchPlans,
   equipPrompt,
-  
+
   // 注册函数
   registerPersona,
   registerTemplate,
-  
+
   // 查询函数
   listPersonas,
   listTemplates,
-  
+
   // 主函数
   planEquip
 };
 
-// 如果直接运行，显示状态
+// 如果直接运行,显示状态
 if (require.main === module) {
   console.log('=== 融合调度器状态 ===');
   const registry = loadRegistry();

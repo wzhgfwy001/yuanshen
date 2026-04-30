@@ -1,0 +1,12 @@
+[SKILL] google-workspace-integration retry 2/5 failed - rate limited (429), waiting 5 minutes before retry 3/5[2026-04-28 21:47:02] Attempting to install skill: web-automation-suite (attempt 3 of 3)
+[2026-04-28 21:47:13] Output: node.exe : ClawHub /api/v1/download failed (429): Rate limit exceeded
+����λ�� ��:1 �ַ�: 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ClawHub /api/v1... limit exceeded:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Downloading web-automation-suite@1.0.0 from ClawHub�?
+
+[2026-04-28 21:47:13] [web-automation-suite] FAILED after 3 attempts, moving on
+[2026-04-28 21:47:13] === ALL DONE ===

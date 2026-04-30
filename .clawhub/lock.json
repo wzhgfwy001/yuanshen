@@ -8,6 +8,18 @@
     "text-to-ppt": {
       "version": "1.0.0",
       "installedAt": 1776519422233
+    },
+    "web-automation": {
+      "version": "1.0.0",
+      "installedAt": 1777381382265
+    },
+    "google-workspace-integration": {
+      "version": "1.0.3",
+      "installedAt": 1777388402421
+    },
+    "web-automation-suite": {
+      "version": "1.0.0",
+      "installedAt": 1777391226363
     }
   }
 }
