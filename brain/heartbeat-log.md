@@ -1,10 +1,54 @@
 
+## 心跳检查 - 2026-05-11T21:13:00.000Z (05:13 UTC+8 2026-05-11)
+- 系统: ✅ 正常（Gateway running, connectivity ok）
+- WAL: ✅ 无待处理项
+- Inbox: ✅ 正常（最后更新2026-05-07）
+- Obsidian双向链接: ✅ 已同步（2026-05-11 05:13）
+  - brain/decisions/ 12 ↔ Obsidian 12 ✅
+  - brain/lessons/ 31 ↔ Obsidian 31 ✅
+  - 同步内容：1个decisions差异 + 4个lessons差异已对齐
+- 待办: 无紧急项
+- 系统: ✅ 正常（Gateway running, connectivity ok）
+- WAL: 无待处理项
+- Inbox: 正常（最后更新2026-05-07，3天前）
+- 待办: 无紧急项
+
+---
+
+## 心跳检查 - 2026-05-08T13:05:00.000Z (21:05 UTC+8)
+- 系统: ✅ 正常（Gateway running, connectivity ok）
+- WAL: 无待处理项
+- Inbox: 4项（正常，<7）
+- 待办: 无紧急项
+
+---
+
 ## 心跳检查 - 2026-04-28T22:43:00.000Z (06:43 UTC+8 2026-04-29)
 
 - 系统: 正常（Dreaming模式后）
 - 学习完成: 浏览器自动化深度学习（gsd-browser/Pydoll/Lightpanda）
 - Inbox: 4项（P0: 高考小程序变现）
 - 待办: 无紧急项
+
+---
+
+## 系统健康深度检查 - 2026-05-07T10:30:00.000Z (18:30 UTC+8)
+
+### 发现的严重问题
+1. Event Loop延迟P99=13438ms（启动风暴，18:43峰值）
+2. Dreaming任务连续3次失败（MiniMax M2.7 + DeepSeek Key）
+3. 190个task-flows堆积，1个卡住任务
+4. 心跳停摆9天（skipWhenBusy导致）
+
+### 已修复
+- ✅ 清理190个task-flows（openclaw tasks maintenance --apply）
+- ✅ Event Loop延迟恢复（P99=32ms，正常）
+- ✅ Cache命中率从0%升至74%
+
+### 待处理
+- ⚠️ heartbeat.skipWhenBusy=true（受保护字段）
+- ⚠️ DeepSeek无有效Key（需提供新Key）
+- ⚠️ lossless-claw ERROR（插件兼容性问题，无严重影响）
 
 ---
 
@@ -258,3 +302,42 @@
 - Inbox: 3 active items
 
 [2026-04-28 20:05] - Status: stable, Gateway running, skills retry in progress (rate limited), no urgent items
+2026-05-03 12:56
+## Heartbeat 2026-05-03 12:56
+- Gateway: running (pid 14224, verified)
+- Inbox: P0 task《吾名午夜》明早8点执行，无紧急事项
+- System: stable
+
+2026-05-06 13:19
+## Heartbeat 2026-05-06 13:19
+- Gateway: running (pid 9036)
+- WAL: clean
+- System: stable
+- Next check: ~30 min
+
+- Gateway: running (pid 14004)
+- WAL: clean
+- System: stable
+- Next check: ~30 min
+
+- Gateway: running (pid 15148, verified)
+- WAL: clean (no pending items)
+- Inbox: 3 items (normal, <7)
+- Working Buffer: exists (791 bytes, not urgent)
+- System: stable
+- Next check: ~30 min
+
+## Heartbeat 2026-05-11 04:36
+- Gateway: running (pid 3756, verified)
+- WAL: clean (no pending items)
+- Inbox: 3 items (normal, <7)
+- System: stable
+- Next check: ~30 min
+
+## Heartbeat 2026-05-11 04:52
+- Gateway: running (pid 3756, verified)
+- WAL: clean
+- Inbox: 3 items (normal)
+- System: stable
+- Next check: ~30 min
+
