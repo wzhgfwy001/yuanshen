@@ -51,3 +51,5 @@ excel-filter-project/
 
 # Heartbeat state (local only)
 heartbeat-state.json
+
+brain/credentials.md
