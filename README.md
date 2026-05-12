@@ -6,6 +6,33 @@
 
 ---
 
+## 最新更新 v2.0.0 (2026-05-12)
+
+### 基于 Anthropic Managed Agents 的重大优化
+
+**16个核心模块全新上线：**
+
+| 类别 | 模块 | 功能 |
+|------|------|------|
+| **安全隔离** | vault-proxy | 凭证代理（AI不接触明文） |
+| **安全隔离** | sandbox.js | 三层安全隔离（文件系统+网络+命令） |
+| **记忆管理** | memdir | 跨会话记忆 |
+| **记忆管理** | session-log | 追加式事件日志 |
+| **记忆管理** | wake-recovery | 断点恢复系统 |
+| **性能优化** | warmup | TTFT预热优化 |
+| **性能优化** | tool-result-clearer | 工具结果清除（节省50%+ Token） |
+| **性能优化** | observation-masker | 调试信息屏蔽（节省50%+ Token） |
+| **维护清理** | cleanup | 自动清理策略 |
+| **维护清理** | plugin-manager | 插件系统 |
+| **架构增强** | context-engine | 上下文压缩引擎 |
+| **架构增强** | hooks-system | 钩子管理器 |
+| **架构增强** | task-hierarchy | 任务分层队列 |
+| **架构增强** | tools-interface | 工具接口标准化 |
+| **架构增强** | commands | Slash Commands系统 |
+| **架构增强** | cattle-policy | Cattle策略（失败自动替换） |
+
+---
+
 ## 核心架构
 
 元神是由**阳神**（动态多Agent协作）和**阴神**（记忆管理系统）组成的AI协作系统，运行在OpenClaw之上。
@@ -44,37 +71,24 @@
 
 ---
 
-## 技术架构（DeerFlow借鉴）
+## 技术亮点
 
-基于DeerFlow架构的核心模式：
+### Anthropic Managed Agents 核心概念实现
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    MiddlewarePipeline                        │
-│         before() → execute() → after()                      │
-├─────────────────────────────────────────────────────────────┤
-│                     EventEmitter                             │
-│              emit() → on() → off()                           │
-├─────────────────────────────────────────────────────────────┤
-│                  Structured State                           │
-│           Result Classes / Dataclass                         │
-├─────────────────────────────────────────────────────────────┤
-│                   多级缓存机制                                │
-│            Memory → Cache → Status                           │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**核心改进：**
-- MiddlewarePipeline (before/after hooks)
-- EventEmitter/TaskEmitter (事件驱动)
-- Structured State (类型安全的结果类)
-- Multi-level caching (多级缓存)
-- Async/Await (异步非阻塞)
-- Input validation middleware (输入验证)
+| 概念 | 实现 | 状态 |
+|------|------|------|
+| Session持久化 | session-log.js | ✅ |
+| Wake恢复 | wake-recovery.js | ✅ |
+| Tool Result Clearing | tool-result-clearer.js | ✅ |
+| Observation Masking | observation-masker.js | ✅ |
+| Cattle Policy | cattle-policy.js | ✅ |
+| Sandbox隔离 | sandbox.js | ✅ |
+| Vault代理 | vault-proxy.js | ✅ |
+| Warmup预热 | warmup.js | ✅ |
 
 ---
 
-## 核心模块（37个）
+## 核心模块（53个）
 
 ### 执行层（5个）
 | 模块 | 功能 |
@@ -84,6 +98,32 @@
 | `batch-processor` | 批量任务处理 |
 | `progressive-processor` | 渐进式处理大任务 |
 | `sandbox` | 隔离执行环境 |
+
+### 安全隔离类（v2.0.0新增）
+| 模块 | 功能 |
+|------|------|
+| `vault-proxy` | 凭证代理 |
+| `sandbox.js` | 三层安全隔离 |
+
+### 记忆管理类（v2.0.0新增）
+| 模块 | 功能 |
+|------|------|
+| `memdir` | 跨会话记忆 |
+| `session-log` | 追加式事件日志 |
+| `wake-recovery` | 断点恢复系统 |
+
+### 性能优化类（v2.0.0新增）
+| 模块 | 功能 |
+|------|------|
+| `warmup` | TTFT预热优化 |
+| `tool-result-clearer` | 工具结果清除 |
+| `observation-masker` | 调试信息屏蔽 |
+
+### 维护清理类（v2.0.0新增）
+| 模块 | 功能 |
+|------|------|
+| `cleanup` | 自动清理策略 |
+| `plugin-manager` | 插件系统 |
 
 ### 任务分析（5个）
 | 模块 | 功能 |
@@ -210,60 +250,29 @@ yuanshen/
 ├── MEMORY.md              # 长期记忆
 │
 ├── brain/                 # 阴神记忆系统
-│   ├── progress.json      # 统一状态文件(v7)
+│   ├── *.js              # v2.0.0新增的16个核心模块
+│   ├── progress.json      # 统一状态文件
 │   ├── inbox.md           # 待处理事项
 │   ├── decisions/         # 决策记录
 │   ├── patterns/          # 成功模式
-│   ├── lessons/           # 失败教训
+│   ├── lessons/          # 失败教训
 │   ├── knowledge_graph/   # 知识图谱
 │   ├── agents/            # 人格Agent(女娲体系)
 │   ├── projects/          # 项目管理
-│   └── standing-orders/   # 持久化指令
+│   └── standing-orders/  # 持久化指令
 │
 ├── skills/                # 阳神技能系统
-│   ├── dynamic-multi-agent-system/  # 混合多Agent系统(v1.9.7)
-│   │   ├── SKILL.md       # 系统主文档
-│   │   ├── core/          # 37个核心模块
-│   │   ├── docs/          # 文档
-│   │   └── examples/      # 示例
-│   │
+│   ├── dynamic-multi-agent-system/  # 混合多Agent系统(v2.0.0)
 │   ├── skills-evolution/  # Skills进化追踪
 │   ├── user-profile/      # 用户画像
 │   ├── agency-agents/     # 193个AI专家角色
-│   ├── auto-router/       # 自动路由
-│   ├── code-review/       # 代码审查
-│   ├── data-analysis/     # 数据分析
-│   ├── content-collector/ # 内容采集
-│   ├── content-publisher/  # 内容发布
-│   ├── writing-blog/      # 博客写作
-│   ├── xiaohongshu-editor/ # 小红书编辑
-│   ├── research-assistant/  # 研究助手
-│   ├── project-planner/   # 项目规划
-│   ├── text-to-ppt/       # PPT生成
-│   ├── visualization-creator/ # 可视化
-│   ├── nuwa/              # 女娲造人
-│   ├── taskflow/          # 任务流
-│   ├── taskflow-inbox-triage/ # 收件箱分流
-│   └── healthcheck/        # 健康检查
+│   └── ...                # 其他技能
 │
 ├── memory/                # 每日记忆日志
-│   └── YYYY-MM-DD.md      # 日期日志
 │
 ├── learnings/             # 错误追踪系统
-│   ├── errors.json        # 错误记录
-│   └── recoveries.json    # 恢复记录
 │
 ├── scripts/               # 阳神脚本库
-│   └── yangshen/          # 阳神核心模块
-│
-├── storyflow/             # StoryFlow可视化工作流系统
-│   ├── src/               # 源代码
-│   ├── tests/             # 测试
-│   └── web/               # 前端
-│
-├── novel-generator/       # 小说生成器
-│
-├── archive/               # 历史存档
 │
 └── projects/              # 项目目录
 ```
@@ -274,7 +283,7 @@ yuanshen/
 
 ### WAL Protocol (Write-Ahead-Log)
 
-```bash
+```
 用户纠正/决定 → 先写 SESSION-STATE.md → 再响应
 STOP → WRITE → RESPOND
 ```
@@ -305,16 +314,15 @@ Compact后必须读取：
 | speech-2.8-hd | TTS | 4000次/日 |
 | music-2.6 | 音乐生成 | 100次/日 |
 
-### 心跳监控（每30分钟）
+### Cron Jobs (v2.0.0)
 
-| 优先级 | 检查项 |
-|--------|--------|
-| 1 | WAL处理 |
-| 2 | Working Buffer监控 |
-| 3 | 记忆更新 |
-| 4 | 系统状态 |
-| 5 | 健康监控增强 |
-| 6 | 追踪机制有效性 |
+| 任务 | 触发时间 | 功能 |
+|------|----------|------|
+| Dreaming | 每天3:00 | 记忆整合 |
+| Heartbeat | 每30分钟 | 健康检查 |
+| Weekly Review | 每周一9:00 | 周报生成 |
+| Memory Cleanup | 每周一2:00 | 文件清理 |
+| Subagent Stats | 每天午夜 | 统计报告 |
 
 ---
 
@@ -322,6 +330,7 @@ Compact后必须读取：
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| v2.0.0 | 2026-05-12 | Anthropic Managed Agents优化（16个核心模块） |
 | v1.9.7 | 2026-04-22 | DeerFlow架构优化（15个模块） |
 | v1.3.1 | 2026-04-17 | Agent工厂+人格设定+P0优化 |
 | v1.2.0 | 2026-04-06 | SkillHub上架 |
@@ -329,7 +338,7 @@ Compact后必须读取：
 
 ---
 
-**当前版本：** v1.9.7
+**当前版本：** v2.0.0
 **状态：** 活跃开发中 🚀
 **GitHub：** https://github.com/wzhgfwy001/yuanshen
 
