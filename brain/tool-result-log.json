@@ -1,19 +1,26 @@
 {
   "summary": {
-    "total": 1,
+    "total": 2,
     "cleared": 1,
-    "kept": 0,
-    "totalBytes": 9001,
-    "savedBytes": 9001,
+    "kept": 1,
+    "totalBytes": 11002,
+    "savedBytes": 11000,
     "savingsPercent": "100.0"
   },
   "records": [
     {
-      "id": "tool-1778575741755-x4u4",
-      "toolName": "search",
+      "id": "tool-1778593344813-tvmo",
+      "toolName": "read",
       "cleared": true,
-      "resultSize": 9001,
-      "timestamp": "2026-05-12T08:49:01.755Z"
+      "resultSize": 11000,
+      "timestamp": "2026-05-12T13:42:24.813Z"
+    },
+    {
+      "id": "tool-1778593344814-ajm7",
+      "toolName": "read",
+      "cleared": false,
+      "resultSize": 2,
+      "timestamp": "2026-05-12T13:42:24.814Z"
     }
   ]
 }
