@@ -1,0 +1,52 @@
+{
+  "tasks": [
+    [
+      "t-1778567595914",
+      {
+        "id": "t-1778567595914",
+        "type": "local",
+        "priority": "P1",
+        "status": "pending",
+        "description": "搜索文件",
+        "data": null,
+        "result": null,
+        "error": null,
+        "createdAt": "2026-05-12T06:33:15.914Z",
+        "startedAt": null,
+        "completedAt": null,
+        "callback": null,
+        "agentId": null,
+        "dependsOn": []
+      }
+    ],
+    [
+      "t-1778567595929",
+      {
+        "id": "t-1778567595929",
+        "type": "agent",
+        "priority": "P2",
+        "status": "pending",
+        "description": "深度研究",
+        "data": null,
+        "result": null,
+        "error": null,
+        "createdAt": "2026-05-12T06:33:15.929Z",
+        "startedAt": null,
+        "completedAt": null,
+        "callback": null,
+        "agentId": null,
+        "dependsOn": []
+      }
+    ]
+  ],
+  "queues": {
+    "local": [
+      "t-1778567595914"
+    ],
+    "remote": [],
+    "agent": [
+      "t-1778567595929"
+    ]
+  },
+  "savedAt": "2026-05-12T06:33:15.929Z"
+}

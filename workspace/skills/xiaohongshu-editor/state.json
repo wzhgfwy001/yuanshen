@@ -1,0 +1,8 @@
+{
+  "article_count": 1,
+  "last_updated": "2026-04-15",
+  "integration": "agency-registry v1.0.0",
+  "source_agent": "marketing-xiaohongshu-specialist",
+  "version": "2.0.0",
+  "notes": "已合并到Agency Agent体系，作为小红书专家的入口Skill"
+}

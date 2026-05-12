@@ -1,0 +1,64 @@
+{
+  "template-name": "科幻创作模板",
+  "version": "1.0",
+  "task-type": "creative-writing",
+  "sub-type": "science-fiction",
+  
+  "standard-flow": {
+    "agents": [
+      {
+        "role": "世界观设计专家",
+        "task": "设计科幻世界观，包括科技水平、社会结构、核心冲突",
+        "model": "qwen3.5-plus",
+        "estimated-time": 60
+      },
+      {
+        "role": "大纲专家",
+        "task": "根据世界观设计故事大纲",
+        "model": "qwen3.5-plus",
+        "estimated-time": 120,
+        "depends-on": ["世界观设计专家"]
+      },
+      {
+        "role": "科幻写作专家",
+        "task": "撰写正文内容",
+        "model": "qwen3.5-plus",
+        "estimated-time": 300,
+        "depends-on": ["大纲专家"]
+      }
+    ],
+    "reviewer-enabled": false,
+    "total-estimated-time": 480
+  },
+  
+  "checklists": [
+    "core/quality-checker/checklists/writing-checklist.md",
+    "templates/sci-fi-creation/worldbuilding-checklist.md"
+  ],
+  
+  "common-issues": [
+    {
+      "issue": "科技设定前后矛盾",
+      "solution": "在世界观文档中明确记录科技水平，写作时对照检查"
+    },
+    {
+      "issue": "世界观过于复杂，影响阅读",
+      "solution": "采用冰山理论，只展示必要的设定"
+    },
+    {
+      "issue": "科技感不足",
+      "solution": "增加具体技术细节描写，引用科学原理"
+    }
+  ],
+  
+  "best-practices": [
+    "先设计世界观再写大纲",
+    "确保科技设定服务于故事",
+    "平衡硬科幻和可读性",
+    "注意科学与幻想的边界"
+  ],
+  
+  "example-outputs": [
+    "examples/outputs/2077-beijing.md"
+  ]
+}

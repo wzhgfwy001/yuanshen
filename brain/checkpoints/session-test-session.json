@@ -1,0 +1,51 @@
+{
+  "sessionId": "test-session",
+  "startedAt": "2026-05-12T08:48:57.206Z",
+  "checkpoints": [
+    {
+      "id": "cp-1778575737234-al4s",
+      "sessionId": "test-session",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "desc": "测试"
+      },
+      "stepNumber": 0,
+      "lastAction": "task_started",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T08:48:57.234Z",
+      "version": "1.0"
+    },
+    {
+      "id": "cp-1778575737235-3vsa",
+      "sessionId": "test-session",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "desc": "测试"
+      },
+      "stepNumber": 1,
+      "lastAction": "step_1",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T08:48:57.235Z",
+      "version": "1.0"
+    },
+    {
+      "id": "cp-1778575737236-t0hf",
+      "sessionId": "test-session",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "desc": "测试"
+      },
+      "stepNumber": 2,
+      "lastAction": "step_2",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T08:48:57.236Z",
+      "version": "1.0"
+    }
+  ]
+}

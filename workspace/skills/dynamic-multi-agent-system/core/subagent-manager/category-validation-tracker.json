@@ -1,0 +1,555 @@
+{
+  "_legacy": {
+    "_comment": "specialized分类拆分验证追踪器",
+    "_version": "1.0.0",
+    "_created": "2026-04-16",
+    "_purpose": "追踪category-mapping软映射的验证进度，自动触发正式迁移决策",
+    "config": {
+      "startDate": "2026-04-16",
+      "threshold": 30,
+      "errorThreshold": 3,
+      "description": "至少30个任务验证，无明显分类错误时可正式迁移"
+    },
+    "status": {
+      "value": "validation_in_progress",
+      "label": "验证中",
+      "since": "2026-04-16T18:48:00+08:00"
+    },
+    "stats": {
+      "totalTasks": 3,
+      "validTasks": 3,
+      "errorCount": 0
+    },
+    "errors": [],
+    "history": [
+      {
+        "taskId": "test-001",
+        "category": "writing",
+        "agentName": "test-agent",
+        "timestamp": "2026-04-22T12:34:39.715Z",
+        "action": "completed"
+      },
+      {
+        "taskId": "verify-002",
+        "category": "system-check",
+        "agentName": "元神-main",
+        "timestamp": "2026-04-22T12:46:46.103Z",
+        "action": "completed"
+      },
+      {
+        "taskId": "health-check-1777027313133",
+        "category": "system-check",
+        "agentName": "元神-main",
+        "timestamp": "2026-04-24T10:41:53.133Z",
+        "action": "completed"
+      }
+    ],
+    "_internal": {
+      "lastUpdated": "2026-04-24T10:41:53.134Z",
+      "nextCheckAt": null
+    }
+  },
+  "executions": [
+    {
+      "id": "migrated_1777131239358_731k",
+      "taskId": "test-001",
+      "category": "writing",
+      "agentName": "test-agent",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-22T12:34:39.715Z",
+      "migrated": true
+    },
+    {
+      "id": "migrated_1777131239358_9249",
+      "taskId": "verify-002",
+      "category": "system-check",
+      "agentName": "元神-main",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-22T12:46:46.103Z",
+      "migrated": true
+    },
+    {
+      "id": "migrated_1777131239358_2nji",
+      "taskId": "health-check-1777027313133",
+      "category": "system-check",
+      "agentName": "元神-main",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-24T10:41:53.133Z",
+      "migrated": true
+    },
+    {
+      "id": "exec_1777131239358_04mun0",
+      "taskId": "t-001",
+      "category": "simple",
+      "agentName": "agent-a",
+      "success": true,
+      "duration": 500,
+      "timestamp": "2026-04-25T15:33:59.358Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777131239359_2bocba",
+      "taskId": "t-002",
+      "category": "standard",
+      "agentName": "agent-b",
+      "success": true,
+      "duration": 1200,
+      "timestamp": "2026-04-25T15:33:59.359Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777131239360_v0wmkn",
+      "taskId": "t-003",
+      "category": "complex",
+      "agentName": "agent-a",
+      "success": false,
+      "duration": 800,
+      "timestamp": "2026-04-25T15:33:59.360Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777133207599_oozpon",
+      "taskId": "task-1777133207599",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-25T16:06:47.600Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777140651889_92lx3m",
+      "taskId": "task-1777140651888",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-25T18:10:51.889Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777144430880_dnakmp",
+      "taskId": "task-1777144430879",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-25T19:13:50.880Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777190220844_t36pgy",
+      "taskId": "creative-001",
+      "category": "creative",
+      "agentName": "subagent-music",
+      "success": false,
+      "duration": null,
+      "timestamp": "2026-04-26T07:57:00.844Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777190220851_xvygbb",
+      "taskId": "creative-002",
+      "category": "creative",
+      "agentName": "subagent-music-poster",
+      "success": true,
+      "duration": 91421,
+      "timestamp": "2026-04-26T07:57:00.851Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777193116095_2as67x",
+      "taskId": "creative-004",
+      "category": "creative",
+      "agentName": "subagent-creative-004",
+      "success": false,
+      "duration": 100231,
+      "timestamp": "2026-04-26T08:45:16.095Z",
+      "metadata": {
+        "causalChainId": "ct_1777192707374_b84hpcl4e",
+        "lessons": [
+          "教训：MiniMax Plus token计划不支持music-2.5+，只支持music-2.6",
+          "教训：需要在prompt中明确指定模型版本",
+          "教训：image-01生成成功，说明图片功能正常"
+        ]
+      }
+    },
+    {
+      "id": "exec_1777193646913_hxhrir",
+      "taskId": "creative-004",
+      "category": "creative",
+      "agentName": "subagent-retry",
+      "success": true,
+      "duration": 184299,
+      "timestamp": "2026-04-26T08:54:06.913Z",
+      "metadata": {
+        "causalChainId": "ct_1777193462610_pxt3wz0wi",
+        "lessons": []
+      }
+    },
+    {
+      "id": "exec_1777193829356_9s7e5q",
+      "taskId": "creative-004",
+      "category": "creative",
+      "agentName": "subagent-retry",
+      "success": true,
+      "duration": 210529,
+      "timestamp": "2026-04-26T08:57:09.356Z",
+      "metadata": {
+        "causalChainId": "ct_1777193399051_u2ckzdhi9",
+        "lessons": [
+          "教训：music-2.6 可以直接使用，不需要切换",
+          "教训：第一次尝试成功，避免了不必要的重试"
+        ]
+      }
+    },
+    {
+      "id": "exec_1777195470378_kzuzl2",
+      "taskId": "creative-005",
+      "category": "creative",
+      "agentName": "subagent",
+      "success": false,
+      "duration": 120000,
+      "timestamp": "2026-04-26T09:24:30.378Z",
+      "metadata": {
+        "causalChainId": "ct_1777194102390_qonf3oeqx",
+        "lessons": [
+          "教训：creative-005子Agent在生成图片后未完成，音乐未生成",
+          "教训：需要调查子Agent为何在生成图片后崩溃",
+          "教训：image文件存在于17:03，但music文件不存在"
+        ]
+      }
+    },
+    {
+      "id": "exec_1777195867626_x6cyq0",
+      "taskId": "creative-005-music",
+      "category": "creative",
+      "agentName": "subagent-retry",
+      "success": true,
+      "duration": 202792,
+      "timestamp": "2026-04-26T09:31:07.626Z",
+      "metadata": {
+        "causalChainId": "ct_1777195664830_kklsgw4s4",
+        "lessons": []
+      }
+    },
+    {
+      "id": "exec_1777196185202_agvga1",
+      "taskId": "creative-005",
+      "category": "creative",
+      "agentName": "subagent-retry",
+      "success": true,
+      "duration": 300000,
+      "timestamp": "2026-04-26T09:36:25.202Z",
+      "metadata": {
+        "causalChainId": "ct_1777195664830_kklsgw4s4",
+        "lessons": [
+          "教训：creative-005音乐重试成功",
+          "教训：增加错误处理和进度日志有助于调试"
+        ]
+      }
+    },
+    {
+      "id": "exec_1777196654312_gnsh0c",
+      "taskId": "creative-006",
+      "category": "creative",
+      "agentName": "subagent",
+      "success": true,
+      "duration": 240000,
+      "timestamp": "2026-04-26T09:44:14.312Z",
+      "metadata": {
+        "causalChainId": "ct_1777196218177_5m966nqbo",
+        "lessons": [
+          "教训：creative-006一次性成功，音乐和海报同时生成"
+        ]
+      }
+    },
+    {
+      "id": "exec_1777200829726_puo467",
+      "taskId": "task-1777200829725",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T10:53:49.726Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777200861299_94sdvi",
+      "taskId": "task-1777200861299",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T10:54:21.300Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777201784934_bnokwi",
+      "taskId": "task-1777201784933",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T11:09:44.934Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777214735648_rgsx27",
+      "taskId": "task-1777214735647",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T14:45:35.648Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777214778992_knxgxg",
+      "taskId": "task-1777214778992",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T14:46:18.992Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777215647582_hr229t",
+      "taskId": "task-1777215647582",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:00:47.582Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777215692240_pqjsgr",
+      "taskId": "task-1777215692239",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:01:32.240Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777215906148_karmhw",
+      "taskId": "test-1777215906147",
+      "category": "creative",
+      "agentName": "main-agent",
+      "success": true,
+      "duration": 100,
+      "timestamp": "2026-04-26T15:05:06.148Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777216294035_9jd5fo",
+      "taskId": "task-1777216294034",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:11:34.035Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777216876637_k9da7n",
+      "taskId": "task-1777216876636",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:21:16.637Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777217760189_hf8sfa",
+      "taskId": "task-1777217760189",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:36:00.190Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777217811515_a8kz3x",
+      "taskId": "task-1777217811515",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:36:51.516Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777217843478_6a58qp",
+      "taskId": "task-1777217843477",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:37:23.478Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777217863655_jhhl68",
+      "taskId": "task-1777217863654",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:37:43.655Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777218186182_ivscsf",
+      "taskId": "task-1777218186181",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T15:43:06.182Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777220899349_sqgsnm",
+      "taskId": "task-1777220899349",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T16:28:19.349Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777220928229_2nkqmc",
+      "taskId": "task-1777220928229",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T16:28:48.229Z",
+      "metadata": {}
+    },
+    {
+      "id": "exec_1777224368235_6h9zel",
+      "taskId": "task-1777224368235",
+      "category": "unknown",
+      "agentName": "orchestrator",
+      "success": true,
+      "duration": null,
+      "timestamp": "2026-04-26T17:26:08.236Z",
+      "metadata": {}
+    }
+  ],
+  "errors": [
+    {
+      "id": "err_1777131239361_di0ics",
+      "taskId": "t-004",
+      "category": "complex",
+      "agentName": "agent-c",
+      "error": "Agent timeout",
+      "errorStack": null,
+      "timestamp": "2026-04-25T15:33:59.361Z",
+      "metadata": {}
+    }
+  ],
+  "stats": {
+    "totalTasks": 34,
+    "successfulTasks": 29,
+    "failedTasks": 5,
+    "byCategory": {
+      "simple": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "avgDuration": 500
+      },
+      "standard": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "avgDuration": 1200
+      },
+      "complex": {
+        "total": 2,
+        "successful": 0,
+        "failed": 2,
+        "avgDuration": 0
+      },
+      "unknown": {
+        "total": 20,
+        "successful": 20,
+        "failed": 0,
+        "avgDuration": 0
+      },
+      "creative": {
+        "total": 10,
+        "successful": 7,
+        "failed": 3,
+        "avgDuration": 207053.14285714287
+      }
+    },
+    "byAgent": {
+      "agent-a": {
+        "total": 2,
+        "successful": 1,
+        "failed": 1
+      },
+      "agent-b": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0
+      },
+      "agent-c": {
+        "total": 1,
+        "successful": 0,
+        "failed": 1
+      },
+      "orchestrator": {
+        "total": 20,
+        "successful": 20,
+        "failed": 0
+      },
+      "subagent-music": {
+        "total": 1,
+        "successful": 0,
+        "failed": 1
+      },
+      "subagent-music-poster": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0
+      },
+      "subagent-creative-004": {
+        "total": 1,
+        "successful": 0,
+        "failed": 1
+      },
+      "subagent-retry": {
+        "total": 4,
+        "successful": 4,
+        "failed": 0
+      },
+      "subagent": {
+        "total": 2,
+        "successful": 1,
+        "failed": 1
+      },
+      "main-agent": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0
+      }
+    },
+    "totalDuration": 1451872,
+    "avgDuration": 125361.22488038278
+  },
+  "lastUpdated": "2026-04-26T17:26:08.236Z"
+}

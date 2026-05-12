@@ -1,0 +1,224 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent-authority.schema.json",
+  "title": "子Agent决策边界配置",
+  "description": "定义子Agent的决策权限范围、回调条件和默认行为",
+  "type": "object",
+  "required": ["agentId", "agentType", "version", "decisionBoundary", "callbackRules", "defaultStrategy", "capabilities"],
+
+  "definitions": {
+    "scopeItem": {
+      "description": "可自主决策的单个事项",
+      "type": "object",
+      "required": ["action", "description", "maxDepth"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "操作类型标识，如：content.gen, format.style, method.select"
+        },
+        "description": {
+          "type": "string",
+          "description": "该操作的中文描述"
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "最大决策深度（1=仅执行，2=可拆分子任务，3=可跨模块）"
+        },
+        "constraints": {
+          "type": "object",
+          "description": "该操作下的约束条件",
+          "properties": {
+            "maxRetries": { "type": "integer", "default": 3 },
+            "timeoutSeconds": { "type": "integer", "default": 300 },
+            "requiresConfirmation": { "type": "boolean", "default": false }
+          }
+        }
+      }
+    },
+
+    "callbackCondition": {
+      "description": "必须回调主Agent的条件",
+      "type": "object",
+      "required": ["condition", "reason", "priority"],
+      "properties": {
+        "condition": {
+          "type": "string",
+          "description": "触发条件（枚举或正则表达式）"
+        },
+        "reason": {
+          "type": "string",
+          "description": "为何必须回调"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "回调优先级，影响主Agent响应速度"
+        },
+        "fallbackAction": {
+          "type": "string",
+          "enum": ["pause", "rollback", "use_default", "abort"],
+          "default": "pause",
+          "description": "等待主Agent时的默认行为"
+        },
+        "includeContext": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "回调时必须携带的上下文字段"
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "agentId": {
+      "type": "string",
+      "description": "子Agent唯一标识"
+    },
+    "agentType": {
+      "type": "string",
+      "description": "Agent类型，如：writer, analyst, coder, reviewer"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "配置版本号，用于追踪变更"
+    },
+    "description": {
+      "type": "string",
+      "description": "该Agent的角色描述（给Agent自己看的）"
+    },
+
+    "decisionBoundary": {
+      "type": "object",
+      "description": "可自主决策范围",
+      "required": ["allowedScopes"],
+      "properties": {
+        "allowedScopes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/scopeItem" },
+          "description": "允许自主决策的操作范围"
+        },
+        "deniedScopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "明确禁止的操作（优先级高于allowedScopes）"
+        },
+        "crossBoundaryRules": {
+          "type": "object",
+          "description": "跨边界规则",
+          "properties": {
+            "allowDelegation": {
+              "type": "boolean",
+              "default": false,
+              "description": "是否可将任务委托给其他子Agent"
+            },
+            "delegableTypes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "可委托给的Agent类型"
+            },
+            "requireExplicitAccept": {
+              "type": "boolean",
+              "default": true,
+              "description": "委托是否需要明确接受确认"
+            }
+          }
+        }
+      }
+    },
+
+    "callbackRules": {
+      "type": "object",
+      "description": "必须回调的条件定义",
+      "properties": {
+        "mustCallbackConditions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/callbackCondition" },
+          "description": "必须回调的条件列表"
+        },
+        "optionalCallbackConditions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/callbackCondition" },
+          "description": "可选回调的条件（Agent可自行判断是否必要）"
+        },
+        "callbackDebounceSeconds": {
+          "type": "integer",
+          "default": 5,
+          "description": "回调防抖时间（秒），避免频繁回调"
+        }
+      }
+    },
+
+    "defaultStrategy": {
+      "type": "object",
+      "description": "收到模糊/未定义任务时的默认策略",
+      "required": ["onUnknownTask", "onAmbiguousTask"],
+      "properties": {
+        "onUnknownTask": {
+          "type": "string",
+          "enum": ["refuse", "ask_parent", "use_nearest", "suspend"],
+          "default": "ask_parent",
+          "description": "收到完全未知任务时的行为"
+        },
+        "onAmbiguousTask": {
+          "type": "string",
+          "enum": ["use_defaults", "ask_parent", "pick_most_likely"],
+          "default": "ask_parent",
+          "description": "任务模糊不清时的行为"
+        },
+        "assumptionPolicy": {
+          "type": "string",
+          "enum": ["conservative", "moderate", "aggressive"],
+          "default": "moderate",
+          "description": "做假设的激进程度：保守=仅用明确信息，中等=可合理推断，激进=可创造性地填补空白"
+        },
+        "stopConditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "提前停止并回调的条件列表"
+        }
+      }
+    },
+
+    "capabilities": {
+      "type": "object",
+      "description": "Agent的能力上限说明",
+      "required": ["maxContextTokens", "maxExecutionTime"],
+      "properties": {
+        "maxContextTokens": {
+          "type": "integer",
+          "description": "最大上下文token数"
+        },
+        "maxExecutionTime": {
+          "type": "integer",
+          "description": "单次任务最大执行时间（秒）"
+        },
+        "canAccessTools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "可使用的工具列表"
+        },
+        "cannotAccessTools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "明确禁止使用的工具"
+        },
+        "externalActions": {
+          "type": "object",
+          "description": "对外操作限制",
+          "properties": {
+            "canSendMessages": { "type": "boolean", "default": false },
+            "canModifyFiles": { "type": "boolean", "default": false },
+            "canCallAPIs": { "type": "boolean", "default": false },
+            "allowedDomains": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "允许访问的域名白名单"
+            }
+          }
+        }
+      }
+    }
+  }
+}

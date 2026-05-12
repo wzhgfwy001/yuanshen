@@ -1,0 +1,29 @@
+{
+  "collection": {
+    "auto-send": true,
+    "delay-seconds": 30,
+    "reminder-enabled": true,
+    "reminder-delay-hours": 24,
+    "max-reminders": 1
+  },
+  "thresholds": {
+    "excellent": 5,
+    "good": 4,
+    "average": 3,
+    "poor": 2,
+    "terrible": 1
+  },
+  "actions": {
+    "on-excellent": ["mark-as-exemplar", "solidify-weight-1.5"],
+    "on-good": ["count-for-solidify"],
+    "on-average": ["record-issues"],
+    "on-poor": ["trigger-reflection"],
+    "on-terrible": ["trigger-reflection", "manual-review"]
+  },
+  "reporting": {
+    "daily-report": true,
+    "weekly-report": true,
+    "monthly-report": true,
+    "report-time": "20:00"
+  }
+}

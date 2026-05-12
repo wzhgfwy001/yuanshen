@@ -1,0 +1,76 @@
+{
+  "template-name": "悬疑创作模板",
+  "version": "1.0",
+  "task-type": "creative-writing",
+  "sub-type": "mystery",
+  
+  "standard-flow": {
+    "agents": [
+      {
+        "role": "案件分析专家",
+        "task": "设计案件手法、密室诡计、线索布局",
+        "model": "qwen3.5-plus",
+        "estimated-time": 120
+      },
+      {
+        "role": "悬疑大纲专家",
+        "task": "设计故事结构、悬念设置、反转设计",
+        "model": "qwen3.5-plus",
+        "estimated-time": 180,
+        "depends-on": ["案件分析专家"]
+      },
+      {
+        "role": "悬疑写作专家",
+        "task": "撰写正文，营造悬疑氛围，埋设伏笔",
+        "model": "qwen3.5-plus",
+        "estimated-time": 600,
+        "depends-on": ["悬疑大纲专家"]
+      },
+      {
+        "role": "审查Agent",
+        "task": "审查逻辑一致性、诡计合理性、悬念效果",
+        "model": "qwen3.5-plus",
+        "estimated-time": 120,
+        "depends-on": ["悬疑写作专家"]
+      }
+    ],
+    "reviewer-enabled": true,
+    "total-estimated-time": 1020
+  },
+  
+  "checklists": [
+    "core/quality-checker/checklists/writing-checklist.md",
+    "templates/mystery-creation/mystery-checklist.md"
+  ],
+  
+  "common-issues": [
+    {
+      "issue": "密室诡计有逻辑漏洞",
+      "solution": "使用标准密室类型（机械/心理/时间），确保实现方式无破绽"
+    },
+    {
+      "issue": "时间线混乱",
+      "solution": "制作详细时间线图，标注每个角色的行动轨迹"
+    },
+    {
+      "issue": "凶手指认过于突兀",
+      "solution": "提前埋设伏笔，确保结局出人意料但合理"
+    },
+    {
+      "issue": "悬念不足",
+      "solution": "增加信息差，控制读者知情范围"
+    }
+  ],
+  
+  "best-practices": [
+    "先设计案件再设计大纲",
+    "制作详细时间线图",
+    "伏笔要隐蔽但可追溯",
+    "结局要出人意料但合理",
+    "审查Agent必须启用"
+  ],
+  
+  "example-outputs": [
+    "examples/outputs/snow-mountain-mystery.md"
+  ]
+}

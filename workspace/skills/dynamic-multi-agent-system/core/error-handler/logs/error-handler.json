@@ -1,0 +1,39 @@
+{
+  "errors": [
+    {
+      "id": "err_1777131026244_bih4ydawd",
+      "timestamp": "2026-04-25T15:30:26.244Z",
+      "message": "Network error: ECONNREFUSED",
+      "stack": "Error: Network error: ECONNREFUSED\n    at [eval]:10:16\n    at runScriptInThisContext (node:internal/vm:209:10)\n    at node:internal/process/execution:446:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:444:60)\n    at evalFunction (node:internal/process/execution:279:30)\n    at evalTypeScript (node:internal/process/execution:291:3)\n    at node:internal/main/eval_string:74:3",
+      "type": "ECONNREFUSED",
+      "category": "recoverable",
+      "context": {
+        "taskId": "test-001",
+        "agentName": "test-agent",
+        "operation": null,
+        "metadata": {}
+      }
+    },
+    {
+      "id": "err_1777131223158_d24pq64f5",
+      "timestamp": "2026-04-25T15:33:43.158Z",
+      "message": "Network error: ECONNREFUSED",
+      "stack": "Error: Network error: ECONNREFUSED\n    at [eval]:5:16\n    at runScriptInThisContext (node:internal/vm:209:10)\n    at node:internal/process/execution:446:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:444:60)\n    at evalFunction (node:internal/process/execution:279:30)\n    at evalTypeScript (node:internal/process/execution:291:3)\n    at node:internal/main/eval_string:74:3",
+      "type": "ECONNREFUSED",
+      "category": "recoverable",
+      "context": {
+        "taskId": "test-001",
+        "agentName": "test-agent",
+        "operation": null,
+        "metadata": {}
+      }
+    }
+  ],
+  "stats": {
+    "total": 2,
+    "recoverable": 2,
+    "unrecoverable": 0,
+    "unknown": 0
+  },
+  "lastUpdated": "2026-04-25T15:33:43.159Z"
+}

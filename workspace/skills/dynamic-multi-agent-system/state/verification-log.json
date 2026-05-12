@@ -1,0 +1,339 @@
+[
+  {
+    "timestamp": "2026-04-17T01:35:14.266Z",
+    "duration": 12,
+    "passed": [
+      {
+        "id": "pass_1776389714272_poyps64ne",
+        "name": "技能目录存在",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "技能 dynamic-multi-agent-system 目录存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "skillPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system"
+        }
+      },
+      {
+        "id": "pass_1776389714275_he7mia6hl",
+        "name": "SKILL.md有效性",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "技能 dynamic-multi-agent-system 的SKILL.md有效",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "skillPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\SKILL.md",
+          "size": 9825
+        }
+      },
+      {
+        "id": "pass_1776389714275_3gq8ab04h",
+        "name": "核心模块-subagent-manager",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "核心模块 subagent-manager 存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "modulePath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\subagent-manager"
+        }
+      },
+      {
+        "id": "pass_1776389714275_73l3v0csj",
+        "name": "核心模块-skill-integrator",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "核心模块 skill-integrator 存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "modulePath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\skill-integrator"
+        }
+      },
+      {
+        "id": "pass_1776389714275_bqg5775kw",
+        "name": "核心模块-task-classifier",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "核心模块 task-classifier 存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "modulePath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\task-classifier"
+        }
+      },
+      {
+        "id": "pass_1776389714276_ree1rgdwn",
+        "name": "核心模块-task-decomposer",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "核心模块 task-decomposer 存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "modulePath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\task-decomposer"
+        }
+      },
+      {
+        "id": "pass_1776389714276_ka2oz057j",
+        "name": "核心模块-quality-checker",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "核心模块 quality-checker 存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "modulePath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\quality-checker"
+        }
+      },
+      {
+        "id": "pass_1776389714276_lymvnm5b7",
+        "name": "核心模块-verification",
+        "category": "setup",
+        "status": "passed",
+        "passed": true,
+        "message": "核心模块 verification 存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "modulePath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\verification"
+        }
+      },
+      {
+        "id": "pass_1776389714276_d2o621ojj",
+        "name": "category-mapping存在",
+        "category": "mapping",
+        "status": "passed",
+        "passed": true,
+        "message": "category-mapping.json存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "mappingPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\subagent-manager\\category-mapping.json"
+        }
+      },
+      {
+        "id": "pass_1776389714277_sx6ebv53d",
+        "name": "category-mapping启用状态",
+        "category": "mapping",
+        "status": "passed",
+        "passed": true,
+        "message": "category-mapping已启用",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "enabled": true
+        }
+      },
+      {
+        "id": "pass_1776389714277_9yuob9e4j",
+        "name": "category-mapping映射数",
+        "category": "mapping",
+        "status": "passed",
+        "passed": true,
+        "message": "category-mapping包含 42 个Agent映射",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "agentCount": 42,
+          "agents": [
+            "_comment",
+            "Accounts Payable Agent",
+            "Agentic Identity Trust",
+            "Agents Orchestrator",
+            "Automation Governance Architect",
+            "Blockchain Security Auditor",
+            "Compliance Auditor",
+            "Corporate Training Designer",
+            "Customer Service",
+            "Data Consolidation Agent",
+            "Government Digital Presales Consultant",
+            "Healthcare Customer Service",
+            "Healthcare Marketing Compliance",
+            "Hospitality Guest Services",
+            "HR Onboarding",
+            "Identity Graph Operator",
+            "Language Translator",
+            "Legal Billing Time Tracking",
+            "Legal Client Intake",
+            "Legal Document Review",
+            "Loan Officer Assistant",
+            "LSP Index Engineer",
+            "Real Estate Buyer Seller",
+            "Recruitment Specialist",
+            "Report Distribution Agent",
+            "Retail Customer Returns",
+            "Sales Data Extraction Agent",
+            "Sales Outreach",
+            "Specialized Chief of Staff",
+            "Specialized Civil Engineer",
+            "Specialized Cultural Intelligence Strategist",
+            "Specialized Developer Advocate",
+            "Specialized Document Generator",
+            "Specialized French Consulting Market",
+            "Specialized Korean Business Navigator",
+            "Specialized MCP Builder",
+            "Specialized Model QA",
+            "Specialized Salesforce Architect",
+            "Specialized Workflow Architect",
+            "Study Abroad Advisor",
+            "Supply Chain Strategist",
+            "ZK Steward"
+          ]
+        }
+      },
+      {
+        "id": "pass_1776389714277_qw2cw16kz",
+        "name": "category-mapping新分类数",
+        "category": "mapping",
+        "status": "passed",
+        "passed": true,
+        "message": "定义了 15 个新分类",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "categoryCount": 15,
+          "categories": [
+            "_comment",
+            "finance",
+            "legal",
+            "hr",
+            "data",
+            "customer_success",
+            "tech_dev",
+            "blockchain_zk",
+            "operations",
+            "sales",
+            "education",
+            "healthcare",
+            "security",
+            "devrel",
+            "international"
+          ]
+        }
+      },
+      {
+        "id": "pass_1776389714277_l5ka33hrw",
+        "name": "工具链-subagent-manager",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "工具 subagent-manager 正常 (category-mapping.json)",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "toolPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\subagent-manager\\category-mapping.json"
+        }
+      },
+      {
+        "id": "pass_1776389714278_cezfuwa84",
+        "name": "工具链-skill-integrator",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "工具 skill-integrator 正常 (skill-integrator.js)",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "toolPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\skill-integrator\\skill-integrator.js"
+        }
+      },
+      {
+        "id": "pass_1776389714278_wughv3hc5",
+        "name": "工具链-task-classifier",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "工具 task-classifier 正常 (SKILL.md)",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "toolPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\task-classifier\\SKILL.md"
+        }
+      },
+      {
+        "id": "pass_1776389714278_sgbzzrrew",
+        "name": "工具链-task-decomposer",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "工具 task-decomposer 正常 (SKILL.md)",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "toolPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\task-decomposer\\SKILL.md"
+        }
+      },
+      {
+        "id": "pass_1776389714278_cgtljw2wx",
+        "name": "工具链-verification",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "工具 verification 正常 (verification.schema.json)",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "toolPath": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\verification\\verification.schema.json"
+        }
+      },
+      {
+        "id": "pass_1776389714278_mii1decm2",
+        "name": "state目录",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "state目录存在",
+        "expected": null,
+        "actual": null,
+        "details": {
+          "stateRoot": "C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\state"
+        }
+      },
+      {
+        "id": "pass_1776389714278_5wc3xwctc",
+        "name": "logs目录",
+        "category": "toolchain",
+        "status": "passed",
+        "passed": true,
+        "message": "logs目录存在",
+        "expected": null,
+        "actual": null,
+        "details": {}
+      }
+    ],
+    "failed": [],
+    "warnings": [
+      {
+        "code": "REGISTRY_NOT_FOUND",
+        "message": "registry.json不存在，category-mapping可能无法生效",
+        "severity": "high",
+        "relatedItem": null
+      }
+    ],
+    "suggestions": [],
+    "summary": {
+      "total": 19,
+      "passedCount": 19,
+      "failedCount": 0,
+      "warningCount": 1,
+      "successRate": 100,
+      "status": "success",
+      "readyForProduction": true
+    },
+    "metadata": {
+      "skillName": "dynamic-multi-agent-system",
+      "verificationType": "full",
+      "environment": "development"
+    }
+  }
+]

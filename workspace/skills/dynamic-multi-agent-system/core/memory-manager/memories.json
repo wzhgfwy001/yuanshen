@@ -1,0 +1,82 @@
+[
+  {
+    "type": "user_preference",
+    "content": "不主动启用Dreaming模式，等用户明确要求才启动",
+    "source": "SESSION-STATE.md",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T03:37:00.000Z",
+    "last_accessed": "2026-04-15T03:37:00.000Z"
+  },
+  {
+    "type": "user_preference",
+    "content": "未执行任务先讨论方案，获得同意后再实施",
+    "source": "SOUL.md",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T01:14:00.000Z",
+    "last_accessed": "2026-04-15T01:14:00.000Z"
+  },
+  {
+    "type": "user_preference",
+    "content": "执行前汇报：分解思路+Agent分配+理由",
+    "source": "SOUL.md",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T01:18:00.000Z",
+    "last_accessed": "2026-04-15T01:18:00.000Z"
+  },
+  {
+    "type": "user_preference",
+    "content": "先确认再执行，揣摩目的，追问确认，不武断",
+    "source": "SOUL.md",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T00:48:00.000Z",
+    "last_accessed": "2026-04-15T00:48:00.000Z"
+  },
+  {
+    "type": "user_preference",
+    "content": "喜欢用阳神（混合动态多Agent系统）执行复杂任务",
+    "source": "用户对话",
+    "confidence": 0.9,
+    "created_at": "2026-04-15T14:28:00.000Z",
+    "last_accessed": "2026-04-15T14:28:00.000Z"
+  },
+  {
+    "type": "success_pattern",
+    "content": "复杂任务用多Agent并行处理效果好",
+    "source": "多次任务执行经验",
+    "confidence": 0.8,
+    "created_at": "2026-04-15T00:00:00.000Z",
+    "last_accessed": "2026-04-15T00:00:00.000Z"
+  },
+  {
+    "type": "success_pattern",
+    "content": "人格细化命名：用动漫角色名字效果好，226个Agent全部命名完成",
+    "source": "2026-04-15任务",
+    "confidence": 0.9,
+    "created_at": "2026-04-15T15:12:00.000Z",
+    "last_accessed": "2026-04-15T15:12:00.000Z"
+  },
+  {
+    "type": "failure_lesson",
+    "content": "MiniMax API限流时子Agent执行失败，529错误",
+    "source": "2026-04-15第3批任务",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T15:25:00.000Z",
+    "last_accessed": "2026-04-15T15:25:00.000Z"
+  },
+  {
+    "type": "context",
+    "content": "当前主要项目：高考志愿系统（v1.6）、混合多Agent系统（v1.3.1 SkillHub上架）",
+    "source": "USER.md",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T00:00:00.000Z",
+    "last_accessed": "2026-04-15T00:00:00.000Z"
+  },
+  {
+    "type": "context",
+    "content": "用户目标：财富自由，正在开发高考志愿填报系统",
+    "source": "USER.md",
+    "confidence": 1.0,
+    "created_at": "2026-04-15T00:00:00.000Z",
+    "last_accessed": "2026-04-15T00:00:00.000Z"
+  }
+]

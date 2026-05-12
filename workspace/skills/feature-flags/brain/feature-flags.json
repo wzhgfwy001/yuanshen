@@ -1,0 +1,55 @@
+{
+  "frustration_detector": {
+    "enabled": true,
+    "type": "stable",
+    "description": "用户情绪感知与不满检测",
+    "version": "1.0.0",
+    "created": "2026-04-12"
+  },
+  "context_compactor": {
+    "enabled": true,
+    "type": "stable",
+    "description": "上下文分级压缩",
+    "version": "1.0.0",
+    "created": "2026-04-12"
+  },
+  "task_typologist": {
+    "enabled": true,
+    "type": "stable",
+    "description": "任务类型细化系统",
+    "version": "1.0.0",
+    "created": "2026-04-12"
+  },
+  "feature_flags_system": {
+    "enabled": true,
+    "type": "stable",
+    "description": "特性开关系统",
+    "version": "1.0.0",
+    "created": "2026-04-12"
+  },
+  "auto_dream": {
+    "enabled": false,
+    "type": "stable",
+    "description": "自动记忆整理（凌晨3点）",
+    "version": "1.0.0"
+  },
+  "proactive_suggest": {
+    "enabled": true,
+    "type": "experimental",
+    "description": "主动建议功能",
+    "version": "0.1.0",
+    "created": "2026-04-12"
+  },
+  "voice_mode": {
+    "enabled": false,
+    "type": "experimental",
+    "description": "语音交互模式",
+    "version": "0.1.0",
+    "created": "2026-04-12"
+  },
+  "multi_agent_native": {
+    "enabled": true,
+    "type": "stable",
+    "description": "原生多Agent协作"
+  }
+}

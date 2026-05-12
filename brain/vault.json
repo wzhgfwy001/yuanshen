@@ -1,0 +1,14 @@
+{
+  "minimax": {
+    "type": "api_key",
+    "encryptedToken": "c2stdGVzdDEyMw==",
+    "lastUsed": "2026-05-12T06:41:01.695Z",
+    "useCount": 1
+  },
+  "github": {
+    "type": "token",
+    "encryptedToken": "Z2hwX3Rlc3Q0NTY=",
+    "lastUsed": null,
+    "useCount": 0
+  }
+}

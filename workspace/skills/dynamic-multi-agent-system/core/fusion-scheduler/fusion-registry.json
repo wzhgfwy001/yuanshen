@@ -1,0 +1,182 @@
+{
+  "version": "1.0.0",
+  "description": "融合调度注册表 - 自动匹配女娲人格/Agency模板/自定义Agent",
+  "updated": "2026-04-18",
+  
+  "personas": {
+    "毛泽东": {
+      "name": "毛泽东",
+      "path": "brain/agents/mao-zedong/SKILL.md",
+      "type": "nuwa",
+      "description": "战略思维、矛盾分析、持久战思维",
+      "triggers": ["毛泽东", "毛主席", "教员", "战略", "困难", "矛盾", "革命", "思想", "斗争", "持久战", "分析", "决策"],
+      "style": "command", 
+      "strengths": ["战略分析", "矛盾分析", "群众路线", "持久战思维"]
+    },
+    "张雪峰": {
+      "name": "张雪峰",
+      "path": "brain/agents/zhang-xuefeng/SKILL.md",
+      "type": "nuwa",
+      "description": "高考志愿、考研规划、职业分析",
+      "triggers": ["张雪峰", "雪峰老师", "高考", "志愿", "考研", "专业", "大学", "职业规划", "选科", "就业"],
+      "style": "direct",
+      "strengths": ["高考志愿", "专业分析", "职业规划", "考研指导"]
+    }
+  },
+  
+  "agencyTemplates": {
+    "data-analyst": {
+      "name": "数据分析师",
+      "path": "core/subagent-manager/roles/data-analyst.md",
+      "category": "data",
+      "triggers": ["数据分析师", "data analyst", "data-analyst", "分析", "数据", "报表", "统计", "图表", "可视化", "Excel", "SQL", "数据库"],
+      "capabilities": ["SQL查询", "数据分析", "报表生成", "可视化图表"]
+    },
+    "product-manager": {
+      "name": "产品经理",
+      "path": "core/subagent-manager/roles/product-manager.md",
+      "category": "product",
+      "triggers": ["产品经理", "product manager", "product-manager", "产品", "需求", "PRD", "功能", "用户体验", "竞品", "Roadmap", "需求文档"],
+      "capabilities": ["需求分析", "PRD撰写", "用户体验", "竞品分析"]
+    },
+    "ui-designer": {
+      "name": "UI设计师",
+      "path": "core/subagent-manager/roles/ui-designer.md",
+      "category": "design",
+      "triggers": ["UI设计师", "界面设计", "UI设计", "界面", "UI", "设计", "原型", "Figma", "配色", "布局", "视觉"],
+      "capabilities": ["UI设计", "原型制作", "视觉设计", "用户界面"]
+    },
+    "ux-researcher": {
+      "name": "UX研究员",
+      "path": "core/subagent-manager/roles/ux-researcher.md",
+      "category": "design",
+      "triggers": ["UX研究员", "用户研究员", "UX", "用户体验", "用户研究", "可用性", "调研", "访谈", "反馈"],
+      "capabilities": ["用户研究", "可用性测试", "数据分析", "洞察提炼"]
+    },
+    "market-researcher": {
+      "name": "市场研究员",
+      "path": "core/subagent-manager/roles/market-researcher.md",
+      "category": "data",
+      "triggers": ["市场研究员", "市场分析", "行业研究", "市场", "调研", "行业", "竞品", "趋势", "市场分析", "行业报告"],
+      "capabilities": ["市场调研", "竞品分析", "行业分析", "报告撰写"]
+    },
+    "financial-analyst": {
+      "name": "财务分析师",
+      "path": "core/subagent-manager/roles/financial-analyst.md",
+      "category": "data",
+      "triggers": ["财务分析师", "财务分析", "财务", "预算", "报表", "利润", "成本", "投资", "收益率"],
+      "capabilities": ["财务分析", "预算编制", "报表解读", "投资分析"]
+    },
+    "data-scientist": {
+      "name": "数据科学家",
+      "path": "core/subagent-manager/roles/data-scientist.md",
+      "category": "data",
+      "triggers": ["数据科学家", "AI工程师", "ML工程师", "机器学习", "AI", "模型", "预测", "算法", "深度学习", "NLP", "数据挖掘"],
+      "capabilities": ["机器学习", "模型训练", "算法优化", "数据挖掘"]
+    },
+    "growth-hacker": {
+      "name": "增长黑客",
+      "path": "core/subagent-manager/roles/growth-hacker.md",
+      "category": "operations",
+      "triggers": ["增长黑客", "增长专家", "增长", "获客", "AARRR", "转化率", "留存", "裂变", "运营", "获客策略"],
+      "capabilities": ["增长策略", "获客分析", "转化优化", "运营分析"]
+    },
+    "legal-advisor": {
+      "name": "法律顾问",
+      "path": "core/subagent-manager/roles/legal-advisor.md",
+      "category": "professional",
+      "triggers": ["法律顾问", "法务", "律师", "法律", "合同", "合规", "风险", "条款", "协议", "法规"],
+      "capabilities": ["合同审核", "合规检查", "风险评估", "法律咨询"]
+    },
+    "technical-writer": {
+      "name": "技术文档工程师",
+      "path": "core/subagent-manager/roles/technical-writer.md",
+      "category": "professional",
+      "triggers": ["技术文档工程师", "文档工程师", "技术写作", "文档", "API", "技术文档", "说明", "手册", "教程", "README"],
+      "capabilities": ["技术写作", "API文档", "教程编写", "文档结构化"]
+    },
+    "brand-strategist": {
+      "name": "品牌策划",
+      "path": "core/subagent-manager/roles/brand-strategist.md",
+      "category": "creative",
+      "triggers": ["品牌策划", "品牌战略", "品牌", "策划", "定位", "品牌战略", "Branding", "品牌故事", "品牌调性"],
+      "capabilities": ["品牌定位", "品牌战略", "品牌故事", "调性规划"]
+    },
+    "content-strategist": {
+      "name": "内容策略师",
+      "path": "core/subagent-manager/roles/content-strategist.md",
+      "category": "creative",
+      "triggers": ["内容策略师", "内容策划", "内容", "内容策略", "选题", "内容规划", "矩阵", "IP", "内容营销"],
+      "capabilities": ["内容规划", "选题策划", "内容矩阵", "IP打造"]
+    },
+    "seo-specialist": {
+      "name": "SEO专家",
+      "path": "core/subagent-manager/roles/seo-specialist.md",
+      "category": "operations",
+      "triggers": ["SEO专家", "SEO", "搜索优化", "关键词", "排名", "搜索引擎", "权重", "外链"],
+      "capabilities": ["关键词分析", "SEO优化", "排名提升", "搜索策略"]
+    },
+    "social-media-specialist": {
+      "name": "社交媒体专家",
+      "path": "core/subagent-manager/roles/social-media-specialist.md",
+      "category": "operations",
+      "triggers": ["社交媒体专家", "社交运营", "新媒体运营", "微博", "抖音", "小红书", "运营", "涨粉", "内容运营"],
+      "capabilities": ["社交运营", "内容策划", "粉丝增长", "平台规则"]
+    },
+    "project-manager": {
+      "name": "项目经理",
+      "path": "core/subagent-manager/roles/project-manager.md",
+      "category": "professional",
+      "triggers": ["项目经理", "PM", "项目", "进度", "排期", "敏捷", "Scrum", "里程碑", "风险管理"],
+      "capabilities": ["项目管理", "进度跟踪", "敏捷管理", "风险管理"]
+    },
+    "devops-engineer": {
+      "name": "DevOps工程师",
+      "path": "core/subagent-manager/roles/devops-engineer.md",
+      "category": "technical",
+      "triggers": ["DevOps工程师", "运维工程师", "DevOps", "CI/CD", "部署", "自动化", "Docker", "K8s", "运维", "流水线"],
+      "capabilities": ["CI/CD", "容器化", "自动化部署", "运维监控"]
+    },
+    "security-engineer": {
+      "name": "安全工程师",
+      "path": "core/subagent-manager/roles/security-engineer.md",
+      "category": "technical",
+      "triggers": ["安全工程师", "网络安全", "安全", "渗透", "漏洞", "加固", "代码审计", "安全测试"],
+      "capabilities": ["代码审计", "渗透测试", "漏洞扫描", "安全加固"]
+    },
+    "qa-engineer": {
+      "name": "QA工程师",
+      "path": "core/subagent-manager/roles/qa-engineer.md",
+      "category": "technical",
+      "triggers": ["QA工程师", "测试工程师", "测试", "QA", "用例", "测试用例", "回归测试", "功能测试", "自动化测试"],
+      "capabilities": ["测试用例", "自动化测试", "质量把控", "回归测试"]
+    },
+    "architect": {
+      "name": "系统架构师",
+      "path": "core/subagent-manager/roles/architect.md",
+      "category": "technical",
+      "triggers": ["架构师", "系统架构师", "架构", "设计", "系统设计", "技术选型", "高并发", "微服务", "方案"],
+      "capabilities": ["系统设计", "技术选型", "架构优化", "方案评估"]
+    },
+    "bi-analyst": {
+      "name": "BI分析师",
+      "path": "core/subagent-manager/roles/bi-analyst.md",
+      "category": "data",
+      "triggers": ["BI分析师", "BI", "商业智能", "仪表盘", "看板", "Dashboard", "数据看板", "经营分析"],
+      "capabilities": ["BI报表", "仪表盘", "数据看板", "经营分析"]
+    }
+  },
+  
+  "fallback": {
+    "mode": "custom",
+    "description": "当没有匹配的人格或模板时，spawn自定义子Agent",
+    "autoCreate": true
+  },
+  
+  "matchingRules": {
+    "priorityOrder": ["agencyTemplate", "persona", "fallback"],
+    "matchThreshold": 0.6,
+    "caseSensitive": false,
+    "allowPartialMatch": true
+  }
+}

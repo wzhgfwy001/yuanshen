@@ -1,0 +1,115 @@
+{
+  "executions": [
+    {
+      "taskId": "task-001",
+      "success": true,
+      "timestamp": "2026-04-25T15:30:35.093Z",
+      "context": {
+        "taskType": "code-review",
+        "category": null,
+        "agentName": "reviewer",
+        "duration": 1500,
+        "steps": [],
+        "result": null,
+        "error": null,
+        "metadata": {}
+      }
+    },
+    {
+      "taskId": "task-002",
+      "success": true,
+      "timestamp": "2026-04-25T15:30:35.097Z",
+      "context": {
+        "taskType": "code-review",
+        "category": null,
+        "agentName": "reviewer",
+        "duration": 2000,
+        "steps": [],
+        "result": null,
+        "error": null,
+        "metadata": {}
+      }
+    },
+    {
+      "taskId": "task-003",
+      "success": true,
+      "timestamp": "2026-04-25T15:30:35.098Z",
+      "context": {
+        "taskType": "code-review",
+        "category": null,
+        "agentName": "reviewer",
+        "duration": 1800,
+        "steps": [],
+        "result": null,
+        "error": null,
+        "metadata": {}
+      }
+    },
+    {
+      "taskId": "evo-task-001",
+      "success": true,
+      "timestamp": "2026-04-25T15:33:49.927Z",
+      "context": {
+        "taskType": "code-review",
+        "category": null,
+        "agentName": "reviewer",
+        "duration": 1500,
+        "steps": [],
+        "result": null,
+        "error": null,
+        "metadata": {}
+      }
+    },
+    {
+      "taskId": "evo-task-002",
+      "success": true,
+      "timestamp": "2026-04-25T15:33:49.929Z",
+      "context": {
+        "taskType": "code-review",
+        "category": null,
+        "agentName": "reviewer",
+        "duration": 2000,
+        "steps": [],
+        "result": null,
+        "error": null,
+        "metadata": {}
+      }
+    },
+    {
+      "taskId": "evo-task-003",
+      "success": true,
+      "timestamp": "2026-04-25T15:33:49.929Z",
+      "context": {
+        "taskType": "code-review",
+        "category": null,
+        "agentName": "reviewer",
+        "duration": 1800,
+        "steps": [],
+        "result": null,
+        "error": null,
+        "metadata": {}
+      }
+    }
+  ],
+  "patterns": {
+    "code-review": {
+      "taskType": "code-review",
+      "totalExecutions": 6,
+      "successfulExecutions": 6,
+      "failedExecutions": 0,
+      "successRate": 1,
+      "avgDuration": 1766.6666666666667,
+      "lastExecution": "2026-04-25T15:33:49.929Z",
+      "evolutionCandidates": [
+        {
+          "taskType": "code-review",
+          "successCount": 4,
+          "trigger": "success_threshold",
+          "suggestedAt": "2026-04-25T15:33:49.928Z",
+          "reason": "成功执行4次，成功率100.0%"
+        }
+      ]
+    }
+  },
+  "evolutions": []
+}

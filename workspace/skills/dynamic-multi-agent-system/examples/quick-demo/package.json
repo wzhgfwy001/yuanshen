@@ -1,0 +1,17 @@
+{
+  "name": "yuanshen-quick-demo",
+  "version": "1.0.0",
+  "description": "元神系统 - 混合动态多Agent协作快速演示",
+  "main": "demo.js",
+  "scripts": {
+    "demo": "node demo.js",
+    "start": "node demo.js"
+  },
+  "keywords": [
+    "openclaw",
+    "multi-agent",
+    "yuanshen"
+  ],
+  "author": "元神",
+  "license": "MIT"
+}

@@ -1,0 +1,84 @@
+{
+  "sessionId": "session-1778570361624",
+  "startedAt": "2026-05-12T07:19:21.624Z",
+  "checkpoints": [
+    {
+      "id": "cp-1778570361630-4rs2",
+      "sessionId": "session-1778570361624",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "description": "搜索合同"
+      },
+      "stepNumber": 0,
+      "lastAction": "task_started",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T07:19:21.630Z",
+      "version": "1.0"
+    },
+    {
+      "id": "cp-1778570361631-v5rq",
+      "sessionId": "session-1778570361624",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "description": "搜索合同"
+      },
+      "stepNumber": 1,
+      "lastAction": "search_started",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T07:19:21.631Z",
+      "version": "1.0"
+    },
+    {
+      "id": "cp-1778570361632-sy7f",
+      "sessionId": "session-1778570361624",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "description": "搜索合同"
+      },
+      "stepNumber": 2,
+      "lastAction": "search_results_received",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T07:19:21.632Z",
+      "version": "1.0"
+    },
+    {
+      "id": "cp-1778570361633-xcxh",
+      "sessionId": "session-1778570361624",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "description": "搜索合同"
+      },
+      "stepNumber": 3,
+      "lastAction": "processing_results",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T07:19:21.633Z",
+      "version": "1.0"
+    },
+    {
+      "id": "cp-1778570361634-xnl4",
+      "sessionId": "session-1778570361624",
+      "taskId": "task-001",
+      "state": {
+        "status": "running",
+        "progress": 0,
+        "description": "搜索合同",
+        "result": {
+          "found": 12
+        }
+      },
+      "stepNumber": 3,
+      "lastAction": "task_completed",
+      "contextSnapshot": {},
+      "createdAt": "2026-05-12T07:19:21.634Z",
+      "version": "1.0"
+    }
+  ]
+}

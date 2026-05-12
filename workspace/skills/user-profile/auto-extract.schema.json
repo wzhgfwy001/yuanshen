@@ -1,0 +1,524 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://openclaw.ai/schemas/user-profile/auto-extract.schema.json",
+  "title": "UserProfile - Auto Extract Schema",
+  "description": "用户画像自动提取结果 Schema，支持从对话中自动推断用户偏好、行为模式、决策风格和长期目标",
+  "type": "object",
+  "required": ["user_id", "extracted_at", "patterns_detected", "preferences"],
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "飞书用户 Open ID"
+    },
+    "extracted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "提取时间戳"
+    },
+    "confidence_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.6,
+      "description": "本次提取使用的置信度阈值"
+    },
+    "patterns_detected": {
+      "type": "array",
+      "description": "检测到的行为模式列表",
+      "items": {
+        "$ref": "#/definitions/PatternEntry"
+      }
+    },
+    "preferences": {
+      "$ref": "#/definitions/Preferences"
+    },
+    "meta": {
+      "$ref": "#/definitions/Meta"
+    }
+  },
+  "definitions": {
+    "PatternEntry": {
+      "type": "object",
+      "required": ["pattern", "source", "confidence"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "检测到的模式名称（枚举值见 PatternType）"
+        },
+        "pattern_key": {
+          "type": "string",
+          "description": "模式唯一标识符（用于去重和追踪）"
+        },
+        "source": {
+          "type": "string",
+          "description": "模式的来源描述（用户明确说出的原话或推断依据）"
+        },
+        "source_messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "message_id": {"type": "string"},
+              "content": {"type": "string"},
+              "timestamp": {"type": "string", "format": "date-time"}
+            }
+          },
+          "description": "触发该模式的具体消息引用（最多保留3条）"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "置信度：0.0-1.0，≥0.6 才纳入最终结果"
+        },
+        "occurrence_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "该模式在对话中出现的次数"
+        },
+        "first_seen": {
+          "type": "string",
+          "format": "date-time",
+          "description": "首次观察到该模式的时间"
+        },
+        "last_seen": {
+          "type": "string",
+          "format": "date-time",
+          "description": "最近一次观察到该模式的时间"
+        },
+        "category": {
+          "$ref": "#/definitions/PatternCategory"
+        }
+      }
+    },
+
+    "PatternCategory": {
+      "type": "string",
+      "enum": [
+        "explicit_preference",   // 用户明确说出的偏好
+        "behavioral_inference",  // 行为模式推断
+        "decision_pattern",      // 决策风格
+        "goal_expression",       // 目标表达
+        "skill_level",           // 技能/熟悉度
+        "work_context"           // 工作类型/上下文
+      ]
+    },
+
+    "PatternType": {
+      "type": "string",
+      "enum": [
+        "详细展开",
+        "简洁回复",
+        "分步说明",
+        "直接给答案",
+        "喜欢对比选项",
+        "谨慎决策",
+        "快速决策",
+        "重复确认",
+        "提问澄清",
+        "主动建议",
+        "被动等待",
+        "技术导向",
+        "业务导向",
+        "视觉偏好",
+        "效率优先",
+        "质量优先"
+      ]
+    },
+
+    "Preferences": {
+      "type": "object",
+      "description": "提取到的用户偏好集合（只包含置信度≥0.6的项）",
+      "properties": {
+        "communication_style": {
+          "$ref": "#/definitions/CommunicationStyle"
+        },
+        "preferred_language": {
+          "type": "string",
+          "enum": ["中文", "英文", "中英混合"],
+          "description": "语言偏好"
+        },
+        "active_hours": {
+          "$ref": "#/definitions/ActiveHours"
+        },
+        "tech_familiarity": {
+          "$ref": "#/definitions/TechFamiliarity"
+        },
+        "work_type": {
+          "$ref": "#/definitions/WorkType"
+        },
+        "decision_style": {
+          "$ref": "#/definitions/DecisionStyle"
+        },
+        "long_term_goals": {
+          "$ref": "#/definitions/LongTermGoals"
+        },
+        "ui_preference": {
+          "type": "string",
+          "enum": ["简洁", "丰富", "高端", "实用", "未知"],
+          "description": "UI风格偏好（从对话推断）"
+        },
+        "response_format": {
+          "type": "string",
+          "enum": ["详细", "简洁", "适中", "技术型", "通俗型"],
+          "description": "期望的回复格式"
+        }
+      }
+    },
+
+    "CommunicationStyle": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": "string",
+          "enum": ["详细展开", "简洁回复", "分步说明", "直接给答案", "未知"],
+          "description": "主要沟通风格"
+        },
+        "secondary": {
+          "type": "string",
+          "enum": ["详细展开", "简洁回复", "分步说明", "直接给答案", "未知"],
+          "description": "次要沟通风格（备用）"
+        },
+        "evidence_count": {
+          "type": "integer",
+          "description": "支持该推断的消息数量"
+        }
+      }
+    },
+
+    "ActiveHours": {
+      "type": "object",
+      "properties": {
+        "typical": {
+          "type": "string",
+          "description": "典型活跃时段（如 '09:00-12:00', '14:00-18:00'）"
+        },
+        "timezone": {
+          "type": "string",
+          "default": "Asia/Shanghai",
+          "description": "时区"
+        },
+        "days_of_week": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "description": "活跃的星期几（0=周日，1=周一...）"
+        },
+        "observation_period": {
+          "type": "object",
+          "properties": {
+            "start": {"type": "string", "format": "date-time"},
+            "end": {"type": "string", "format": "date-time"},
+            "message_count": {"type": "integer"}
+          }
+        }
+      }
+    },
+
+    "TechFamiliarity": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["技术专家", "技术熟悉", "技术一般", "技术小白", "未知"],
+          "description": "技术熟悉度等级"
+        },
+        "tech_topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": {"type": "string"},
+              "proficiency": {
+                "type": "string",
+                "enum": ["精通", "熟悉", "了解", "初学"]
+              }
+            }
+          },
+          "description": "用户表现出的技术领域及熟练度"
+        },
+        "indicators": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "推断依据（如：使用专业术语、理解复杂概念、快速理解技术文档）"
+        }
+      }
+    },
+
+    "WorkType": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["技术开发", "产品设计", "市场运营", "数据分析", "管理", "教育", "自由职业", "学生", "未知"],
+          "description": "工作类型"
+        },
+        "detail": {
+          "type": "string",
+          "description": "更细粒度的描述（如：全栈开发、iOS开发、产品经理）"
+        },
+        "industry": {
+          "type": "string",
+          "description": "行业（如：互联网、教育、金融）"
+        }
+      }
+    },
+
+    "DecisionStyle": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": "string",
+          "enum": [
+            "深思熟虑+多方案对比",
+            "快速决策",
+            "谨慎验证",
+            "直觉判断",
+            "数据驱动",
+            "经验导向",
+            "混合型",
+            "未知"
+          ],
+          "description": "主要决策风格"
+        },
+        "options_need": {
+          "type": "number",
+          "minimum": 1,
+          "description": "用户做决定前通常需要几个选项对比"
+        },
+        "confidence_indicator": {
+          "type": "string",
+          "enum": ["高", "中", "低"],
+          "description": "决策自信心"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "推断证据"
+        }
+      }
+    },
+
+    "LongTermGoals": {
+      "type": "object",
+      "properties": {
+        "goals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GoalEntry"
+          },
+          "description": "用户表达的长期目标列表"
+        },
+        "priority_order": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "目标优先级顺序（目标ID列表）"
+        }
+      }
+    },
+
+    "GoalEntry": {
+      "type": "object",
+      "required": ["id", "goal", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "目标唯一标识符"
+        },
+        "goal": {
+          "type": "string",
+          "description": "目标描述"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["明确", "模糊", "已达成", "已放弃", "进行中"],
+          "description": "目标状态"
+        },
+        "mentioned_count": {
+          "type": "integer",
+          "description": "被提及的次数"
+        },
+        "first_mentioned": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_mentioned": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "related_sub_goals": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "关联的子目标ID"
+        }
+      }
+    },
+
+    "Meta": {
+      "type": "object",
+      "properties": {
+        "extraction_version": {
+          "type": "string",
+          "default": "1.0.0"
+        },
+        "model_used": {
+          "type": "string",
+          "description": "用于提取的模型"
+        },
+        "messages_analyzed": {
+          "type": "integer",
+          "description": "分析的对话消息数量"
+        },
+        "extraction_duration_ms": {
+          "type": "integer",
+          "description": "提取耗时（毫秒）"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "警告信息（如数据不足、置信度低等）"
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "user_id": "ou_fda40b3c672324f30e38213a1e07e782",
+      "extracted_at": "2026-04-16T19:45:00+08:00",
+      "confidence_threshold": 0.6,
+      "patterns_detected": [
+        {
+          "pattern": "详细展开",
+          "pattern_key": "comm_style_detailed",
+          "source": "用户多次要求'详细说明'、'展开讲讲'、'具体是什么'",
+          "source_messages": [
+            {
+              "message_id": "msg_001",
+              "content": "这个方案详细说明一下？",
+              "timestamp": "2026-04-16T10:30:00+08:00"
+            },
+            {
+              "message_id": "msg_015",
+              "content": "能不能展开讲讲技术实现细节",
+              "timestamp": "2026-04-16T14:20:00+08:00"
+            }
+          ],
+          "confidence": 0.9,
+          "occurrence_count": 5,
+          "first_seen": "2026-04-16T10:30:00+08:00",
+          "last_seen": "2026-04-16T16:00:00+08:00",
+          "category": "explicit_preference"
+        },
+        {
+          "pattern": "喜欢对比选项",
+          "pattern_key": "decision_compare_options",
+          "source": "用户在做决策前倾向于先看多个方案对比",
+          "confidence": 0.75,
+          "occurrence_count": 3,
+          "first_seen": "2026-04-15T11:00:00+08:00",
+          "last_seen": "2026-04-16T15:30:00+08:00",
+          "category": "decision_pattern"
+        },
+        {
+          "pattern": "技术导向",
+          "pattern_key": "tech_oriented",
+          "source": "用户使用专业术语（API、SDK、架构图），询问实现原理",
+          "confidence": 0.85,
+          "occurrence_count": 8,
+          "first_seen": "2026-04-10T09:00:00+08:00",
+          "last_seen": "2026-04-16T17:00:00+08:00",
+          "category": "skill_level"
+        }
+      ],
+      "preferences": {
+        "communication_style": {
+          "primary": "详细展开",
+          "secondary": "分步说明",
+          "evidence_count": 5
+        },
+        "preferred_language": "中文",
+        "active_hours": {
+          "typical": "09:00-12:00, 14:00-18:00",
+          "timezone": "Asia/Shanghai",
+          "days_of_week": [1, 2, 3, 4, 5],
+          "observation_period": {
+            "start": "2026-04-10T00:00:00+08:00",
+            "end": "2026-04-16T19:45:00+08:00",
+            "message_count": 127
+          }
+        },
+        "tech_familiarity": {
+          "level": "技术熟悉",
+          "tech_topics": [
+            {"topic": "全栈开发", "proficiency": "熟悉"},
+            {"topic": "AI/机器学习", "proficiency": "了解"},
+            {"topic": "系统架构", "proficiency": "熟悉"}
+          ],
+          "indicators": [
+            "使用专业术语",
+            "询问实现原理",
+            "理解技术文档"
+          ]
+        },
+        "work_type": {
+          "category": "技术开发",
+          "detail": "全栈开发",
+          "industry": "互联网"
+        },
+        "decision_style": {
+          "primary": "深思熟虑+多方案对比",
+          "options_need": 3,
+          "confidence_indicator": "高",
+          "evidence": [
+            "做决定前要求提供多个方案",
+            "会问'有什么优缺点'",
+            "权衡后做出选择"
+          ]
+        },
+        "long_term_goals": {
+          "goals": [
+            {
+              "id": "goal_001",
+              "goal": "财富自由",
+              "status": "明确",
+              "mentioned_count": 4,
+              "first_mentioned": "2026-04-07T10:00:00+08:00",
+              "last_mentioned": "2026-04-16T14:00:00+08:00"
+            },
+            {
+              "id": "goal_002",
+              "goal": "高考志愿系统商业化",
+              "status": "进行中",
+              "mentioned_count": 12,
+              "first_mentioned": "2026-04-01T09:00:00+08:00",
+              "last_mentioned": "2026-04-16T17:30:00+08:00",
+              "related_sub_goals": ["goal_003", "goal_004"]
+            },
+            {
+              "id": "goal_003",
+              "goal": "完成系统v2.0升级",
+              "status": "进行中",
+              "mentioned_count": 6,
+              "first_mentioned": "2026-04-05T11:00:00+08:00",
+              "last_mentioned": "2026-04-15T16:00:00+08:00"
+            }
+          ],
+          "priority_order": ["goal_001", "goal_002", "goal_003"]
+        },
+        "ui_preference": "高端",
+        "response_format": "详细"
+      },
+      "meta": {
+        "extraction_version": "1.0.0",
+        "model_used": "MiniMax-M2.7",
+        "messages_analyzed": 127,
+        "extraction_duration_ms": 320,
+        "warnings": []
+      }
+    }
+  ]
+}

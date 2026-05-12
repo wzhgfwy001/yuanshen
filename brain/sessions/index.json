@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "2026-05-12": [
+      {
+        "id": "evt-1778569467308-y7jt",
+        "type": "session_started",
+        "timestamp": "2026-05-12T07:04:27.308Z"
+      },
+      {
+        "id": "evt-1778569467309-gyrt",
+        "type": "task_received",
+        "timestamp": "2026-05-12T07:04:27.309Z"
+      },
+      {
+        "id": "evt-1778569467309-nikd",
+        "type": "task_completed",
+        "timestamp": "2026-05-12T07:04:27.309Z"
+      },
+      {
+        "id": "evt-1778569467310-tqqz",
+        "type": "decision",
+        "timestamp": "2026-05-12T07:04:27.310Z"
+      },
+      {
+        "id": "evt-1778575721004-f4c6",
+        "type": "session_started",
+        "timestamp": "2026-05-12T08:48:41.004Z"
+      },
+      {
+        "id": "evt-1778575721103-lt5w",
+        "type": "task_received",
+        "timestamp": "2026-05-12T08:48:41.103Z"
+      },
+      {
+        "id": "evt-1778575721104-cjse",
+        "type": "task_completed",
+        "timestamp": "2026-05-12T08:48:41.104Z"
+      }
+    ]
+  },
+  "lastUpdated": "2026-05-12T08:48:41.105Z"
+}

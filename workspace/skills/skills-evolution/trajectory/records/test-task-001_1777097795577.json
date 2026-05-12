@@ -1,0 +1,71 @@
+{
+  "taskId": "test-task-001",
+  "taskType": "code_review",
+  "startedAt": "2026-04-25T06:16:35.567Z",
+  "endedAt": "2026-04-25T06:16:35.577Z",
+  "finalStatus": "failed",
+  "totalDuration": 10,
+  "stepCount": 4,
+  "steps": [
+    {
+      "id": 1,
+      "timestamp": "2026-04-25T06:16:35.572Z",
+      "type": "task_start",
+      "taskId": "test-task-001",
+      "taskType": "code_review",
+      "metadata": {
+        "userId": "test"
+      }
+    },
+    {
+      "id": 2,
+      "timestamp": "2026-04-25T06:16:35.572Z",
+      "type": "tool_call",
+      "tool": "read",
+      "action": "call",
+      "inputs": {
+        "path": "test.js"
+      },
+      "status": "success",
+      "outputs": {
+        "content": "test content"
+      },
+      "error": null,
+      "duration": 0
+    },
+    {
+      "id": 3,
+      "timestamp": "2026-04-25T06:16:35.572Z",
+      "type": "tool_call",
+      "tool": "exec",
+      "action": "call",
+      "inputs": {
+        "command": "npm install"
+      },
+      "status": "failed",
+      "outputs": {
+        "stdout": "error"
+      },
+      "error": {
+        "name": "Error",
+        "message": "npm ERR! permission denied",
+        "stack": "Error: npm ERR! permission denied\n    at Object.<anonymous> (C:\\Users\\DELL\\.openclaw\\workspace\\skills\\skills-evolution\\test_integration.js:20:73)\n    at Module._compile (node:internal/modules/cjs/loader:1706:14)\n    at Object..js (node:internal/modules/cjs/loader:1839:10)\n    at Module.load (node:internal/modules/cjs/loader:1441:32)\n    at Function._load (node:internal/modules/cjs/loader:1263:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49"
+      },
+      "duration": 4
+    },
+    {
+      "id": 4,
+      "timestamp": "2026-04-25T06:16:35.577Z",
+      "type": "task_end",
+      "status": "failed",
+      "summary": {
+        "reason": "npm permission denied"
+      },
+      "totalDuration": 10,
+      "totalSteps": 3
+    }
+  ],
+  "metadata": {
+    "userId": "test"
+  }
+}

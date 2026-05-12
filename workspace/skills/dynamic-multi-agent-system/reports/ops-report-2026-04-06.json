@@ -1,0 +1,47 @@
+﻿{
+    "date":  "2026-04-06",
+    "timestamp":  "2026-04-06 11:55:15",
+    "tasks":  {
+                  "p1":  [
+                             {
+                                 "status":  "Pending",
+                                 "due":  "2026-04-07",
+                                 "name":  "Browser Control Config"
+                             },
+                             {
+                                 "status":  "Pending",
+                                 "due":  "2026-04-07",
+                                 "name":  "API Multi-Model Config"
+                             }
+                         ],
+                  "p0":  [
+                             {
+                                 "status":  "In Progress",
+                                 "due":  "2026-04-10",
+                                 "name":  "SkillHub Review Tracking"
+                             }
+                         ],
+                  "p2":  [
+                             {
+                                 "status":  "Pending",
+                                 "due":  "2026-04-11",
+                                 "name":  "User Review Guide"
+                             }
+                         ]
+              },
+    "skillhub":  {
+                     "stage":  "Under Review",
+                     "estimated":  "2026-04-10 ~ 04-11",
+                     "version":  "v1.2.0",
+                     "submitted":  "2026-04-06 11:35"
+                 },
+    "system":  {
+                   "status":  "OK",
+                   "timestamp":  "2026-04-06 11:55:15",
+                   "issues":  [
+
+                              ],
+                   "gateway":  "Running",
+                   "score":  100
+               }
+}

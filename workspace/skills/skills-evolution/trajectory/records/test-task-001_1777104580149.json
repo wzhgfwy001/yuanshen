@@ -1,0 +1,73 @@
+{
+  "taskId": "test-task-001",
+  "taskType": "code_review",
+  "startedAt": "2026-04-25T08:09:40.142Z",
+  "endedAt": "2026-04-25T08:09:40.149Z",
+  "finalStatus": "failed",
+  "totalDuration": 7,
+  "stepCount": 4,
+  "steps": [
+    {
+      "id": 1,
+      "timestamp": "2026-04-25T08:09:40.145Z",
+      "type": "task_start",
+      "taskId": "test-task-001",
+      "taskType": "code_review",
+      "metadata": {
+        "userId": "test"
+      }
+    },
+    {
+      "id": 2,
+      "timestamp": "2026-04-25T08:09:40.145Z",
+      "type": "tool_call",
+      "tool": "read",
+      "action": "call",
+      "inputs": {
+        "path": "test.js"
+      },
+      "status": "success",
+      "outputs": {
+        "content": "console.log(\"test\")"
+      },
+      "error": null,
+      "duration": 0
+    },
+    {
+      "id": 3,
+      "timestamp": "2026-04-25T08:09:40.145Z",
+      "type": "tool_call",
+      "tool": "exec",
+      "action": "call",
+      "inputs": {
+        "command": "npm test"
+      },
+      "status": "failed",
+      "outputs": {
+        "stdout": "",
+        "stderr": "npm ERR!"
+      },
+      "error": {
+        "name": "Error",
+        "message": "npm ERR! permission denied",
+        "stack": "Error: npm ERR! permission denied\n    at Object.<anonymous> (C:\\Users\\DELL\\.openclaw\\workspace\\skills\\dynamic-multi-agent-system\\core\\trajectory-integration.js:249:5)\n    at Module._compile (node:internal/modules/cjs/loader:1706:14)\n    at Object..js (node:internal/modules/cjs/loader:1839:10)\n    at Module.load (node:internal/modules/cjs/loader:1441:32)\n    at Function._load (node:internal/modules/cjs/loader:1263:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49"
+      },
+      "duration": 4
+    },
+    {
+      "id": 4,
+      "timestamp": "2026-04-25T08:09:40.149Z",
+      "type": "task_end",
+      "status": "failed",
+      "summary": {
+        "reason": "test failed",
+        "duration": 5000
+      },
+      "totalDuration": 7,
+      "totalSteps": 3
+    }
+  ],
+  "metadata": {
+    "userId": "test"
+  }
+}

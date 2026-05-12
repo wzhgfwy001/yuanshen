@@ -1,0 +1,53 @@
+name: LLM Wiki Sync CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # CI 在 Ubuntu runner 上运行，验证脚本语法正确、帮助信息可用
+  # 本地路径检查(C:/, D:/)在 CI 环境中不适用，用 --ci 模式跳过
+  lint-and-syntax:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax check (node --check)
+        run: node --check llm-wiki-sync.js
+
+      - name: Help output works
+        run: node llm-wiki-sync.js help
+
+      - name: List operations
+        run: |
+          node llm-wiki-sync.js compile --help 2>&1 | head -5
+          node llm-wiki-sync.js lint --help 2>&1 | head -5
+
+      - name: Quick smoke test (help/ping equivalent)
+        run: node llm-wiki-sync.js health --help 2>&1 | head -3
+
+      - name: Run stats in CI mode
+        run: node llm-wiki-sync.js stats
+
+      - name: Generate HTML report
+        run: node llm-wiki-sync.js export --format=html --out ./artifacts || true
+
+      - name: Generate JSON report
+        run: node llm-wiki-sync.js export --format=json --out ./artifacts || true
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-sync-reports-${{ github.run_number }}
+          path: artifacts/
+          retention-days: 14

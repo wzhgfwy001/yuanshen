@@ -1,0 +1,30 @@
+{
+  "queue": {
+    "pending": [],
+    "running": [],
+    "paused": [],
+    "completed": [],
+    "failed": []
+  },
+  "resources": {
+    "taskSlots": {
+      "total": 3,
+      "used": 0,
+      "available": 3
+    },
+    "subagentPool": {
+      "total": 12,
+      "active": 0,
+      "idle": 12
+    }
+  },
+  "stats": {
+    "totalSubmitted": 0,
+    "totalCompleted": 0,
+    "totalFailed": 0,
+    "totalCancelled": 0,
+    "avgWaitTimeSeconds": 0,
+    "avgExecutionTimeSeconds": 0
+  },
+  "lastUpdated": "2026-04-04T19:00:00Z"
+}

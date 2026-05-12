@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "description": "上下文分级压缩系统",
+  
+  "thresholds": {
+    "MICRO": 60,
+    "AUTO": 60,
+    "FULL": 75
+  },
+  
+  "keep_recent_turns": 5,
+  "summary_max_tokens": 500,
+  "max_context_tokens": 100000
+}

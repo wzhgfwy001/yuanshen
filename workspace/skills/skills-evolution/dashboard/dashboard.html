@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Evolution Dashboard - 技能进化仪表盘</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1419;
+      color: #e7e9ea;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #2f3336;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .refresh-btn {
+      background: #1d9bf0;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .refresh-btn:hover {
+      background: #1a8cd8;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: #16181c;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #2f3336;
+    }
+    
+    .stat-card .label {
+      color: #71767b;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .stat-card .sub {
+      color: #71767b;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    
+    .stat-card.success .value { color: #00ba7c; }
+    .stat-card.warning .value { color: #ffd400; }
+    .stat-card.danger .value { color: #f4212e; }
+    
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .chart-card {
+      background: #16181c;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #2f3336;
+    }
+    
+    .chart-card h3 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #e7e9ea;
+    }
+    
+    .chart-container {
+      height: 250px;
+    }
+    
+    .failure-list {
+      background: #16181c;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #2f3336;
+    }
+    
+    .failure-list h3 {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .failure-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #2f3336;
+    }
+    
+    .failure-item:last-child {
+      border-bottom: none;
+    }
+    
+    .failure-pattern {
+      font-weight: 500;
+    }
+    
+    .failure-count {
+      background: #f4212e;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    
+    .lesson-list {
+      background: #16181c;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #2f3336;
+    }
+    
+    .lesson-item {
+      padding: 12px;
+      background: #1c1f23;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 3px solid #f4212e;
+    }
+    
+    .lesson-time {
+      color: #71767b;
+      font-size: 12px;
+    }
+    
+    .lesson-content {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-badge.ok { background: #00ba7c22; color: #00ba7c; }
+    .status-badge.warning { background: #ffd40022; color: #ffd400; }
+    .status-badge.error { background: #f4212e22; color: #f4212e; }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #71767b;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #71767b;
+    }
+    
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧠 Skills Evolution Dashboard</h1>
+      <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
+    </header>
+    
+    <!-- Stats Row -->
+    <div class="grid">
+      <div class="stat-card success">
+        <div class="label">总任务数</div>
+        <div class="value" id="total-tasks">-</div>
+        <div class="sub">成功 <span id="success-rate">-</span>%</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">追踪的技能</div>
+        <div class="value" id="total-skills">-</div>
+        <div class="sub">需要审查: <span id="skills-review">-</span></div>
+      </div>
+      <div class="stat-card warning">
+        <div class="label">失败模式</div>
+        <div class="value" id="failure-patterns">-</div>
+        <div class="sub">最近30天</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="label">教训记录</div>
+        <div class="value" id="lesson-count">-</div>
+        <div class="sub">自动生成</div>
+      </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>📈 任务趋势</h3>
+        <div class="chart-container">
+          <canvas id="trend-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>🔍 失败模式分布</h3>
+        <div class="chart-container">
+          <canvas id="pattern-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>⏱️ 平均执行时间</h3>
+        <div class="chart-container">
+          <canvas id="duration-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>🎯 Skill健康度</h3>
+        <div class="chart-container">
+          <canvas id="skill-health-chart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Failures & Lessons -->
+    <div class="chart-grid">
+      <div class="failure-list">
+        <h3>🚨 常见失败模式</h3>
+        <div id="failure-list-content">
+          <div class="loading">加载中...</div>
+        </div>
+      </div>
+      <div class="lesson-list">
+        <h3>📚 最新教训</h3>
+        <div id="lesson-list-content">
+          <div class="loading">加载中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Chart instances
+    let trendChart, patternChart, durationChart, skillHealthChart;
+    
+    // Colors
+    const colors = {
+      primary: '#1d9bf0',
+      success: '#00ba7c',
+      warning: '#ffd400',
+      danger: '#f4212e',
+      purple: '#7856ff',
+      cyan: '#00c9c9'
+    };
+    
+    // Initialize charts
+    function initCharts() {
+      const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: '#2f3336' },
+            ticks: { color: '#71767b' }
+          },
+          y: {
+            grid: { color: '#2f3336' },
+            ticks: { color: '#71767b' }
+          }
+        }
+      };
+      
+      // Trend chart
+      trendChart = new Chart(document.getElementById('trend-chart'), {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: '成功',
+            data: [],
+            borderColor: colors.success,
+            backgroundColor: colors.success + '22',
+            fill: true,
+            tension: 0.4
+          }, {
+            label: '失败',
+            data: [],
+            borderColor: colors.danger,
+            backgroundColor: colors.danger + '22',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: { ...defaultOptions }
+      });
+      
+      // Pattern chart (doughnut)
+      patternChart = new Chart(document.getElementById('pattern-chart'), {
+        type: 'doughnut',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            backgroundColor: [colors.danger, colors.warning, colors.primary, colors.success, colors.purple, colors.cyan]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: '#e7e9ea', padding: 12 }
+            }
+          }
+        }
+      });
+      
+      // Duration chart (bar)
+      durationChart = new Chart(document.getElementById('duration-chart'), {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: '平均时长(秒)',
+            data: [],
+            backgroundColor: colors.primary
+          }]
+        },
+        options: { ...defaultOptions }
+      });
+      
+      // Skill health chart (radar)
+      skillHealthChart = new Chart(document.getElementById('skill-health-chart'), {
+        type: 'radar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: '成功率',
+            data: [],
+            borderColor: colors.success,
+            backgroundColor: colors.success + '44'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0,
+              max: 100,
+              ticks: { color: '#71767b' },
+              pointLabels: { color: '#e7e9ea' },
+              grid: { color: '#2f3336' }
+            }
+          }
+        }
+      });
+    }
+    
+    // Load data from backend
+    async function loadData() {
+      try {
+        // Fetch dashboard data
+        const response = await fetch('/api/skills-evolution/dashboard');
+        const data = await response.json();
+        
+        // Update stats
+        document.getElementById('total-tasks').textContent = data.totalTasks || 0;
+        document.getElementById('success-rate').textContent = ((data.successRate || 0) * 100).toFixed(1);
+        document.getElementById('total-skills').textContent = data.totalSkills || 0;
+        document.getElementById('skills-review').textContent = data.skillsNeedingReview || 0;
+        document.getElementById('failure-patterns').textContent = data.failurePatterns || 0;
+        document.getElementById('lesson-count').textContent = data.lessonCount || 0;
+        
+        // Update charts
+        updateCharts(data);
+        
+        // Update lists
+        updateFailureList(data.topPatterns || []);
+        updateLessonList(data.recentLessons || []);
+        
+      } catch (e) {
+        console.error('Failed to load data:', e);
+        // Use mock data for demo
+        loadMockData();
+      }
+    }
+    
+    function updateCharts(data) {
+      // Trend chart
+      if (data.trendLabels && data.trendLabels.length > 0) {
+        trendChart.data.labels = data.trendLabels;
+        trendChart.data.datasets[0].data = data.successCounts || [];
+        trendChart.data.datasets[1].data = data.failedCounts || [];
+        trendChart.update();
+      }
+      
+      // Pattern chart
+      if (data.patternLabels && data.patternLabels.length > 0) {
+        patternChart.data.labels = data.patternLabels;
+        patternChart.data.datasets[0].data = data.patternCounts || [];
+        patternChart.update();
+      }
+      
+      // Duration chart
+      if (data.taskTypeLabels && data.taskTypeLabels.length > 0) {
+        durationChart.data.labels = data.taskTypeLabels;
+        durationChart.data.datasets[0].data = data.avgDurations || [];
+        durationChart.update();
+      }
+      
+      // Skill health chart
+      if (data.skillLabels && data.skillLabels.length > 0) {
+        skillHealthChart.data.labels = data.skillLabels;
+        skillHealthChart.data.datasets[0].data = data.skillRates || [];
+        skillHealthChart.update();
+      }
+    }
+    
+    function updateFailureList(patterns) {
+      const container = document.getElementById('failure-list-content');
+      
+      if (patterns.length === 0) {
+        container.innerHTML = '<div class="empty-state">暂无数据</div>';
+        return;
+      }
+      
+      container.innerHTML = patterns.map(p => `
+        <div class="failure-item">
+          <div>
+            <div class="failure-pattern">${p.pattern}</div>
+            <div style="color: #71767b; font-size: 12px;">影响: ${p.impact}/10</div>
+          </div>
+          <span class="failure-count">${p.count}次</span>
+        </div>
+      `).join('');
+    }
+    
+    function updateLessonList(lessons) {
+      const container = document.getElementById('lesson-list-content');
+      
+      if (lessons.length === 0) {
+        container.innerHTML = '<div class="empty-state">暂无教训</div>';
+        return;
+      }
+      
+      container.innerHTML = lessons.map(l => `
+        <div class="lesson-item">
+          <div class="lesson-time">${l.time}</div>
+          <div class="lesson-content">${l.pattern}: ${l.summary}</div>
+        </div>
+      `).join('');
+    }
+    
+    // Load mock data for demo (when backend not available)
+    function loadMockData() {
+      // Mock stats
+      document.getElementById('total-tasks').textContent = '47';
+      document.getElementById('success-rate').textContent = '85.1';
+      document.getElementById('total-skills').textContent = '8';
+      document.getElementById('skills-review').textContent = '1';
+      document.getElementById('failure-patterns').textContent = '6';
+      document.getElementById('lesson-count').textContent = '12';
+      
+      // Mock trend data
+      const labels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+      trendChart.data.labels = labels;
+      trendChart.data.datasets[0].data = [8, 12, 10, 15, 11, 9, 14];
+      trendChart.data.datasets[1].data = [1, 2, 1, 3, 1, 2, 1];
+      trendChart.update();
+      
+      // Mock pattern data
+      patternChart.data.labels = ['file_path_issue', 'permission_issue', 'timeout_issue', 'npm_install', 'network'];
+      patternChart.data.datasets[0].data = [5, 3, 2, 2, 1];
+      patternChart.update();
+      
+      // Mock duration data
+      durationChart.data.labels = ['code', 'code_review', 'writing', 'research', 'data_analysis'];
+      durationChart.data.datasets[0].data = [45, 30, 60, 90, 120];
+      durationChart.update();
+      
+      // Mock skill health
+      skillHealthChart.data.labels = ['博客写作', '代码审查', '数据分析', '研究调研', '系统部署'];
+      skillHealthChart.data.datasets[0].data = [90, 85, 75, 60, 45];
+      skillHealthChart.update();
+      
+      // Mock failure list
+      updateFailureList([
+        { pattern: 'file_path_issue', count: 5, impact: 8 },
+        { pattern: 'permission_issue', count: 3, impact: 9 },
+        { pattern: 'timeout_issue', count: 2, impact: 6 }
+      ]);
+      
+      // Mock lesson list
+      updateLessonList([
+        { time: '2026-04-25 14:17', pattern: 'permission_issue', summary: 'npm install需要管理员权限' },
+        { time: '2026-04-24 23:45', pattern: 'file_path_issue', summary: '相对路径导致文件找不到' },
+        { time: '2026-04-24 18:30', pattern: 'timeout_issue', summary: '大文件处理超时' }
+      ]);
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+      loadData();
+      
+      // Auto refresh every 60s
+      setInterval(loadData, 60000);
+    });
+  </script>
+</body>
+</html>

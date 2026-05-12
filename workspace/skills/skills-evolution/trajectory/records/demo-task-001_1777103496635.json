@@ -1,0 +1,71 @@
+{
+  "taskId": "demo-task-001",
+  "taskType": "code_review",
+  "startedAt": "2026-04-25T07:51:36.633Z",
+  "endedAt": "2026-04-25T07:51:36.635Z",
+  "finalStatus": "failed",
+  "totalDuration": 2,
+  "stepCount": 4,
+  "steps": [
+    {
+      "id": 1,
+      "timestamp": "2026-04-25T07:51:36.634Z",
+      "type": "task_start",
+      "taskId": "demo-task-001",
+      "taskType": "code_review",
+      "metadata": {
+        "userId": "demo"
+      }
+    },
+    {
+      "id": 2,
+      "timestamp": "2026-04-25T07:51:36.634Z",
+      "type": "tool_call",
+      "tool": "read",
+      "action": "call",
+      "inputs": {
+        "path": "test.js"
+      },
+      "status": "success",
+      "outputs": {
+        "content": "..."
+      },
+      "error": null,
+      "duration": 0
+    },
+    {
+      "id": 3,
+      "timestamp": "2026-04-25T07:51:36.634Z",
+      "type": "tool_call",
+      "tool": "exec",
+      "action": "call",
+      "inputs": {
+        "command": "npm test"
+      },
+      "status": "failed",
+      "outputs": {
+        "stdout": "error"
+      },
+      "error": {
+        "name": "Error",
+        "message": "npm ERR!",
+        "stack": "Error: npm ERR!\n    at Timeout._onTimeout (C:\\Users\\DELL\\.openclaw\\workspace\\skills\\skills-evolution\\auto-trajectory-tracker.js:422:86)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)"
+      },
+      "duration": 1
+    },
+    {
+      "id": 4,
+      "timestamp": "2026-04-25T07:51:36.635Z",
+      "type": "task_end",
+      "status": "failed",
+      "summary": {
+        "reason": "test failed"
+      },
+      "totalDuration": 2,
+      "totalSteps": 3
+    }
+  ],
+  "metadata": {
+    "userId": "demo"
+  }
+}
