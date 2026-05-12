@@ -17,6 +17,27 @@ tools:
   limited: [web_search, web_fetch, browser]
 ---
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"研究"、"调研"、"research"、"整理资料"
+- 用户说"生成报告"、"调查报告"
+- 用户提供主题需要深入分析（如"分析AI大模型发展趋势"）
+
+**示例对话：**
+- 用户："帮我研究一下今年的高考志愿填报趋势"
+- AI：自动使用 research-assistant Skill → 收集资料 → 分析整理 → 输出研究报告
+
+- 用户："生成一份关于新能源汽车的技术报告"
+- AI：自动使用 research-assistant Skill → 调用子Agent并行分析 → 汇总输出
+
+**不适用场景：**
+- 简单查找（如"找一下这个文件在哪"用 content-collector）
+- 内容改写/创作（如写小红书用 xiaohongshu-editor）
+- 只需快速问答不需要深度报告的情况
+
+---
+
 # research-assistant
 
 **【考古学】Archaeology** — 

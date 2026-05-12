@@ -209,6 +209,32 @@ console.log('连接状态:', stats.connected);
 | 集成度 | 需要API Key | 可选API Key |
 | 离线爬取 | 需要API | ✅ 支持 |
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"爬取"、"抓取"、"scrape"、"crawl" → 自动调用此Skill
+- 用户说"搜索网页"、"搜索XX"、"search" → 自动调用此Skill
+- 用户给了一个URL并说"提取内容"、"分析这个页面" → 自动调用此Skill
+- 用户说"整站爬取"、"抓取整个网站" → 自动调用此Skill
+
+**示例对话：**
+- 用户："帮我爬取 https://example.com"
+- AI自动使用此Skill调用 `firecrawl_scrape_url` 抓取页面
+
+- 用户："搜索最新的AI新闻"
+- AI自动使用此Skill调用 `firecrawl_search` 进行智能搜索
+
+- 用户："提取这个页面的所有链接"
+- AI自动使用此Skill调用 `firecrawl_extract_links`
+
+- 用户："帮我分析整个网站的结构"
+- AI自动使用此Skill调用 `firecrawl_crawl_website` 整站爬取
+
+**不适用场景：**
+- 简单问答不需要此Skill（如"1+1等于几"）
+- 本地文件操作不需要网页抓取
+- 用户已明确说"不需要联网"时
+
 ## 安装
 
 ```bash

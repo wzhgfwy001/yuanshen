@@ -22,6 +22,25 @@ metadata:
 
 Use this skill when user asks to write a blog post or article.
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说「写博客」「写文章」「blog」「article」时自动调用
+- 用户要求撰写博客文章或网站内容时自动调用
+
+**示例对话：**
+- 用户：「帮我写一篇关于AI发展趋势的博客」
+- AI自动使用此Skill处理，从选题到正文完整输出
+- 用户：「我要发布一篇技术文章」
+- AI自动调用此Skill进行写作
+
+**不适用场景：**
+- 简单问答不需要此Skill（如「什么是博客」）
+- 纯聊天无写作需求时不需要
+- 只需提取或整理信息时用 content-collector
+
+---
+
 ## 内网兼容性
 
 - ✅ `read` - 读取参考文档

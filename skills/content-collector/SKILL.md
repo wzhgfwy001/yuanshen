@@ -17,6 +17,27 @@ tools:
   limited: [web_search, web_fetch, browser]
 ---
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"采集内容"、"抓取内容"、"搜索内容"、"整理资料"
+- 用户说"帮我找找本地文件"、"扫描文件夹"
+- 用户提供内网URL需要抓取数据
+
+**示例对话：**
+- 用户："帮我采集一下这个文件夹里的所有文档"
+- AI：自动使用 content-collector Skill → 读取文件 → 分析整理 → 输出采集报告
+
+- 用户："抓取这份PDF的关键信息"
+- AI：自动使用 content-collector Skill → pdf工具分析 → 提取要点
+
+**不适用场景：**
+- 简单问答（如"今天天气怎样"）
+- 需要外网搜索的研究任务（用 research-assistant）
+- 已有完整内容只需改写（用 writing-blog 或 xiaohongshu-editor）
+
+---
+
 # content-collector
 
 **【搜索宝物】Find Treasure** — 

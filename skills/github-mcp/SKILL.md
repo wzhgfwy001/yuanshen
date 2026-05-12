@@ -20,6 +20,27 @@ tags:
 
 # GitHub MCP Skill
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"管理GitHub"、"查看仓库"、"搜索代码" → 自动调用此Skill
+- 用户说"创建Issue"、"查看PR"、"检查Actions" → 自动调用此Skill
+- 用户说"搜索GitHub"、"获取文件"、"列出分支" → 自动调用此Skill
+
+**示例对话：**
+- 用户："帮我搜索 wzhgfwy001 的 yuanshen 仓库"
+- AI自动使用 `github_search_repositories` 工具处理
+
+- 用户："查看 yuanshen 仓库的 README.md"
+- AI自动使用 `github_get_file_contents` 工具处理
+
+- 用户："给 yuanshen 仓库创建一个 bug 报告"
+- AI自动使用 `github_issue_write` 工具处理
+
+**不适用场景：**
+- 简单问答不需要GitHub操作时不使用此Skill
+- 与GitHub无关的任务（如仅发送消息）不使用此Skill
+
 ## 状态: ✅ 开发完成 + Bridge 集成完成
 
 **版本: v1.1.0** - Bridge 集成完成，支持 OpenClaw executeTool 路由

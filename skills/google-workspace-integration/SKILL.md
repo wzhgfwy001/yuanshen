@@ -14,6 +14,32 @@ metadata:
 
 # Google Workspace
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"管理Google用户"、"创建用户账号" → 自动调用此Skill
+- 用户说"管理Google群组"、"添加群组成员" → 自动调用此Skill
+- 用户说"查看Google日历"、"创建日历事件" → 自动调用此Skill
+- 用户说"管理Google Drive"、"分享文件" → 自动调用此Skill
+- 用户说"查看Gmail"、"发送邮件" → 自动调用此Skill
+
+**示例对话：**
+- 用户："帮我创建一个新用户账号"
+- AI自动使用 Membrane CLI 的 `create-user` 工具处理
+
+- 用户："列出所有群组成员"
+- AI自动使用 `list-group-members` 工具处理
+
+- 用户："查看Google Drive中的文件"
+- AI自动使用 Membrane 工具处理 Drive 文件操作
+
+**不适用场景：**
+- 简单问答不需要Google Workspace操作时不使用此Skill
+- 非Google相关服务（如GitHub、Slack）不使用此Skill
+- 用户未完成 Membrane 认证时不使用此Skill
+
+## Google Workspace Overview
+
 Google Workspace is a suite of online productivity tools developed by Google, including Gmail, Docs, Drive, Calendar, and Meet. It's used by businesses of all sizes to facilitate communication, collaboration, and document management.
 
 Official docs: https://developers.google.com/workspace

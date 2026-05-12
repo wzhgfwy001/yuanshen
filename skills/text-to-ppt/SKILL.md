@@ -3,6 +3,25 @@ name: text-to-ppt
 description: Convert any text input (research reports, summaries, proposals, plans, etc.) into a beautiful HTML-based presentation. Use when the user asks to create a PPT, slides, presentation, deck, or convert text/documents into slides. Also triggers on phrases like "做成PPT", "生成幻灯片", "做个演示文稿", "转成slides", "create presentation", "make slides", "text to presentation". Supports data visualization with Chart.js, Font Awesome icons, and modern design themes.
 ---
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"做成PPT"、"生成幻灯片"、"做个演示文稿"、"转成slides"、"create presentation"、"make slides"、"text to presentation" → 自动调用此Skill
+- 用户要求将文本/文档/报告转换为演示文稿时
+
+**示例对话：**
+- 用户："把这个报告做成PPT"
+- AI：自动使用此Skill，两阶段生成HTML演示文稿
+- 用户："帮我做个项目汇报的slides"
+- AI：自动使用此Skill处理
+
+**不适用场景：**
+- 简单问答不需要此Skill
+- 仅需要文字回复而不需要可视化演示时
+- 用户明确要求导出为PPTX/DOCX等特定格式（非HTML）时
+
+---
+
 # Text-to-PPT — 文本转 HTML 演示文稿
 
 Convert any text input into a visually stunning, single-file HTML presentation.

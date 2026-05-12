@@ -13,6 +13,40 @@ metadata:
   }
 ---
 
+## 🎯 快速使用
+
+**触发场景：**
+- 用户说"路由"、"自动判断"、"智能路由"
+- 用户提出任务但不确定该用哪个Skill
+- 用户说"帮我决定用什么工具处理这个"
+- **任何任务对话时（主动推荐模式）**：auto-router会自动分析并推荐合适的Skill
+
+**主动推荐模式（v2.2新增）：**
+当用户提出任务时，即使没有明确要求路由，auto-router也会：
+1. 自动分析用户意图
+2. 主动推荐最合适的Skill
+3. 在回复开头显示："🔀 建议使用 xxx Skill"
+
+**示例对话：**
+- 用户："帮我写一篇技术博客"
+- AI自动："🔀 建议使用 writing-blog Skill"
+- 用户："分析一下这份数据"
+- AI自动："🔀 建议使用 data-analysis Skill"
+
+**示例对话：**
+- 用户："我有一段代码要审查，帮我路由一下"
+- AI：自动使用 auto-router Skill → 分析意图 → 路由到 code-review-assistant
+
+- 用户："我想做个数据可视化，路由"
+- AI：自动使用 auto-router Skill → 分析意图 → 路由到 visualization-creator
+
+**不适用场景：**
+- 用户已明确指定要用的Skill（如"直接用research-assistant"）
+- 简单闲聊无任务意图
+- 已知具体技能名称的直接调用
+
+---
+
 # auto-router
 
 **【气流顺引】Gust of Wind** — 自动路由 + 三位一体向量触发器
